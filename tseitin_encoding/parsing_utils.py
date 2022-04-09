@@ -1,57 +1,26 @@
 from tseitin_encoding.symbols import Symbols
 from tseitin_encoding.ast_tree import ASTNodeFactory
-import tseitin_encoding.word_utils as wu
 
-def invalid_start_index(formula, start_index):
-    return f"invalid start index: {start_index}, len(formula): {len(formula)}"
+symbols_mapping = {
+    "not": Symbols.NOT,
+    "and": Symbols.AND,
+    "or": Symbols.OR,
+    "(": Symbols.LEFT_PARENTHESE,
+    ")": Symbols.RIGHT_PARENTHESE
+}
 
-def parse_variable(formula: str, start_index):
-    if start_index >= len(formula):
-        raise RuntimeError(f"PARSE_VARIABLE: {invalid_start_index(formula, start_index)}")
-    if not wu.is_letter(formula[start_index]):
-        raise RuntimeError(f"PARSE_VARIABLE: {formula[start_index:]}")
-    result_index = start_index
-    result_word = ""
-    for c in formula[start_index:]:
-        if not wu.is_letter(c) and not wu.is_digit(c):
-            return result_index, result_word
-        result_word += c
-        result_index += 1
-    return result_index, result_word
-
-def parse_whitespace(formula: str, start_index):
-    while start_index < len(formula) and wu.is_whitespace(formula[start_index]):
-        start_index += 1
-    return start_index
+def to_symbol(symbol: str):
+    if symbol in [ "not", "and", "or", "(", ")" ]:
+        return (symbols_mapping[symbol], symbol)
+    if not symbol.isalnum() or not symbol[0].isalpha():
+        raise RuntimeError(f"Wrong symbol: {symbol}")
+    return (Symbols.VARIABLE, symbol)
 
 def parse_formula(formula: str):
     """Create a list of tokens from string representation in SMT-LIB format"""
-    symbol_list = []
-    current_index = 0
-    while current_index < len(formula):
-        current_index = parse_whitespace(formula, current_index)
-        if current_index >= len(formula):
-            return current_index
-        c = formula[current_index]
-        if c == '(':
-            symbol_list.append((Symbols.LEFT_PARENTHESE, None))
-            current_index += 1
-        elif c == ')':
-            symbol_list.append((Symbols.RIGHT_PARENTHESE, None))
-            current_index += 1
-        elif wu.is_letter(c):
-            current_index, word = parse_variable(formula, current_index)
-            if word == 'or':
-                symbol_list.append((Symbols.OR, None))
-            elif word == 'not':
-                symbol_list.append((Symbols.NOT, None))
-            elif word == 'and':
-                symbol_list.append((Symbols.AND, None))
-            else:
-                symbol_list.append((Symbols.VARIABLE, word))
-        else:
-            raise RuntimeError(f"PARSE_FORMULA: invalid char at position {current_index}: {c}")
-    
+    formula = formula.replace("(", "( ").replace(")", " )")
+    symbol_list = [to_symbol(s) for s in formula.split() if len(s) > 0]
+
     return symbol_list
 
 def create_not_node(symbol_list, stack, index):
@@ -106,6 +75,7 @@ def create_and_or_node(symbol_list, stack, index):
     return index, stack
 
 def create_abstract_syntax_tree(formula: str):
+    """Non-recursive formula tree construction"""
     symbol_list = parse_formula(formula)
 
     index = len(symbol_list) - 1
