@@ -23,54 +23,39 @@ def parse_formula(formula: str):
 
     return symbol_list
 
-def create_not_node(symbol_list, stack, index):
-    if len(stack) < 2 or \
-        index == 0 or \
+def not_stack_correct(stack, symbol_list, index):
+    if  index == 0 or \
         symbol_list[index - 1][0] != Symbols.LEFT_PARENTHESE or \
-        stack[0][0] not in [Symbols.VARIABLE, Symbols.PROCESSED] or \
-        stack[1][0] != Symbols.RIGHT_PARENTHESE \
+        stack[0][0] not in [Symbols.VARIABLE, Symbols.PROCESSED] \
         :
-        raise RuntimeError("NOT")
+        return True
+    if  symbol_list[index][0] == Symbols.NOT and \
+        stack[1][0] != Symbols.RIGHT_PARENTHESE:
+        return True
+    
+    if  symbol_list[index][0] in [ Symbols.AND, Symbols.OR] and \
+        (   stack[1][0] not in [Symbols.VARIABLE, Symbols.PROCESSED] or \
+            stack[2][0] != Symbols.RIGHT_PARENTHESE \
+        ):
+        return True
+    return False
+
+def create_binary_node(symbol_list, stack, index):
+    if not_stack_correct(stack, symbol_list, index):
+        raise RuntimeError(f"stack: {stack}" + "\n" + f"symbol_list[{index}]: {symbol_list[index]}")
 
     tp = symbol_list[index][0]
     node = ASTNodeFactory.get_node(tp, None)
 
-    child = stack[0][1]
-    if stack[0][0] == Symbols.VARIABLE:
-        child = ASTNodeFactory.get_node(Symbols.VARIABLE, child)
-    node.children[0] = child
+    lnc = len(node.children)
+    for i in range(lnc):
+        if stack[i][0] == Symbols.VARIABLE:
+            node.children[i] = ASTNodeFactory.get_node(Symbols.VARIABLE, stack[i][1])
+        else:
+            node.children[i] = stack[i][1]
 
     index -= 2 # left parenthese
-    stack = stack[2:]
-    stack = [(Symbols.PROCESSED, node)] + stack
-    return index, stack
-
-def create_and_or_node(symbol_list, stack, index):
-    if len(stack) < 3 or \
-        index == 0 or \
-        symbol_list[index - 1][0] != Symbols.LEFT_PARENTHESE or \
-        stack[0][0] not in [Symbols.VARIABLE, Symbols.PROCESSED] or \
-        stack[1][0] not in [Symbols.VARIABLE, Symbols.PROCESSED] or \
-        stack[2][0] != Symbols.RIGHT_PARENTHESE \
-        :
-        raise RuntimeError("AND/OR")
-
-    tp = symbol_list[index][0]
-    node = ASTNodeFactory.get_node(tp, None)
-
-    leftChild = stack[0][1]
-    if stack[0][0] == Symbols.VARIABLE:
-        leftChild = ASTNodeFactory.get_node(Symbols.VARIABLE, leftChild)
-
-    rightChild = stack[1][1]
-    if stack[1][0] == Symbols.VARIABLE:
-        rightChild = ASTNodeFactory.get_node(Symbols.VARIABLE, rightChild)
-
-    node.children[0] = leftChild
-    node.children[1] = rightChild
-
-    index -= 2 # left parenthese
-    stack = stack[3:]
+    stack = stack[lnc + 1:]
     stack = [(Symbols.PROCESSED, node)] + stack
     return index, stack
 
@@ -87,12 +72,8 @@ def create_abstract_syntax_tree(formula: str):
             index -= 1
             continue
         
-        if type == Symbols.NOT:
-            index, stack = create_not_node(symbol_list, stack, index)
-            continue
-        
-        if type in [Symbols.AND, Symbols.OR]:
-            index, stack = create_and_or_node(symbol_list, stack, index)
+        if type in [Symbols.AND, Symbols.OR, Symbols.NOT]:
+            index, stack = create_binary_node(symbol_list, stack, index)
             continue
     
     if len(stack) != 1:
