@@ -44,12 +44,13 @@ class ASTNaryNode(ASTAbstractNode):
         return subformulas
     
     def __str__(self) -> str:
+        s = ""
         for i, c in enumerate(self.children):
             if i == 0:
                 s += str(c)
             else:
                 s += f" {self.type.value} {c}"
-        return f"( {s} _)"
+        return f"( {s} )"
 
     def count(self):
         result = {
