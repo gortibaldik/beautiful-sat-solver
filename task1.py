@@ -52,7 +52,7 @@ def _print_to_dmacs(tseitin_ast_tree_root: ASTAbstractNode, file):
 
     subformulas = transform_to_numbers(tseitin_ast_tree_root, mapping)
 
-    print(f"p cnf {len(count_stats['variables'])} {len(subformulas)}")
+    print(f"p cnf {len(count_stats['variables'])} {len(subformulas)}", file=file)
     for sf in subformulas:
         print(" ".join([str(tk) for tk in sf]), file=file)
 

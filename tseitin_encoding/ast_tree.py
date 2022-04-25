@@ -11,7 +11,7 @@ class ASTNodeFactory:
             return ASTVariableNode(type, value)
 
 class ASTAbstractNode:
-    def __init__(self, type):
+    def __init__(self, type: Symbols):
         self.children = []
         self._type: Symbols = type
     
@@ -30,7 +30,7 @@ class ASTAbstractNode:
         pass
 
 class ASTNaryNode(ASTAbstractNode):
-    def __init__(self, type):
+    def __init__(self, type: Symbols):
         super().__init__(type)
         self.children = []
     
@@ -64,12 +64,12 @@ class ASTNaryNode(ASTAbstractNode):
         return result
 
 class ASTBinaryNode(ASTNaryNode):
-    def __init__(self, type) -> None:
+    def __init__(self, type: Symbols) -> None:
         super().__init__(type)
         self.children = [ None, None ]
 
 class ASTUnaryNode(ASTNaryNode):
-    def __init__(self, type) -> None:
+    def __init__(self, type: Symbols) -> None:
         super().__init__(type)
         self.children = [ None ]
     
@@ -78,7 +78,7 @@ class ASTUnaryNode(ASTNaryNode):
         return s
 
 class ASTVariableNode(ASTAbstractNode):
-    def __init__(self, type, value) -> None:
+    def __init__(self, type: Symbols, value) -> None:
         super().__init__(type)
         self._value = value
     
