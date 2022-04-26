@@ -55,7 +55,7 @@ def _print_to_dmacs(tseitin_ast_tree_root: ASTAbstractNode, file):
     # len(subformulas) + 1 because we add special __spec__n variable as a separate clause
     print(f"p cnf {len(count_stats['variables'])} {len(subformulas)}", file=file)
     for sf in subformulas:
-        print(" ".join([str(tk) for tk in sf]) + "  0", file=file)
+        print(" ".join([str(tk) for tk in sf]) + " 0", file=file)
 
 def print_to_dmacs(tseitin_ast_tree_root: ASTAbstractNode, file):
     if file is not None:
