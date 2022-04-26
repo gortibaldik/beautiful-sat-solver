@@ -28,6 +28,9 @@ class ASTAbstractNode:
     
     def count(self):
         pass
+    
+    def copy(self):
+        pass
 
 class ASTNaryNode(ASTAbstractNode):
     def __init__(self, type: Symbols):
@@ -62,6 +65,13 @@ class ASTNaryNode(ASTAbstractNode):
             result["variables"] = result["variables"].union(res_c["variables"])
             result["subformulas"] += res_c["subformulas"]
         return result
+    
+    def copy(self):
+        node = ASTNaryNode(type=self._type)
+        for c in self.children:
+            new_c = c.copy()
+            node.children.append(new_c)
+        return node
 
 class ASTBinaryNode(ASTNaryNode):
     def __init__(self, type: Symbols) -> None:
@@ -76,6 +86,12 @@ class ASTUnaryNode(ASTNaryNode):
     def __str__(self) -> str:
         s = f"{self.type.value} {self.children[0]}"
         return s
+    
+    def copy(self):
+        node = ASTUnaryNode(type=self._type)
+        new_c = self.children[0].copy()
+        node.children = [new_c]
+        return node
 
 class ASTVariableNode(ASTAbstractNode):
     def __init__(self, type: Symbols, value) -> None:
@@ -90,3 +106,6 @@ class ASTVariableNode(ASTAbstractNode):
             "variables": set([self._value]),
             "subformulas": 0
         }
+    
+    def copy(self):
+        return ASTVariableNode(self._type, self._value)
