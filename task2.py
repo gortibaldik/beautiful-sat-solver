@@ -4,6 +4,7 @@ from enum import Enum
 from logzero import logger
 from task1 import read_formula, tseitin_encoding, set_debug_level
 from dpll.dpll import dpll
+from timeit import default_timer as timer
 from tseitin_encoding.ast_tree import ASTNaryNode, ASTUnaryNode, ASTVariableNode
 from tseitin_encoding.symbols import Symbols
 from tseitin_encoding.tseitin_transformation import log_node_info
@@ -97,18 +98,19 @@ def print_model(model, args):
             if "__spec__" not in variable:
                 print(f"{variable}: {value}")
 
-def print_result(result, model, args):
+def print_result(result, model, ndecs, nunit, time, args):
     if result == "SAT":
-        print("SAT")
-        print("---")
+        logger.info(f"SAT; decs: {ndecs}; unit: {nunit}; time: {time}")
         print_model(model, args)
     else:
-        print("UNSAT")
+        logger.info(f"UNSAT; decs: {ndecs}; unit: {nunit}; time: {time}")
 
 if __name__ == "__main__":
     parser = create_parser()
     args = parser.parse_args()
     set_debug_level(args.debug)
     ast_tree_root = read_tree(args)
-    result, model = dpll(ast_tree_root)
-    print_result(result, model, args)
+    start = timer()
+    result, model, ndecs, nunit = dpll(ast_tree_root)
+    end = timer()
+    print_result(result, model, ndecs, nunit, end - start, args)
