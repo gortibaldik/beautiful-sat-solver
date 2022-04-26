@@ -52,9 +52,10 @@ def _print_to_dmacs(tseitin_ast_tree_root: ASTAbstractNode, file):
 
     subformulas = transform_to_numbers(tseitin_ast_tree_root, mapping)
 
+    # len(subformulas) + 1 because we add special __spec__n variable as a separate clause
     print(f"p cnf {len(count_stats['variables'])} {len(subformulas)}", file=file)
     for sf in subformulas:
-        print(" ".join([str(tk) for tk in sf]), file=file)
+        print(" ".join([str(tk) for tk in sf]) + "  0", file=file)
 
 def print_to_dmacs(tseitin_ast_tree_root: ASTAbstractNode, file):
     if file is not None:
@@ -66,6 +67,7 @@ def print_to_dmacs(tseitin_ast_tree_root: ASTAbstractNode, file):
 def tseitin_encoding(formula: str, nnf_reduce_implications: bool):
     ast_tree_root = create_abstract_syntax_tree(formula)
     tseitin_ast_tree_root = turn_nnf_to_tseitin(ast_tree_root, nnf_reduce_implications)
+
     return tseitin_ast_tree_root
 
 def create_parser():

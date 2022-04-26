@@ -41,7 +41,7 @@ def negate_literal(formula: ASTAbstractNode):
         not_formula = ASTUnaryNode(Symbols.NOT)
         not_formula.children = [ formula ]
     elif formula.type == Symbols.NOT:
-        not_formula = formula.children[0]
+        not_formula: ASTVariableNode = formula.children[0]
     return not_formula
 
 def negate_and(formula: ASTAbstractNode):
@@ -203,5 +203,7 @@ def turn_nnf_to_tseitin(root_of_nnf: ASTAbstractNode, nnf_reduce_implications: b
 
         top_level_and = merge_and(*top_level_and.children, imp)
     
+    top_level_and.children = [equivalences[-1].children[0]] + top_level_and.children
+
     log_node_info(top_level_and)
     return top_level_and
