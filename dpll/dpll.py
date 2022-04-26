@@ -32,7 +32,7 @@ def dpll(ast_tree_root: ASTAbstractNode):
     if unit_assignment == None:
         return "UNSAT", None
 
-    pure_elimination_assignment = pure_literal_elimination(vcm, removed_clauses)
+    pure_elimination_assignment = pure_literal_elimination(vcm, removed_clauses, unit_assignment)
     
     remove_clauses_from_root(ast_tree_root, removed_clauses)
     model = combine_assignments(unit_assignment, pure_elimination_assignment)

@@ -50,25 +50,31 @@ def unit_propagation(ast_tree_root: ASTAbstractNode):
 
         # clause index and info whether variable is present in the
         # clause as negative literal
-        for clause_index, clause_negative in vcm[value]:
-            if clause_negative == negative:
-                logger.debug(f"REMOVE {ast_tree_root.children[clause_index]}")
-                removed_clauses.add(clause_index)
-            elif clause_index not in removed_clauses:
-                clause = ast_tree_root.children[clause_index]
-                if len(clause.children) <= 1:
-                    # unit propagation found contradiction
-                    return None, None, None
+        remove_from_vcmvalue = set()
+        for i, (clause_index, clause_negative) in enumerate(vcm[value]):
+            if clause_index not in removed_clauses:
+                remove_from_vcmvalue.add(i)
+                if clause_negative == negative:
+                    logger.debug(f"REMOVE {ast_tree_root.children[clause_index]}")
+                    removed_clauses.add(clause_index)
+                else:
+                    clause = ast_tree_root.children[clause_index]
+                    if len(clause.children) <= 1:
+                        # unit propagation found contradiction
+                        return None, None, None
 
-                logger.debug(f"DECREASE: {clause} || {value}")
-                idx_to_remove = find_clause_child(clause, value)
-                clause.children.pop(idx_to_remove)
-                if len(clause.children) == 1:
-                    # found another unit clause!
-                    remaining_child = clause.children[0]
-                    logger.debug(f"NEW UNIT: {remaining_child}")
-                    ast_tree_root.children[clause_index] = remaining_child
-                    unit_clauses.add(remaining_child)
-        vcm.pop(value)
+                    logger.debug(f"DECREASE: {clause} || {value}")
+                    idx_to_remove = find_clause_child(clause, value)
+                    clause.children.pop(idx_to_remove)
+                    if len(clause.children) == 1:
+                        # found another unit clause!
+                        remaining_child = clause.children[0]
+                        logger.debug(f"NEW UNIT: {remaining_child}")
+                        ast_tree_root.children[clause_index] = remaining_child
+                        unit_clauses.add(remaining_child)
+        for i in sorted(remove_from_vcmvalue, reverse=True):
+            vcm[value].pop(i)
+
+        #vcm.pop(value)
 
     return assignment, vcm, removed_clauses

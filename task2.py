@@ -94,7 +94,8 @@ def print_model(model, args):
     else:
         array_to_write = sorted(list(model.items()))
         for variable, value in array_to_write:
-            print(f"{variable}: {value}")
+            if "__spec__" not in variable:
+                print(f"{variable}: {value}")
 
 def print_result(result, model, args):
     if result == "SAT":

@@ -1,11 +1,12 @@
 from logzero import logger
-from tseitin_encoding.ast_tree import ASTAbstractNode
 
-def pure_literal_elimination(vcm, removed_clauses):
+def pure_literal_elimination(vcm, removed_clauses, unit_assignment):
     assignment = {}
     while True:
         removed_values = set()
         for variable, clauses in vcm.items():
+            if variable in unit_assignment:
+                continue
             first_is_negative = None
             all_same, at_least_one = True, False
             for i, v in clauses:
@@ -16,8 +17,7 @@ def pure_literal_elimination(vcm, removed_clauses):
                     elif v != first_is_negative:
                         all_same = False
                         break
-            
-            #logger.debug(f"variable: {variable}; at_least_one: {at_least_one}")
+
             all_same = all_same and at_least_one
             
             if all_same:
