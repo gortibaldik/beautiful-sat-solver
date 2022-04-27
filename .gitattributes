@@ -1,0 +1,1 @@
+*.{sat,cnf} filter=lfs diff=lfs merge=lfs -text
