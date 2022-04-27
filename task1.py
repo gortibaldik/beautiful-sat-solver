@@ -75,8 +75,12 @@ def create_parser():
     parser.add_argument('input', nargs='?', default=None, type=str)
     parser.add_argument('output', nargs='?', default=None, type=str)
     parser.add_argument('--only_left_to_right', action='store_true', help="If specified, the input should be in NNF, and only left to right implications are used")
-    parser.add_argument('--debug', action='store_true')
     return parser
+
+def add_parser_debug_levels(parser: ArgumentParser):
+    parser.add_argument('--debug', action='store_true')
+    parser.add_argument('--warning', action='store_true')
+
 
 def read_formula(input_file):
     formula = ""
@@ -88,17 +92,20 @@ def read_formula(input_file):
     logger.debug(f"read formula: {formula}")
     return formula
 
-def set_debug_level(is_debug: bool):
-    if is_debug:
+def set_debug_level(args):
+    if args.warning:
+        logzero.loglevel(logzero.WARNING)
+    elif args.debug:
         logzero.loglevel(logzero.DEBUG)
     else:
         logzero.loglevel(logzero.INFO)
 
 def main():
     parser = create_parser()
+    add_parser_debug_levels(parser)
     args = parser.parse_args()
 
-    set_debug_level(args.debug)
+    set_debug_level(args)
     formula = read_formula(args.input)
     tseitin_ast_tree_root = tseitin_encoding(formula, nnf_reduce_implications=args.only_left_to_right)
     print_to_dmacs(tseitin_ast_tree_root, args.output)

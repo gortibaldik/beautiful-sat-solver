@@ -2,7 +2,7 @@ import os
 from argparse import ArgumentParser
 from enum import Enum
 from logzero import logger
-from task1 import read_formula, tseitin_encoding, set_debug_level
+from task1 import read_formula, tseitin_encoding, set_debug_level, add_parser_debug_levels
 from dpll.dpll import dpll
 from timeit import default_timer as timer
 from tseitin_encoding.ast_tree import ASTNaryNode, ASTUnaryNode, ASTVariableNode
@@ -42,6 +42,9 @@ def read_dimacs(formula: str):
             # comments with variable names
             continue
 
+        if symbols[0] in ["0", "%"]:
+            continue
+
         if symbols[0] == "p":
             if len(symbols) != 4:
                 raise RuntimeError(f"Unexpected comment line: {line}")
@@ -69,7 +72,6 @@ def read_dimacs(formula: str):
 def create_parser():
     parser = ArgumentParser()
     parser.add_argument("input_file", type=str, help="Input file in DIMACS (.cnf) or in SMTLIB (.sat) format.")
-    parser.add_argument('--debug', action='store_true')
     return parser
 
 def read_tree(args):
@@ -100,15 +102,16 @@ def print_model(model, args):
 
 def print_result(result, model, ndecs, nunit, time, args):
     if result == "SAT":
-        logger.info(f"SAT; decs: {ndecs}; unit: {nunit}; time: {time}")
+        logger.warning(f"SAT; decs: {ndecs}; unit: {nunit}; time: {time}")
         print_model(model, args)
     else:
-        logger.info(f"UNSAT; decs: {ndecs}; unit: {nunit}; time: {time}")
+        logger.warning(f"UNSAT; decs: {ndecs}; unit: {nunit}; time: {time}")
 
 if __name__ == "__main__":
     parser = create_parser()
+    add_parser_debug_levels(parser)
     args = parser.parse_args()
-    set_debug_level(args.debug)
+    set_debug_level(args)
     ast_tree_root = read_tree(args)
     start = timer()
     result, model, ndecs, nunit = dpll(ast_tree_root)

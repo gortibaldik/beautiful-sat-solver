@@ -1,2 +1,5 @@
 **__pycache__
 te.sh
+test_sat.sh
+test_unsat.sh
+dpll/test_data
