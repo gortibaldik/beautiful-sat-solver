@@ -32,7 +32,6 @@ def dpll(ast_tree_root: ASTAbstractNode):
     if unit_assignment == None:
         return "UNSAT", None, 0, 0
     unit_propagation_steps = len(unit_assignment)
-    
 
     pure_elimination_assignment = pure_literal_elimination(vcm, removed_clauses, unit_assignment)
     

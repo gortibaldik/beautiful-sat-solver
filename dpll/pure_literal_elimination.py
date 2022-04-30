@@ -4,6 +4,9 @@ def pure_literal_elimination(vcm, removed_clauses, unit_assignment):
     assignment = {}
     while True:
         removed_values = set()
+        # go through variable clause mapping
+        # find any variable which exists in all the clauses
+        # as the same literal
         for variable, clauses in vcm.items():
             if variable in unit_assignment:
                 continue

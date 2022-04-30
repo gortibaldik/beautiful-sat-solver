@@ -35,26 +35,37 @@ def find_clause_child(clause, value):
     raise RuntimeError(f"INVALID REMOVAL of {value} from {clause}")
 
 
+def set_unit_clause_assignment(unit_clause: ASTAbstractNode, assignment):
+    # the clause is unit, therefore
+    # either it is just a variable node
+    # or it is a not node with only one child
+    not_node = len(unit_clause.children) == 1
+    var_name = unit_clause.children[0]._value if not_node else unit_clause._value
+    assignment[var_name] = not not_node
+    return not not_node, var_name
+
 
 def unit_propagation(ast_tree_root: ASTAbstractNode):
+    # vcm - variable clause mapping
+    # each variable is mapped to a list of clauses it appears in
     vcm, unit_clauses = create_clause_mapping(ast_tree_root)
     assignment = {}
     removed_clauses = set()
 
     while len(unit_clauses) != 0:
         first = unit_clauses.pop()
-        negative = len(first.children) == 1
-        value = first.children[0]._value if negative else first._value
-        assignment[value] = not negative
+        assigned_value, var_name = set_unit_clause_assignment(first, assignment)
         logger.debug(f"-- UNIT PROPAGATION: {first}")
 
         # clause index and info whether variable is present in the
         # clause as negative literal
-        remove_from_vcmvalue = set()
-        for i, (clause_index, clause_negative) in enumerate(vcm[value]):
+        remove_from_vcmvar_name = set()
+        for i, (clause_index, clause_negative) in enumerate(vcm[var_name]):
             if clause_index not in removed_clauses:
-                remove_from_vcmvalue.add(i)
-                if clause_negative == negative:
+                remove_from_vcmvar_name.add(i)
+
+                # if literal is in the clause, remove clause
+                if clause_negative == (not assigned_value):
                     logger.debug(f"REMOVE {ast_tree_root.children[clause_index]}")
                     removed_clauses.add(clause_index)
                 else:
@@ -63,8 +74,8 @@ def unit_propagation(ast_tree_root: ASTAbstractNode):
                         # unit propagation found contradiction
                         return None, None, None
 
-                    logger.debug(f"DECREASE: {clause} || {value}")
-                    idx_to_remove = find_clause_child(clause, value)
+                    logger.debug(f"DECREASE: {clause} || {var_name}")
+                    idx_to_remove = find_clause_child(clause, var_name)
                     clause.children.pop(idx_to_remove)
                     if len(clause.children) == 1:
                         # found another unit clause!
@@ -72,9 +83,7 @@ def unit_propagation(ast_tree_root: ASTAbstractNode):
                         logger.debug(f"NEW UNIT: {remaining_child}")
                         ast_tree_root.children[clause_index] = remaining_child
                         unit_clauses.add(remaining_child)
-        for i in sorted(remove_from_vcmvalue, reverse=True):
-            vcm[value].pop(i)
-
-        #vcm.pop(value)
+        for i in sorted(remove_from_vcmvar_name, reverse=True):
+            vcm[var_name].pop(i)
 
     return assignment, vcm, removed_clauses
