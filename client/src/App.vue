@@ -81,13 +81,6 @@
             ><mdb-icon icon="table" class="mr-3" />Tables</mdb-list-group-item
           >
         </router-link>
-        <router-link to="/maps" @click.native="activeItem = 4">
-          <mdb-list-group-item
-            :action="true"
-            :class="activeItem === 4 && 'active'"
-            ><mdb-icon icon="map" class="mr-3" />Maps</mdb-list-group-item
-          >
-        </router-link>
         <router-link to="/404" @click.native="activeItem = 5">
           <mdb-list-group-item
             :action="true"
