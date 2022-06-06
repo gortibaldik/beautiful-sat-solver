@@ -32,13 +32,15 @@
 
 ### Run development server for both frontend and backend
 
-1. Run flask backend server: 
+1. Run flask backend server:
+2. Run npm frontend dev server: `./run_frontend.sh`
 
 ### Run in docker container
 
 1. Build docker container: `docker build -t satsmt:latest .`
 2. Run docker container: `docker run -d --name satsmt-container -e "PORT=8765" -p 8007:8765 satsmt:latest`
 3. When finished your experiments: `docker stop satsmt-container`
+4. Remove container to be able to rebuild: `docker rm satsmt-container`
 
 -----
 
