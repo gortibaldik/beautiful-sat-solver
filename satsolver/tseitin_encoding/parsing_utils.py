@@ -1,5 +1,5 @@
-from tseitin_encoding.symbols import Symbols
-from tseitin_encoding.ast_tree import ASTNodeFactory
+from satsolver.tseitin_encoding.symbols import Symbols
+from satsolver.tseitin_encoding.ast_tree import ASTNodeFactory
 
 symbols_mapping = {
     "not": Symbols.NOT,

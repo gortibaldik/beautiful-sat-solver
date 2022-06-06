@@ -1,5 +1,5 @@
 from logzero import logger
-from tseitin_encoding.ast_tree import ASTAbstractNode
+from satsolver.tseitin_encoding.ast_tree import ASTAbstractNode
 
 def _update_mapping(vcm, clause_index, value, negative: bool):
     vcm[value] = vcm.get(value, []) + [(clause_index, negative)]

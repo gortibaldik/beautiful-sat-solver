@@ -1,9 +1,9 @@
 
-from dpll.pure_literal_elimination import pure_literal_elimination
-from dpll.unit_propagation import unit_propagation
+from satsolver.dpll.pure_literal_elimination import pure_literal_elimination
+from satsolver.dpll.unit_propagation import unit_propagation
 from logzero import logger
-from tseitin_encoding.ast_tree import ASTAbstractNode
-from tseitin_encoding.tseitin_transformation import negate_literal
+from satsolver.tseitin_encoding.ast_tree import ASTAbstractNode
+from satsolver.tseitin_encoding.tseitin_transformation import negate_literal
 
 def combine_assignments(unit_assignment, pure_elimination_assignment):
     if len(unit_assignment) < len(pure_elimination_assignment):

@@ -2,12 +2,12 @@ import os
 from argparse import ArgumentParser
 from enum import Enum
 from logzero import logger
-from task1 import read_formula, tseitin_encoding, set_debug_level, add_parser_debug_levels
-from dpll.dpll import dpll
+from satsolver.task1 import read_formula, tseitin_encoding, set_debug_level, add_parser_debug_levels
+from satsolver.dpll.dpll import dpll
 from timeit import default_timer as timer
-from tseitin_encoding.ast_tree import ASTNaryNode, ASTUnaryNode, ASTVariableNode
-from tseitin_encoding.symbols import Symbols
-from tseitin_encoding.tseitin_transformation import log_node_info
+from satsolver.tseitin_encoding.ast_tree import ASTNaryNode, ASTUnaryNode, ASTVariableNode
+from satsolver.tseitin_encoding.symbols import Symbols
+from satsolver.tseitin_encoding.tseitin_transformation import log_node_info
 
 class Extensions(Enum):
     DIMACS=".cnf"

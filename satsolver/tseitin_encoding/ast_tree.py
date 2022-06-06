@@ -1,4 +1,4 @@
-from tseitin_encoding.symbols import Symbols
+from satsolver.tseitin_encoding.symbols import Symbols
 
 class ASTNodeFactory:
     @staticmethod

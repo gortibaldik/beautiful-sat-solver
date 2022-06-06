@@ -2,9 +2,9 @@ import logzero
 import sys
 from argparse import ArgumentParser
 from logzero import logger
-from tseitin_encoding.ast_tree import ASTAbstractNode
-from tseitin_encoding.parsing_utils import create_abstract_syntax_tree
-from tseitin_encoding.tseitin_transformation import turn_nnf_to_tseitin
+from satsolver.tseitin_encoding.ast_tree import ASTAbstractNode
+from satsolver.tseitin_encoding.parsing_utils import create_abstract_syntax_tree
+from satsolver.tseitin_encoding.tseitin_transformation import turn_nnf_to_tseitin
 
 def transform_to_numbers(tseitin_ast_tree_root: ASTAbstractNode, mapping):
     subformulas = []

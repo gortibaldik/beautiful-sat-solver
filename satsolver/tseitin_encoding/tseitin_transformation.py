@@ -1,6 +1,6 @@
 from logzero import logger
-from tseitin_encoding.symbols import Symbols
-from tseitin_encoding.ast_tree import ASTAbstractNode, ASTBinaryNode, ASTNaryNode, ASTUnaryNode, ASTVariableNode
+from satsolver.tseitin_encoding.symbols import Symbols
+from satsolver.tseitin_encoding.ast_tree import ASTAbstractNode, ASTBinaryNode, ASTNaryNode, ASTUnaryNode, ASTVariableNode
 
 def create_equivalence(subformula: ASTAbstractNode, additional_variable_index, equivalences):
     new_variable = ASTVariableNode(Symbols.VARIABLE, f"__spec__{additional_variable_index}")

@@ -2,7 +2,7 @@
 te.sh
 test_sat.sh
 test_unsat.sh
-dpll/test_data
+**/dpll/test_data
 
 .DS_Store
 node_modules
