@@ -30,11 +30,15 @@
 | uff75-325  | 3.36  | 2 814.0                   | 1076.0             |
 | uff100-430 | 39.98 | 27 209.3                  | 10 294.0           |
 
+### Run development server for both frontend and backend
+
+1. Run flask backend server: 
+
 ### Run in docker container
 
 1. Build docker container: `docker build -t satsmt:latest .`
 2. Run docker container: `docker run -d --name satsmt-container -e "PORT=8765" -p 8007:8765 satsmt:latest`
-3. When finished your experiments: `docker stop flask-vue`
+3. When finished your experiments: `docker stop satsmt-container`
 
 -----
 

@@ -3,531 +3,42 @@
     <mdb-card class="mb-4">
       <mdb-card-body class="d-sm-flex justify-content-between">
         <h4 class="mb-sm-0 pt-2">
-          <a href="https://mdbootstrap.com/material-design-for-bootstrap/" target="_blank">Home Page</a><span>/</span><span>Dashboard</span>
+          Run selected implementations on benchmarks
         </h4>
-        <form class="d-flex md-form justify-content-center" style="margin:0;">
-          <input aria-label="Search" class="form-control" placeholder="Type your query" type="search" />
-          <mdb-btn color="primary" size="sm" class="my-0" type="submit"><i class="fa fa-search"></i></mdb-btn>
-        </form>
       </mdb-card-body>
     </mdb-card>
     <section class="mt-lg-5">
       <mdb-row>
-        <mdb-col xl="3" md="6" class="mb-r">
-          <mdb-card cascade class="cascading-admin-card">
+        <mdb-col xl="4" md="6" class="mb-r" v-for="(algorithm, index) in algorithms" :key="algorithm.name">
+          <mdb-card class="cascading-admin-card">
             <div class="admin-up">
-              <mdb-icon icon="money-bill-alt" far class="primary-color"/>
-              <div class="data">
-                <p>SALES</p>
-                <h4>
-                  <strong>$2000</strong>
-                </h4>
+              <mdb-view>
+              <mdb-card-title>
+                  <div>
+                    <mdb-icon :icon="symbolsForAlgorithms[index]" fas class="m-2 primary-color" size="3x"/>
+                    <strong class="algorithmName">{{algorithm.name}}</strong>
+                  </div>
+              </mdb-card-title>
+              </mdb-view>
+              <div class="taskNumber">
+                <p>TASK {{algorithm.task}}</p>
               </div>
             </div>
             <mdb-card-body>
-              <div class="progress">
-                <div aria-valuemax="100" aria-valuemin="0" aria-valuenow="25" class="progress-bar bg-primary" role="progressbar"
-                  style="width: 25%"></div>
-              </div>
-              <mdb-card-text>Better than last week (25%)</mdb-card-text>
-            </mdb-card-body>
-          </mdb-card>
-        </mdb-col>
-        <mdb-col xl="3" md="6" class="mb-r">
-          <mdb-card cascade class="cascading-admin-card">
-            <div class="admin-up">
-              <mdb-icon icon="chart-line" class="warning-color"/>
-              <div class="data">
-                <p>SUBSCRIPTIONS</p>
-                <h4>
-                  <strong>200</strong>
-                </h4>
-              </div>
-            </div>
-            <mdb-card-body>
-              <div class="progress">
-                <div aria-valuemax="100" aria-valuemin="0" aria-valuenow="25" class="progress-bar bg grey darken-2" role="progressbar"
-                  style="width: 25%"></div>
-              </div>
-              <mdb-card-text>Worse than last week (25%)</mdb-card-text>
-            </mdb-card-body>
-          </mdb-card>
-        </mdb-col>
-        <mdb-col xl="3" md="6" class="mb-r">
-          <mdb-card cascade class="cascading-admin-card">
-            <div class="admin-up">
-              <mdb-icon icon="chart-pie" class="light-blue lighten-1"/>
-              <div class="data">
-                <p>TRAFFIC</p>
-                <h4>
-                  <strong>20000</strong>
-                </h4>
-              </div>
-            </div>
-            <mdb-card-body>
-              <div class="progress">
-                <div aria-valuemax="100" aria-valuemin="0" aria-valuenow="75" class="progress-bar grey darken-2" role="progressbar"
-                  style="width: 75%"></div>
-              </div>
-              <mdb-card-text>Worse than last week (75%)</mdb-card-text>
-            </mdb-card-body>
-          </mdb-card>
-        </mdb-col>
-        <mdb-col xl="3" md="6" class="mb-r">
-          <mdb-card cascade class="cascading-admin-card">
-            <div class="admin-up">
-              <mdb-icon icon="chart-bar" class="red accent-2"/>
-              <div class="data">
-                <p>ORGANIC TRAFFIC</p>
-                <h4>
-                  <strong>2000</strong>
-                </h4>
-              </div>
-            </div>
-            <mdb-card-body>
-              <div class="progress">
-                <div aria-valuemax="100" aria-valuemin="0" aria-valuenow="25" class="progress-bar bg-primary" role="progressbar"
-                  style="width: 25%"></div>
-              </div>
-              <mdb-card-text>Better than last week (25%)</mdb-card-text>
-            </mdb-card-body>
-          </mdb-card>
-        </mdb-col>
-      </mdb-row>
-    </section>
-    <section>
-      <mdb-row class="mt-5">
-          <mdb-col md="9" class="mb-4">
-              <mdb-card>
-                  <mdb-card-body>
-                      <div style="display: block">
-                        <mdb-bar-chart :data="barChartData" :options="barChartOptions" :height="500"/>
-                      </div>
-                  </mdb-card-body>
-              </mdb-card>
-          </mdb-col>
-          <mdb-col md="3" class="mb-4">
-              <mdb-card class="mb-4">
-                  <mdb-card-header class="text-center"> Pie chart </mdb-card-header>
-                  <mdb-card-body>
-                      <div style="display: block">
-                        <mdb-pie-chart :data="pieChartData" :options="pieChartOptions" :height="200"/>
-                      </div>
-                  </mdb-card-body>
-              </mdb-card>
-              <mdb-card class="mb-4">
-                  <mdb-card-body>
-                      <mdb-list-group class="list-group-flush">
-                          <mdb-list-group-item action waves>Sales
-                              <mdb-badge color="success-color" pill class="pull-right">22%
-                                  <mdb-icon icon="arrow-up" class="ml-1"/>
-                              </mdb-badge>
-                          </mdb-list-group-item>
-                          <mdb-list-group-item action waves>Traffic
-                              <mdb-badge color="danger-color" pill class="pull-right">5%
-                                  <mdb-icon icon="arrow-down" class="n ml-1"/>
-                              </mdb-badge>
-                          </mdb-list-group-item>
-                          <mdb-list-group-item action waves>Orders
-                              <mdb-badge color="primary-color" pill class="pull-right">14</mdb-badge>
-                          </mdb-list-group-item>
-                          <mdb-list-group-item action waves>Issues
-                              <mdb-badge color="primary-color" pill class="pull-right">123</mdb-badge>
-                          </mdb-list-group-item>
-                          <mdb-list-group-item action waves>Messages
-                              <mdb-badge color="primary-color" pill class="pull-right">8</mdb-badge>
-                          </mdb-list-group-item>
-                      </mdb-list-group>
-                  </mdb-card-body>
-              </mdb-card>
-          </mdb-col>
-      </mdb-row>
-    </section>
-    <section>
-      <mdb-row>
-          <mdb-col md="6" class="mb-4">
-              <mdb-card>
-                  <mdb-card-body>
-                      <mdb-tbl hover>
-                          <thead class="blue-grey lighten-4">
-                              <tr>
-                                  <th>#</th>
-                                  <th>Lorem</th>
-                                  <th>Ipsum</th>
-                                  <th>Dolor</th>
-                              </tr>
-                          </thead>
-                          <tbody>
-                              <tr>
-                                  <th scope="row">1</th>
-                                  <td>Cell 1</td>
-                                  <td>Cell 2</td>
-                                  <td>Cell 3</td>
-                              </tr>
-                              <tr>
-                                  <th scope="row">2</th>
-                                  <td>Cell 4</td>
-                                  <td>Cell 5</td>
-                                  <td>Cell 6</td>
-                              </tr>
-                              <tr>
-                                  <th scope="row">3</th>
-                                  <td>Cell 7</td>
-                                  <td>Cell 8</td>
-                                  <td>Cell 9</td>
-                              </tr>
-                          </tbody>
-                      </mdb-tbl>
-                  </mdb-card-body>
-              </mdb-card>
-          </mdb-col>
-          <mdb-col md="6" class="mb-4">
-              <mdb-card>
-                  <mdb-card-body>
-                      <mdb-tbl hover>
-                          <thead class="blue lighten-4">
-                              <tr>
-                                  <th>#</th>
-                                  <th>Lorem</th>
-                                  <th>Ipsum</th>
-                                  <th>Dolor</th>
-                              </tr>
-                          </thead>
-                          <tbody>
-                              <tr>
-                                  <th scope="row">1</th>
-                                  <td>Cell 1</td>
-                                  <td>Cell 2</td>
-                                  <td>Cell 3</td>
-                              </tr>
-                              <tr>
-                                  <th scope="row">2</th>
-                                  <td>Cell 4</td>
-                                  <td>Cell 5</td>
-                                  <td>Cell 6</td>
-                              </tr>
-                              <tr>
-                                  <th scope="row">3</th>
-                                  <td>Cell 7</td>
-                                  <td>Cell 8</td>
-                                  <td>Cell 9</td>
-                              </tr>
-                          </tbody>
-                      </mdb-tbl>
-                  </mdb-card-body>
-              </mdb-card>
-          </mdb-col>
-      </mdb-row>
-    </section>
-    <section>
-      <mdb-row class="mt-3">
-        <mdb-col md="12" lg="4" class="mb-4">
-          <mdb-card class="mb-4">
-            <mdb-card-header> Line chart </mdb-card-header>
-            <mdb-card-body>
-              <div style="display: block">
-                <mdb-line-chart :data="lineChartData" :options="lineChartOptions" :height="200"/>
-              </div>
-            </mdb-card-body>
-          </mdb-card>
-        </mdb-col>
-        <mdb-col md="12" lg="4" class="mb-4">
-          <mdb-card class="mb-4">
-            <mdb-card-header> Radar chart </mdb-card-header>
-            <mdb-card-body>
-              <div style="display: block">
-                <mdb-radar-chart :data="radarChartData" :options="radarChartOptions" :height="300"/>
-              </div>
-            </mdb-card-body>
-          </mdb-card>
-        </mdb-col>
-        <mdb-col md="12" lg="4" class="mb-4">
-          <mdb-card class="mb-4">
-            <mdb-card-header> Doughnut chart </mdb-card-header>
-            <mdb-card-body>
-              <div style="display: block">
-                <mdb-doughnut-chart :data="doughnutChartData" :options="doughnutChartOptions" :height="300"/>
-              </div>
-            </mdb-card-body>
-          </mdb-card>
-        </mdb-col>
-      </mdb-row>
-    </section>
-    <section>
-      <mdb-row>
-        <mdb-col lg="6" class="mb-4">
-          <mdb-card>
-            <mdb-card-header>Google Map</mdb-card-header>
-            <mdb-card-body>
-              <GmapMap
-                :center="{lat:10, lng:10}"
-                :zoom="7"
-                style="width: 100%; height: 300px"
-              >
-              </GmapMap>
-            </mdb-card-body>
-          </mdb-card>
-        </mdb-col>
-        <mdb-col lg="6" class="mb-4">
-          <mdb-card>
-            <mdb-card-header>Modals</mdb-card-header>
-            <mdb-card-body>
-              <section>
-                <h4 class="mb-5 mt-4 dark-grey-text text-center font-bold"><strong>Position & Sizes</strong></h4>
-                <div class="text-center mb-5">
-                  <p class="lead">Click buttons below to launch modals demo</p>
+              <mdb-container>
+                <p class="benchmarkSelector">SELECT BENCHMARK:</p>
+                <select class="browser-default custom-select benchmarkPossibilities" multiple v-model="selected[index]">
+                  <option v-for="value in benchmarks" :key="value">
+                    {{value}}
+                  </option>
+                </select>
+                <mdb-btn color="primary" class="runButton" @click="runBenchmarkClicked(algorithm.name,selected[index][0], index)" :disabled="isDisabled">Run</mdb-btn>
+
+                <div class="progress" :style="displayProgressBar(index)">
+                  <div aria-valuemax="100" aria-valuemin="0" :aria-valuenow="progressBarValue" class="progress-bar bg-primary" role="progressbar"
+                    :style="progressBarStyle"></div>
                 </div>
-                <mdb-row>
-                  <mdb-col md="3" class="mb-3">
-                    <h5 class="text-center mb-3">Frame modal</h5>
-                    <img class="img-fluid z-depth-1" src="https://mdbootstrap.com/img/brandflow/modal4.jpg" alt="frame position"/>
-                    <div class="text-center">
-                      <h5 class="my-3">Position</h5>
-                      <mdb-btn color="primary" size="sm" @click.native="showFrameModalTop = true">Top</mdb-btn>
-                      <mdb-modal frame removeBackdrop position="top" :show="showFrameModalTop" @close="showFrameModalTop = false">
-                        <mdb-modal-body class="text-center">
-                          <span>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Impedit nisi quo provident fugiat reprehenderit nostrum quos...</span>
-                          <mdb-btn color="secondary" @click.native="showFrameModalTop = false">Close</mdb-btn>
-                          <mdb-btn color="primary">Save changes</mdb-btn>
-                        </mdb-modal-body>
-                      </mdb-modal>
-                      <mdb-btn color="primary" size="sm" @click.native="showFrameModalBottom = true">Bottom</mdb-btn>
-                      <mdb-modal frame removeBackdrop position="bottom" :show="showFrameModalBottom" @close="showFrameModalBottom = false">
-                        <mdb-modal-body class="text-center">
-                          <span>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Impedit nisi quo provident fugiat reprehenderit nostrum quos...</span>
-                          <mdb-btn color="secondary" @click.native="showFrameModalBottom = false">Close</mdb-btn>
-                          <mdb-btn color="primary">Save changes</mdb-btn>
-                        </mdb-modal-body>
-                      </mdb-modal>
-                    </div>
-                  </mdb-col>
-                  <mdb-col md="3" class="mb-3">
-                    <h5 class="text-center mb-3">Side modal</h5>
-                    <img class="img-fluid z-depth-1" src="https://mdbootstrap.com/img/brandflow/modal3.jpg" alt="frame position"/>
-                    <div class="text-center">
-                      <h5 class="my-3">Position</h5>
-                      <mdb-btn color="primary" size="sm" @click.native="showSideModalTopRight = true">Top right</mdb-btn>
-                      <mdb-modal side position="top-right" :show="showSideModalTopRight" @close="showSideModalTopRight = false">
-                        <mdb-modal-header>
-                          <mdb-modal-title>Modal title</mdb-modal-title>
-                        </mdb-modal-header>
-                        <mdb-modal-body>...</mdb-modal-body>
-                        <mdb-modal-footer>
-                          <mdb-btn color="secondary" @click.native="showSideModalTopRight = false">Close</mdb-btn>
-                          <mdb-btn color="primary">Save changes</mdb-btn>
-                        </mdb-modal-footer>
-                      </mdb-modal>
-                      <mdb-btn color="primary" size="sm" @click.native="showSideModalTopLeft = true">Top left</mdb-btn>
-                      <mdb-modal side position="top-left" :show="showSideModalTopLeft" @close="showSideModalTopLeft = false">
-                        <mdb-modal-header>
-                          <mdb-modal-title>Modal title</mdb-modal-title>
-                        </mdb-modal-header>
-                        <mdb-modal-body>...</mdb-modal-body>
-                        <mdb-modal-footer>
-                          <mdb-btn color="secondary" @click.native="showSideModalTopLeft = false">Close</mdb-btn>
-                          <mdb-btn color="primary">Save changes</mdb-btn>
-                        </mdb-modal-footer>
-                      </mdb-modal>
-                      <mdb-btn color="primary" size="sm" @click.native="showSideModalBottomRight = true">Bottom right</mdb-btn>
-                      <mdb-modal side position="bottom-right" :show="showSideModalBottomRight" @close="showSideModalBottomRight = false">
-                        <mdb-modal-header>
-                          <mdb-modal-title>Modal title</mdb-modal-title>
-                        </mdb-modal-header>
-                        <mdb-modal-body>...</mdb-modal-body>
-                        <mdb-modal-footer>
-                          <mdb-btn color="secondary" @click.native="showSideModalBottomRight = false">Close</mdb-btn>
-                          <mdb-btn color="primary">Save changes</mdb-btn>
-                        </mdb-modal-footer>
-                      </mdb-modal>
-                      <mdb-btn color="primary" size="sm" @click.native="showSideModalBottomLeft = true">Bottom left</mdb-btn>
-                      <mdb-modal side position="bottom-left" :show="showSideModalBottomLeft" @close="showSideModalBottomLeft = false">
-                        <mdb-modal-header>
-                          <mdb-modal-title>Modal title</mdb-modal-title>
-                        </mdb-modal-header>
-                        <mdb-modal-body>...</mdb-modal-body>
-                        <mdb-modal-footer>
-                          <mdb-btn color="secondary" @click.native="showSideModalBottomLeft = false">Close</mdb-btn>
-                          <mdb-btn color="primary">Save changes</mdb-btn>
-                        </mdb-modal-footer>
-                      </mdb-modal>
-                    </div>
-                  </mdb-col>
-                  <mdb-col md="3" class="mb-3">
-                    <h5 class="text-center mb-3">Central modal</h5>
-                    <img class="img-fluid z-depth-1" src="https://mdbootstrap.com/img/brandflow/modal2.jpg" alt="frame position"/>
-                    <div class="text-center">
-                      <h5 class="my-3">Size</h5>
-                      <mdb-btn color="primary" size="sm" @click.native="showCentralModalSmall = true">Small</mdb-btn>
-                      <mdb-modal size="sm" :show="showCentralModalSmall" @close="showCentralModalSmall = false">
-                        <mdb-modal-header>
-                          <mdb-modal-title>Modal title</mdb-modal-title>
-                        </mdb-modal-header>
-                        <mdb-modal-body>...</mdb-modal-body>
-                        <mdb-modal-footer>
-                          <mdb-btn size="sm" color="secondary" @click.native="showCentralModalSmall = false">Close</mdb-btn>
-                          <mdb-btn size="sm" color="primary">Save changes</mdb-btn>
-                        </mdb-modal-footer>
-                      </mdb-modal>
-                      <mdb-btn color="primary" size="sm" @click.native="showCentralModalMedium = true">Medium</mdb-btn>
-                      <mdb-modal :show="showCentralModalMedium" @close="showCentralModalMedium = false">
-                        <mdb-modal-header>
-                          <mdb-modal-title>Modal title</mdb-modal-title>
-                        </mdb-modal-header>
-                        <mdb-modal-body>...</mdb-modal-body>
-                        <mdb-modal-footer>
-                          <mdb-btn color="secondary" @click.native="showCentralModalMedium = false">Close</mdb-btn>
-                          <mdb-btn color="primary">Save changes</mdb-btn>
-                        </mdb-modal-footer>
-                      </mdb-modal>
-                      <mdb-btn color="primary" size="sm" @click.native="showCentralModalLarge = true">Large</mdb-btn>
-                      <mdb-modal size="lg" :show="showCentralModalLarge" @close="showCentralModalLarge = false">
-                        <mdb-modal-header>
-                          <mdb-modal-title>Modal title</mdb-modal-title>
-                        </mdb-modal-header>
-                        <mdb-modal-body>...</mdb-modal-body>
-                        <mdb-modal-footer>
-                          <mdb-btn color="secondary" @click.native="showCentralModalLarge = false">Close</mdb-btn>
-                          <mdb-btn color="primary">Save changes</mdb-btn>
-                        </mdb-modal-footer>
-                      </mdb-modal>
-                      <mdb-btn color="primary" size="sm" @click.native="showCentralModalFluid = true">Fluid</mdb-btn>
-                      <mdb-modal size="fluid" :show="showCentralModalFluid" @close="showCentralModalFluid = false">
-                        <mdb-modal-header>
-                          <mdb-modal-title>Modal title</mdb-modal-title>
-                        </mdb-modal-header>
-                        <mdb-modal-body>...</mdb-modal-body>
-                        <mdb-modal-footer>
-                          <mdb-btn color="secondary" @click.native="showCentralModalFluid = false">Close</mdb-btn>
-                          <mdb-btn color="primary">Save changes</mdb-btn>
-                        </mdb-modal-footer>
-                      </mdb-modal>
-                    </div>
-                  </mdb-col>
-                  <mdb-col md="3" class="mb-3">
-                    <h5 class="text-center mb-3">Fluid modal</h5>
-                    <img class="img-fluid z-depth-1" src="https://mdbootstrap.com/img/brandflow/modal1.jpg" alt="frame position"/>
-                    <div class="text-center">
-                      <h5 class="my-3">Position</h5>
-                      <mdb-btn color="primary" size="sm" @click.native="showFluidModalRight = true">Right</mdb-btn>
-                      <mdb-modal fullHeight position="right" :show="showFluidModalRight" @close="showFluidModalRight = false">
-                        <mdb-modal-header>
-                          <mdb-modal-title>Modal title</mdb-modal-title>
-                        </mdb-modal-header>
-                        <mdb-modal-body>...</mdb-modal-body>
-                        <mdb-modal-footer>
-                          <mdb-btn color="secondary" @click.native="showFluidModalRight = false">Close</mdb-btn>
-                          <mdb-btn color="primary">Save changes</mdb-btn>
-                        </mdb-modal-footer>
-                      </mdb-modal>
-                      <mdb-btn color="primary" size="sm" @click.native="showFluidModalLeft = true">Left</mdb-btn>
-                      <mdb-modal fullHeight position="left" :show="showFluidModalLeft" @close="showFluidModalLeft = false">
-                        <mdb-modal-header>
-                          <mdb-modal-title>Modal title</mdb-modal-title>
-                        </mdb-modal-header>
-                        <mdb-modal-body>...</mdb-modal-body>
-                        <mdb-modal-footer>
-                          <mdb-btn color="secondary" @click.native="showFluidModalLeft = false">Close</mdb-btn>
-                          <mdb-btn color="primary">Save changes</mdb-btn>
-                        </mdb-modal-footer>
-                      </mdb-modal>
-                      <mdb-btn color="primary" size="sm" @click.native="showFluidModalTop = true">Top</mdb-btn>
-                      <mdb-modal fullHeight position="top" :show="showFluidModalTop" @close="showFluidModalTop = false">
-                        <mdb-modal-header>
-                          <mdb-modal-title>Modal title</mdb-modal-title>
-                        </mdb-modal-header>
-                        <mdb-modal-body>...</mdb-modal-body>
-                        <mdb-modal-footer>
-                          <mdb-btn color="secondary" @click.native="showFluidModalTop = false">Close</mdb-btn>
-                          <mdb-btn color="primary">Save changes</mdb-btn>
-                        </mdb-modal-footer>
-                      </mdb-modal>
-                      <mdb-btn color="primary" size="sm" @click.native="showFluidModalBottom = true">Bottom</mdb-btn>
-                      <mdb-modal fullHeight position="bottom" :show="showFluidModalBottom" @close="showFluidModalBottom = false">
-                        <mdb-modal-header>
-                          <mdb-modal-title>Modal title</mdb-modal-title>
-                        </mdb-modal-header>
-                        <mdb-modal-body>...</mdb-modal-body>
-                        <mdb-modal-footer>
-                          <mdb-btn color="secondary" @click.native="showFluidModalBottom = false">Close</mdb-btn>
-                          <mdb-btn color="primary">Save changes</mdb-btn>
-                        </mdb-modal-footer>
-                      </mdb-modal>
-                    </div>
-                  </mdb-col>
-                </mdb-row>
-              </section>
-            </mdb-card-body>
-          </mdb-card>
-        </mdb-col>
-      </mdb-row>
-    </section>
-    <section>
-      <mdb-row>
-        <mdb-col xl="3" md="6" class="mb-3">
-          <mdb-card class="classic-admin-card primary-color">
-            <mdb-card-body>
-              <div class="pull-right">
-                <mdb-icon icon="money"/>
-              </div>
-              <p class="white-text">SALES</p>
-              <h4><strong>$2000</strong></h4>
-            </mdb-card-body>
-            <div class="progress">
-              <div aria-valuemax="100" aria-valuemin="0" aria-valuenow="25" class="progress-bar bg grey darken-3" role="progressbar" style="width: 25%"></div>
-            </div>
-            <mdb-card-body>
-              <p>Better than last week (25%)</p>
-            </mdb-card-body>
-          </mdb-card>
-        </mdb-col>
-        <mdb-col xl="3" md="6" class="mb-3">
-          <mdb-card class="classic-admin-card warning-color">
-            <mdb-card-body>
-              <div class="pull-right">
-                <mdb-icon icon="line-chart"/>
-              </div>
-              <p class="white-text">SALES</p>
-              <h4><strong>200</strong></h4>
-            </mdb-card-body>
-            <div class="progress">
-              <div aria-valuemax="100" aria-valuemin="0" aria-valuenow="25" class="progress-bar bg grey darken-3" role="progressbar" style="width: 25%"></div>
-            </div>
-            <mdb-card-body>
-              <p>Worse than last week (25%)</p>
-            </mdb-card-body>
-          </mdb-card>
-        </mdb-col>
-        <mdb-col xl="3" md="6" class="mb-3">
-          <mdb-card class="classic-admin-card primary-color">
-            <mdb-card-body>
-              <div class="pull-right">
-                <mdb-icon icon="pie-chart"/>
-              </div>
-              <p class="white-text">TRAFFIC</p>
-              <h4><strong>20000</strong></h4>
-            </mdb-card-body>
-            <div class="progress">
-              <div aria-valuemax="100" aria-valuemin="0" aria-valuenow="75" class="progress-bar bg grey darken-3" role="progressbar" style="width: 75%"></div>
-            </div>
-            <mdb-card-body>
-              <p>Better than last week (75%)</p>
-            </mdb-card-body>
-          </mdb-card>
-        </mdb-col>
-        <mdb-col xl="3" md="6" class="mb-3">
-          <mdb-card class="classic-admin-card red accent-2">
-            <mdb-card-body>
-              <div class="pull-right">
-                <mdb-icon icon="bar-chart"/>
-              </div>
-              <p class="white-text">ORGANIC TRAFFIC</p>
-              <h4><strong>2000</strong></h4>
-            </mdb-card-body>
-            <div class="progress">
-              <div aria-valuemax="100" aria-valuemin="0" aria-valuenow="25" class="progress-bar bg grey darken-3" role="progressbar" style="width: 25%"></div>
-            </div>
-            <mdb-card-body>
-              <p>Better than last week (75%)</p>
+              </mdb-container>
             </mdb-card-body>
           </mdb-card>
         </mdb-col>
@@ -537,33 +48,30 @@
 </template>
 
 <script>
-import { mdbRow, mdbCol, mdbBtn, mdbCard, mdbCardBody, mdbCardHeader, mdbCardText, mdbIcon, mdbTbl, mdbBarChart, mdbPieChart, mdbLineChart, mdbRadarChart, mdbDoughnutChart, mdbListGroup, mdbListGroupItem, mdbBadge, mdbModal, mdbModalHeader, mdbModalTitle, mdbModalBody, mdbModalFooter } from 'mdbvue'
+import {
+    mdbBtn,
+    mdbRow,
+    mdbCol,
+    mdbCard,
+    mdbCardBody,
+    mdbIcon,
+    mdbCardTitle,
+    mdbContainer,
+    mdbView
+} from 'mdbvue'
 
 export default {
   name: 'Dashboard',
   components: {
+    mdbBtn,
     mdbRow,
     mdbCol,
-    mdbBtn,
     mdbCard,
     mdbCardBody,
-    mdbCardHeader,
-    mdbCardText,
+    mdbCardTitle,
     mdbIcon,
-    mdbTbl,
-    mdbBarChart,
-    mdbPieChart,
-    mdbLineChart,
-    mdbRadarChart,
-    mdbDoughnutChart,
-    mdbListGroup,
-    mdbListGroupItem,
-    mdbBadge,
-    mdbModal,
-    mdbModalHeader,
-    mdbModalTitle,
-    mdbModalBody,
-    mdbModalFooter
+    mdbContainer,
+    mdbView
   },
   data () {
     return {
@@ -581,139 +89,112 @@ export default {
       showFluidModalLeft: false,
       showFluidModalTop: false,
       showFluidModalBottom: false,
-      barChartData: {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
-        datasets: [
-          {
-            label: '#1',
-            data: [12, 39, 3, 50, 2, 32, 84],
-            backgroundColor: 'rgba(245, 74, 85, 0.5)',
-            borderWidth: 1
-          }, {
-            label: '#2',
-            data: [56, 24, 5, 16, 45, 24, 8],
-            backgroundColor: 'rgba(90, 173, 246, 0.5)',
-            borderWidth: 1
-          }, {
-            label: '#3',
-            data: [12, 25, 54, 3, 15, 44, 3],
-            backgroundColor: 'rgba(245, 192, 50, 0.5)',
-            borderWidth: 1
-          }
-        ]
-      },
-      barChartOptions: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          xAxes: [{
-            barPercentage: 1,
-            gridLines: {
-              display: true,
-              color: 'rgba(0, 0, 0, 0.1)'
-            }
-          }],
-          yAxes: [{
-            gridLines: {
-              display: true,
-              color: 'rgba(0, 0, 0, 0.1)'
-            },
-            ticks: {
-              beginAtZero: true
-            }
-          }]
+
+      benchmarks: [
+        'firstBenchmark',
+        'secondBenchmark',
+        '3Benchmark',
+        '4Benchmark',
+        '5Benchmark',
+        '6Benchmark',
+        '7Benchmark',
+        '8Benchmark',
+        '9Benchmark',
+        '10Benchmark',
+      ],
+      algorithms: [
+        {
+          name: 'DPPL',
+          task: '2'
+        },
+        {
+          name: 'Watched Literals',
+          task: '3'
+        },
+        {
+          name: 'CDCL',
+          task: '4'
+        },
+        {
+          name: 'Decision Heuristics',
+          task: '5'
+        },
+        {
+          name: 'Look-Ahead Solver',
+          task: '6'
         }
-      },
-      pieChartData: {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
-        datasets: [
-          {
-            data: [300, 50, 100, 40, 120, 24, 52],
-            backgroundColor: ['#F7464A', '#46BFBD', '#FDB45C', '#949FB1', '#4D5360', '#ac64ad'],
-            hoverBackgroundColor: ['#FF5A5E', '#5AD3D1', '#FFC870', '#A8B3C5', '#616774', '#da92db']
-          }
-        ]
-      },
-      pieChartOptions: {
-        responsive: true,
-        maintainAspectRatio: false
-      },
-      lineChartData: {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
-        datasets: [
-          {
-            label: '#1',
-            backgroundColor: 'rgba(245, 74, 85, 0.5)',
-            data: [65, 59, 80, 81, 56, 55, 40]
-          },
-          {
-            label: '#2',
-            backgroundColor: 'rgba(90, 173, 246, 0.5)',
-            data: [12, 42, 121, 56, 24, 12, 2]
-          },
-          {
-            label: '#3',
-            backgroundColor: 'rgba(245, 192, 50, 0.5)',
-            data: [2, 123, 154, 76, 54, 23, 5]
-          }
-        ]
-      },
-      lineChartOptions: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          xAxes: [{
-            gridLines: {
-              display: true,
-              color: 'rgba(0, 0, 0, 0.1)'
-            }
-          }],
-          yAxes: [{
-            gridLines: {
-              display: true,
-              color: 'rgba(0, 0, 0, 0.1)'
-            }
-          }]
-        }
-      },
-      radarChartData: {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
-        datasets: [
-          {
-            label: '#1',
-            backgroundColor: 'rgba(245, 74, 85, 0.5)',
-            data: [65, 59, 80, 81, 56, 55, 40]
-          },
-          {
-            label: '#2',
-            backgroundColor: 'rgba(90, 173, 246, 0.5)',
-            data: [12, 42, 121, 56, 24, 12, 2]
-          },
-          {
-            label: '#3',
-            backgroundColor: 'rgba(245, 192, 50, 0.5)',
-            data: [2, 123, 154, 76, 54, 23, 5]
-          }
-        ]
-      },
-      radarChartOptions: {
-        responsive: true,
-        maintainAspectRatio: false
-      },
-      doughnutChartData: {
-        labels: ['Red', 'Green', 'Yellow', 'Grey', 'Dark Grey'],
-        datasets: [
-          {
-            data: [300, 50, 100, 40, 120],
-            backgroundColor: ['#F7464A', '#46BFBD', '#FDB45C', '#949FB1', '#4D5360'],
-            hoverBackgroundColor: ['#FF5A5E', '#5AD3D1', '#FFC870', '#A8B3C5', '#616774']
-          }
-        ]
-      },
-      doughnutChartOptions: {
-        responsive: true,
-        maintainAspectRatio: false
+      ],
+      symbolsForAlgorithms: [
+        'cat',
+        'crow',
+        'dove',
+        'dragon',
+        'hippo'
+      ],
+      // need to render dynamically
+      selected: [
+        [], [], [], [], []
+      ],
+      runningComputation: false,
+      runComputationFor: 3000,
+      runningIndex: null,
+      computationRuntime: 0,
+      progressBarValue: 0,
+      progressBarStyle: "width: 0%"
+    }
+  },
+  methods: {
+    runBenchmarkClicked(algorithmName, selectedBenchmark, selectedIndex) {
+      algorithmName = null
+      selectedBenchmark = null
+      this.runningComputation = true
+      this.start = new Date()
+      this.runningIndex = selectedIndex
+      this.pollingInterval = setInterval(this.pollComputation.bind(this), 1000)
+    },
+    resetPollingParameters() {
+      this.start = null
+      this.runningIndex = null
+      this.runningComputation = false
+      this.computationRuntime = 0
+    },
+    pollComputation() {
+      let current = new Date()
+      this.computationRuntime = current.getTime() - this.start.getTime()
+      if (this.computationRuntime > this.runComputationFor) {
+        clearInterval(this.pollingInterval)
+        this.resetPollingParameters()
       }
+    },
+    displayProgressBar(index) {
+      if (index === this.runningIndex) {
+        return ""
+      } else {
+        return "display: none;"
+      }
+    },
+  },
+  computed: {
+    isDisabled() {
+      return this.runningComputation;
+    },
+    getComputationRuntime: {
+      get() {
+        return this.computationRuntime
+      },
+      set(value) {
+        this.computationRuntime = value
+      }
+    },
+  },
+  watch: {
+    computationRuntime: {
+      handler(newValue) {
+        let percent = newValue * 100 / this.runComputationFor
+        this.progressBarValue = percent
+        this.progressBarStyle = `width: ${percent}%`
+      },
+      immediate: true
     }
   }
 }
@@ -725,29 +206,57 @@ export default {
   margin: 20px 0;
 }
 .cascading-admin-card .admin-up {
-  margin-left: 4%;
+  margin-left: -20px;
   margin-right: 4%;
   margin-top: -20px;
 }
 .cascading-admin-card .admin-up .fas,
 .cascading-admin-card .admin-up .far {
   box-shadow: 0 2px 9px 0 rgba(0, 0, 0, 0.2), 0 2px 13px 0 rgba(0, 0, 0, 0.19);
-  padding: 1.7rem;
-  font-size: 2rem;
+  padding: 1.2rem;
+  font-size: 2.8rem;
   color: #fff;
   text-align: left;
-  margin-right: 1rem;
-  border-radius: 3px;
+  margin-right: 0.5rem;
+  border-radius: 5px;
 }
-.cascading-admin-card .admin-up .data {
+.cascading-admin-card .admin-up .algorithmName {
+  position: absolute;
+  top: 38%;
+  left: 55%;
+  transform: translateX(-50%) translateY(-0%);
+}
+.cascading-admin-card .admin-up .taskNumber {
   float: right;
-  margin-top: 2rem;
+  margin-top: -3rem;
   text-align: right;
 }
-.admin-up .data p {
+.admin-up .taskNumber p {
   color: #999999;
   font-size: 12px;
 }
+
+.cascading-admin-card .benchmarkSelector {
+  color: #999999;
+  margin-bottom: -0.05rem;
+  font-size: 13px;
+}
+
+.cascading-admin-card .benchmarkPossibilities {
+  color: #1f71ff;
+  font-size: 12px;
+  padding: 0.1rem;
+}
+
+.cascading-admin-card .runButton {
+  margin-left: 40%;
+  margin-top: 1rem;
+}
+
+.cascading-admin-card .progress {
+  margin-top: 0.5rem;
+}
+
 .classic-admin-card .card-body {
   color: #fff;
   margin-bottom: 0;
