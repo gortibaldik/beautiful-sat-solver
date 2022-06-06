@@ -145,8 +145,9 @@ export default {
   },
   methods: {
     runBenchmarkClicked(algorithmName, selectedBenchmark, selectedIndex) {
-      algorithmName = null
-      selectedBenchmark = null
+      if (!algorithmName || !selectedBenchmark) {
+        return
+      }
       this.runningComputation = true
       this.start = new Date()
       this.runningIndex = selectedIndex
