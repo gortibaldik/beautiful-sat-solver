@@ -29,3 +29,18 @@
 | uff50-218  | 0.42  | 428.3                     | 190.9              |
 | uff75-325  | 3.36  | 2 814.0                   | 1076.0             |
 | uff100-430 | 39.98 | 27 209.3                  | 10 294.0           |
+
+### Run in docker container
+
+1. Build docker container: `docker build -t satsmt:latest .`
+2. Run docker container: `docker run -d --name satsmt-container -e "PORT=8765" -p 8007:8765 satsmt:latest`
+3. When finished your experiments: `docker stop flask-vue`
+
+-----
+
+#### Resources
+
+- [How to deploy flask with vue.js in docker container](https://testdriven.io/blog/deploying-flask-to-heroku-with-docker-and-gitlab/)
+- [Proxy pass in nginx](https://dev.to/danielkun/nginx-everything-about-proxypass-2ona)
+- [WSGI servers](https://www.fullstackpython.com/wsgi-servers.html)
+- [What is Green Unicorn](https://vsupalov.com/what-is-gunicorn/)
