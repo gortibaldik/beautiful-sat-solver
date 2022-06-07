@@ -107,6 +107,13 @@ def print_result(result, model, ndecs, nunit, time, args):
     else:
         logger.warning(f"UNSAT; decs: {ndecs}; unit: {nunit}; time: {time}")
 
+def get_info():
+    return {
+        "name": "DPPL",
+        "taskName": "TASK 2",
+        "benchmarkable": True
+    }
+
 if __name__ == "__main__":
     parser = create_parser()
     add_parser_debug_levels(parser)

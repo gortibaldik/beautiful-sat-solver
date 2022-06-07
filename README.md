@@ -48,5 +48,9 @@
 
 - [How to deploy flask with vue.js in docker container](https://testdriven.io/blog/deploying-flask-to-heroku-with-docker-and-gitlab/)
 - [Proxy pass in nginx](https://dev.to/danielkun/nginx-everything-about-proxypass-2ona)
+- [Develop SPA with Flask and Vue.js](https://testdriven.io/blog/developing-a-single-page-app-with-flask-and-vuejs/)
 - [WSGI servers](https://www.fullstackpython.com/wsgi-servers.html)
 - [What is Green Unicorn](https://vsupalov.com/what-is-gunicorn/)
+- [Using fetch API](https://flaviocopes.com/fetch-api/)
+- [Redis Message Queue for long running tasks](https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-xxii-background-jobs)
+- [official Docker tutorial - Docker compose part](https://docs.docker.com/get-started/08_using_compose/)

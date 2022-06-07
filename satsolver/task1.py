@@ -110,5 +110,12 @@ def main():
     tseitin_ast_tree_root = tseitin_encoding(formula, nnf_reduce_implications=args.only_left_to_right)
     print_to_dmacs(tseitin_ast_tree_root, args.output)
 
+def get_info():
+    return {
+        "name": "Tseitin Encoding",
+        "taskName": "TASK 1",
+        "benchmarkable": False
+    }
+
 if __name__ == "__main__":
     main()

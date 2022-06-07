@@ -21,7 +21,7 @@
               </mdb-card-title>
               </mdb-view>
               <div class="taskNumber">
-                <p>TASK {{algorithm.task}}</p>
+                <p>{{algorithm.task}}</p>
               </div>
             </div>
             <mdb-card-body>
