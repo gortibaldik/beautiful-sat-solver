@@ -32,12 +32,27 @@
                     {{value}}
                   </option>
                 </select>
-                <mdb-btn color="primary" class="runButton" @click="runBenchmarkClicked(algorithm.name,selected[index][0], index)" :disabled="isDisabled">Run</mdb-btn>
-
+                <div class="text-center">
+                  <mdb-btn color="primary" class="runButton" @click="runBenchmarkClicked(algorithm.name,selected[index][0], index)" :disabled="isDisabled">Run</mdb-btn>
+                </div>
+                <div class="text-center" :style="displayModalButton(index)">
+                  <mdb-btn color="primary" class="runButton" @click="clickDisplayModalButton(index)" >Display results</mdb-btn>
+                </div>
                 <div class="progress" :style="displayProgressBar(index)">
                   <div aria-valuemax="100" aria-valuemin="0" :aria-valuenow="progressBarValue" class="progress-bar bg-primary" role="progressbar"
                     :style="progressBarStyle"></div>
                 </div>
+                <mdb-modal :show="displayedModals[index]" @close="closeModal(index)" scrollable>
+                  <mdb-modal-header>
+                    <mdb-modal-title>Algorithm result</mdb-modal-title>
+                  </mdb-modal-header>
+                  <mdb-modal-body>
+                    {{modalMessages[index]}}
+                  </mdb-modal-body>
+                  <mdb-modal-footer>
+                    <mdb-btn color="secondary" @click.native="closeModal(index)">Close</mdb-btn>
+                  </mdb-modal-footer>
+                </mdb-modal>
               </mdb-container>
             </mdb-card-body>
           </mdb-card>
