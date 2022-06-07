@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import Router from 'vue-router';
-import Dashboard from '@/components/Dashboard'
+import Benchmarks from '@/components/Benchmarks'
 import BadGateway from '@/components/BadGateway'
 
 
@@ -10,24 +10,12 @@ export default new Router({
   mode: 'history',
   routes: [
     {
-      path: '/dashboard',
-      name: 'Dashboard',
-      component: Dashboard,
+      path: '/benchmarks',
+      name: 'Benchmarks',
+      component: Benchmarks,
       props: { page: 1 },
       alias: '/'
     },
-    // {
-    //   path: '/profile',
-    //   name: 'Profile',
-    //   props: { page: 2 },
-    //   component: Profile
-    // },
-    // {
-    //   path: '/tables',
-    //   name: 'Tables',
-    //   props: { page: 3 },
-    //   component: Tables
-    // },
     {
       path: '/404',
       name: 'BadGateway',

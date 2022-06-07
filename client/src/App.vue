@@ -6,7 +6,7 @@
         ><img alt="" class="img-fluid" src="./assets/logo-mdb-vue-small.png"
       /></a>
       <mdb-list-group class="list-group-flush">
-        <router-link to="/dashboard" @click.native="activeItem = 1">
+        <router-link to="/benchmarks" @click.native="activeItem = 1">
           <mdb-list-group-item
             :action="true"
             :class="activeItem === 1 && 'active'"
@@ -83,12 +83,14 @@ export default {
 
 <style scoped>
 main {
+  margin-top: -0%;
   background-color: #ededee;
 }
 
 .flexible-content {
   transition: padding-left 0.3s;
   padding-left: 270px;
+  margin-top: -50px;
 }
 
 .flexible-navbar {
