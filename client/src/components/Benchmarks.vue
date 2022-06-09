@@ -46,8 +46,7 @@
                   <mdb-modal-header>
                     <mdb-modal-title>Algorithm result</mdb-modal-title>
                   </mdb-modal-header>
-                  <mdb-modal-body>
-                    {{modalMessages[index]}}
+                  <mdb-modal-body v-html="modalMessages[index]">
                   </mdb-modal-body>
                   <mdb-modal-footer>
                     <mdb-btn color="secondary" @click.native="closeModal(index)">Close</mdb-btn>

@@ -32,8 +32,8 @@
 
 ### Run development server for both frontend and backend
 
-1. Run flask backend server:
-2. Run npm frontend dev server: `./run_frontend.sh`
+1. In one terminal window: Run flask backend server and redis queue: `./run_backend.sh`
+2. In another terminal window: Run npm frontend dev server: `./run_frontend.sh`
 
 ### Run in docker container
 

@@ -1,0 +1,5 @@
+{
+  "rq_config": {
+    "queue_name": "satsmt_backgound_tasks"
+  }
+}

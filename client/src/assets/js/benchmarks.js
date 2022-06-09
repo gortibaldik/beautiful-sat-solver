@@ -52,18 +52,7 @@ export default {
       showFluidModalTop: false,
       showFluidModalBottom: false,
 
-      benchmarks: [
-        'firstBenchmark',
-        'secondBenchmark',
-        '3Benchmark',
-        '4Benchmark',
-        '5Benchmark',
-        '6Benchmark',
-        '7Benchmark',
-        '8Benchmark',
-        '9Benchmark',
-        '10Benchmark',
-      ],
+      benchmarks: [],
       algorithms: [],
       symbolsForAlgorithms: [
         'cat',
@@ -75,50 +64,77 @@ export default {
       selected: [],
       displayedModalButtons: [],
       displayedModals: [],
-      modalMessages:[
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-        "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit,",
-        "sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam",
-        "quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?",
-        "At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi",
-      ],
+      displayedModalTimeouts: [],
+      modalMessages:[],
       runningComputation: false,
-      runComputationFor: 3000,
       runningIndex: null,
-      computationRuntime: 0,
+      runningBenchmark: null,
+      progressOfAlgorithm: 0,
       progressBarValue: 0,
       progressBarStyle: "width: 0%",
-      displayModalFor: 10000,
+      displayModalFor: 0, // will be populated from backend
     }
   },
   methods: {
+    startMonitoringProgress(algorithmName, selectedBenchmark, selectedIndex) {
+      this.runningComputation = true
+      this.runningIndex = selectedIndex
+      this.runningBenchmark = selectedBenchmark
+      // switch off the modal button
+      if (this.displayedModalButtons[this.runningIndex]) {
+        Vue.set(this.displayedModalButtons, this.runningIndex, false)
+        clearTimeout(this.displayedModalTimeouts[this.runningIndex])
+      }
+      this.pollingInterval = setInterval(this.pollComputation.bind(this, algorithmName, selectedBenchmark), 1000)
+    },
     runBenchmarkClicked(algorithmName, selectedBenchmark, selectedIndex) {
       if (!algorithmName || !selectedBenchmark) {
         return
       }
-      // here call to the backend API should be made
-      // start the computation
-      this.runningComputation = true
-      this.start = new Date()
-      this.runningIndex = selectedIndex
-      this.pollingInterval = setInterval(this.pollComputation, 1000)
+      fetch("http://127.0.0.1:5000/start_algorithm", {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({algorithm: algorithmName, benchmark: selectedBenchmark})
+      })
+        .then(response => response.json())
+        .then(function(data) {
+          if (data['response'] != "success") {
+            return
+          }
+          this.startMonitoringProgress(algorithmName, selectedBenchmark, selectedIndex)
+        }.bind(this))
     },
     resetPollingParameters() {
-      this.start = null
       this.runningIndex = null
       this.runningComputation = false
-      this.computationRuntime = 0
+      this.progressOfAlgorithm = 0
     },
-    pollComputation() {
+    pollComputation(algorithmName, benchmarkName) {
       // here call to the backend 
-      let current = new Date()
-      this.computationRuntime = current.getTime() - this.start.getTime()
-      if (this.computationRuntime > this.runComputationFor) {
-        clearInterval(this.pollingInterval)
-        setTimeout(this.cooldownDisplayModal.bind(this, this.runningIndex), this.displayModalFor)
-        Vue.set(this.displayedModalButtons, this.runningIndex, true)
-        this.resetPollingParameters()
-      }
+      fetch("http://127.0.0.1:5000/get_progress", {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({algorithm: algorithmName, benchmark: benchmarkName})
+      }).then(response => response.json())
+        .then(function(data) {
+          this.progressOfAlgorithm = data['progress']
+          if (this.progressOfAlgorithm === 'error') {
+            clearInterval(this.pollingInterval)
+            this.resetPollingParameters()
+          }
+          else if (this.progressOfAlgorithm == 100) {
+            clearInterval(this.pollingInterval)
+            Vue.set(this.displayedModalTimeouts, this.runningIndex, setTimeout(this.cooldownDisplayModal.bind(this, this.runningIndex), this.displayModalFor))
+            Vue.set(this.displayedModalButtons, this.runningIndex, true)
+            this.resetPollingParameters()
+          }
+        }.bind(this))
     },
     cooldownDisplayModal(indexToSwitchOff) {
       Vue.set(this.displayedModalButtons, indexToSwitchOff, false)
@@ -131,9 +147,18 @@ export default {
       }
     },
     clickDisplayModalButton(index) {
-      // there should be loading of modalMessage
-      // from backend server
-      Vue.set(this.displayedModals, index, true)
+      fetch("http://127.0.0.1:5000/get_result", {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({algorithm: this.algorithms[index].name, benchmark: this.runningBenchmark})
+      }).then(response => response.json())
+        .then(function(data) {
+          Vue.set(this.modalMessages, index, data["result"])
+          Vue.set(this.displayedModals, index, true)
+        }.bind(this))
     },
     closeModal(index) {
       Vue.set(this.displayedModals, index, false);
@@ -147,10 +172,11 @@ export default {
     },
     extractAlgorithmNamesFromResponse(response) {
       let algorithmNames = []
-      for (let i = 0; i < response.length; i++) {
+      let benchmarkableAlgorithms = response["benchmarkable_algorithms"]
+      for (let i = 0; i < benchmarkableAlgorithms.length; i++) {
         algorithmNames.push({
-          name: response[i].name,
-          task: response[i].taskName
+          name: benchmarkableAlgorithms[i].name,
+          task: benchmarkableAlgorithms[i].taskName
         })
       }
       return algorithmNames
@@ -158,21 +184,41 @@ export default {
     getAlgorithms() {
       fetch("http://127.0.0.1:5000/algorithms")
         .then(response => response.json())
-        .then(data => (this.algorithms = this.extractAlgorithmNamesFromResponse(data)))
+        .then(function(data) {
+          this.algorithms = this.extractAlgorithmNamesFromResponse(data)
+          this.displayModalFor = data["benchmarked_result_availability"]
+          this.populatePlaceholders()
+          this.benchmarks = data["benchmarks"]
+          this.restartMonitorings(data["benchmarkable_algorithms_running_status"])
+        }.bind(this))
         .then(() => this.populatePlaceholders())
     },
     populatePlaceholders() {
       let s = []
       let dmb = []
       let dm = []
+      let mm = []
+      let dmto = []
       for (let i = 0; i < this.algorithms.length; i++) {
         s.push([])
         dmb.push(null)
         dm.push(false)
+        mm.push("")
+        dmto.push(null)
       }
       this.selected = s
       this.displayedModalButtons = dmb
       this.displayedModals = dm
+      this.modalMessages = mm
+      this.displayedModalTimeouts = dmto
+    },
+    restartMonitorings(running_statuses) {
+      for (let i = 0; i < running_statuses.length; i++) {
+        if (running_statuses[i].running) {
+          this.startMonitoringProgress(this.algorithms[i].name, running_statuses[i].benchmarkName, i)
+          Vue.set(this.selected, i, [running_statuses[i].benchmarkName])
+        }
+      }
     }
   },
   computed: {
@@ -182,11 +228,10 @@ export default {
 
   },
   watch: {
-    computationRuntime: {
+    progressOfAlgorithm: {
       handler(newValue) {
-        let percent = newValue * 100 / this.runComputationFor
-        this.progressBarValue = percent
-        this.progressBarStyle = `width: ${percent}%`
+        this.progressBarValue = newValue
+        this.progressBarStyle = `width: ${newValue}%`
       },
       immediate: true
     },
