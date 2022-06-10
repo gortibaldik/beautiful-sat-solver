@@ -2,7 +2,7 @@ import os
 from flask import request
 from logzero import logger
 
-from server.task_runner import get_job_log_file, has_job_finished
+from server.task_runner import get_job_log_file, has_job_finished, has_job_started, task_runner_stop_job
 
 def get_post_data():
   post_data = request.get_json()
@@ -49,11 +49,23 @@ def get_running_status(benchmarkable_algorithms, saved_jobs):
     running_statuses.append(find_running_benchmark(ba["name"], saved_jobs))
   return running_statuses
 
+def saved_job_index(algorithm_name, benchmark_name):
+  return f"{algorithm_name},{benchmark_name}"
+
 def save_job(job, algorithm_name, benchmark_name, saved_jobs):
-  saved_jobs[f"{algorithm_name},{benchmark_name}"] = {
+  saved_jobs[saved_job_index(algorithm_name, benchmark_name)] = {
     "job": job,
     "logs": None 
   }
+
+def stop_job(algorithm_name, benchmark_name, saved_jobs):
+  job = saved_jobs[saved_job_index(algorithm_name, benchmark_name)]["job"]
+  if has_job_started(job) and not has_job_finished(job):
+    task_runner_stop_job(job)
+    saved_jobs.pop(saved_job_index(algorithm_name, benchmark_name))
+    return True
+  logger.warning("Job cannot be stopped!")
+  return False
 
 def get_benchmark_names():
   return [

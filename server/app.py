@@ -4,7 +4,7 @@ from logzero import logger
 
 import server.getters
 from server.task_runner import get_benchmark_progress, start_algorithm_on_benchmark
-from server.app_utils import get_post_data, get_environ, retrieve_log_file, get_running_status, get_benchmark_names, save_job
+from server.app_utils import get_post_data, get_environ, retrieve_log_file, get_running_status, get_benchmark_names, save_job, stop_job
 
 # configuration
 DEBUG = True
@@ -23,14 +23,14 @@ def algorithm_index():
     benchmarkable_algorithms = [a for a in algorithms_infos if a["benchmarkable"]]
     benchmarked_result_availability = int(get_environ("BENCHMARKED_RESULTS_AVAILABILITY"))
     return jsonify({
-      "response": "success",
+      "result": "success",
       "benchmarks": get_benchmark_names(),
       "benchmarkable_algorithms_running_status": get_running_status(benchmarkable_algorithms, saved_jobs),
       "benchmarkable_algorithms": benchmarkable_algorithms,
       "benchmarked_result_availability": benchmarked_result_availability - 5000
     })
   except:
-    return jsonify({ 'response': 'failure'})
+    return jsonify({ 'result': 'failure'})
 
 @app.route('/start_algorithm', methods=['POST'])
 def start_algorithm():
@@ -39,8 +39,18 @@ def start_algorithm():
     job = start_algorithm_on_benchmark(algorithm_name, benchmark_name)
     save_job(job, algorithm_name, benchmark_name, saved_jobs)
   except:
-    return jsonify({ 'response': 'failure'})
-  return jsonify({ 'response': 'success' })
+    return jsonify({ 'result': 'failure'})
+  return jsonify({ 'result': 'success' })
+
+@app.route('/stop_algorithm', methods=['POST'])
+def stop_algorithm():
+  try:
+    algorithm_name, benchmark_name = get_post_data()
+    if stop_job(algorithm_name, benchmark_name, saved_jobs):
+      return jsonify({'result': 'success'})
+  except Exception as e:
+    logger.warning(e)
+  return jsonify({'result': 'failure'})
 
 @app.route('/get_progress', methods=['POST'])
 def get_progress():
@@ -49,8 +59,8 @@ def get_progress():
     progress = get_benchmark_progress(saved_jobs[f"{algorithm_name},{benchmark_name}"]["job"])
   except Exception as e:
     logger.warning(e)
-    return jsonify({'progress': 'error'})
-  return jsonify({'progress': progress})
+    return jsonify({'result': 'failure'})
+  return jsonify({'result': progress})
 
 @app.route('/get_result', methods=['POST'])
 def get_result():

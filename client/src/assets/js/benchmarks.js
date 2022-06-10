@@ -64,7 +64,7 @@ export default {
       selected: [],
       displayedModalButtons: [],
       displayedModals: [],
-      displayedModalTimeouts: [],
+      displayedModalButtonTimeouts: [],
       modalMessages:[],
       runningComputation: false,
       runningIndex: null,
@@ -83,12 +83,16 @@ export default {
       // switch off the modal button
       if (this.displayedModalButtons[this.runningIndex]) {
         Vue.set(this.displayedModalButtons, this.runningIndex, false)
-        clearTimeout(this.displayedModalTimeouts[this.runningIndex])
+        clearTimeout(this.displayedModalButtonTimeouts[this.runningIndex])
       }
       this.pollingInterval = setInterval(this.pollComputation.bind(this, algorithmName, selectedBenchmark), 1000)
     },
     runBenchmarkClicked(algorithmName, selectedBenchmark, selectedIndex) {
       if (!algorithmName || !selectedBenchmark) {
+        return
+      }
+      if (this.runButtonDisplaysStopMessage(selectedIndex)) {
+        this.clickStopComputation(algorithmName, selectedBenchmark, selectedIndex)
         return
       }
       fetch("http://127.0.0.1:5000/start_algorithm", {
@@ -101,7 +105,7 @@ export default {
       })
         .then(response => response.json())
         .then(function(data) {
-          if (data['response'] != "success") {
+          if (data['result'] != "success") {
             return
           }
           this.startMonitoringProgress(algorithmName, selectedBenchmark, selectedIndex)
@@ -123,20 +127,41 @@ export default {
         body: JSON.stringify({algorithm: algorithmName, benchmark: benchmarkName})
       }).then(response => response.json())
         .then(function(data) {
-          this.progressOfAlgorithm = data['progress']
-          if (this.progressOfAlgorithm === 'error') {
+          this.progressOfAlgorithm = data['result']
+          if (this.progressOfAlgorithm === 'failure') {
             clearInterval(this.pollingInterval)
             this.resetPollingParameters()
           }
           else if (this.progressOfAlgorithm == 100) {
             clearInterval(this.pollingInterval)
-            Vue.set(this.displayedModalTimeouts, this.runningIndex, setTimeout(this.cooldownDisplayModal.bind(this, this.runningIndex), this.displayModalFor))
+            Vue.set(this.displayedModalButtonTimeouts, this.runningIndex, setTimeout(this.cooldownDisplayModalButton.bind(this, this.runningIndex), this.displayModalFor))
             Vue.set(this.displayedModalButtons, this.runningIndex, true)
             this.resetPollingParameters()
           }
         }.bind(this))
     },
-    cooldownDisplayModal(indexToSwitchOff) {
+    clickStopComputation(algorithmName, benchmarkName) {
+      fetch("http://127.0.0.1:5000/stop_algorithm", {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({algorithm: algorithmName, benchmark: benchmarkName})
+      }).then(response => response.json())
+        .then(function(data) {
+          if (data['result'] === 'failure') {
+            return
+          }
+          else {
+            clearInterval(this.pollingInterval)
+            Vue.set(this.displayedModalButtonTimeouts, this.runningIndex, setTimeout(this.cooldownDisplayModalButton.bind(this, this.runningIndex), this.displayModalFor))
+            Vue.set(this.displayedModalButtons, this.runningIndex, true)
+            this.resetPollingParameters()
+          }
+        }.bind(this))
+    },
+    cooldownDisplayModalButton(indexToSwitchOff) {
       Vue.set(this.displayedModalButtons, indexToSwitchOff, false)
     },
     displayModalButton(index) {
@@ -156,7 +181,7 @@ export default {
         body: JSON.stringify({algorithm: this.algorithms[index].name, benchmark: this.runningBenchmark})
       }).then(response => response.json())
         .then(function(data) {
-          if (data['response'] === "failure") {
+          if (data['result'] === "failure") {
             return
           }
           Vue.set(this.modalMessages, index, data["result"])
@@ -188,7 +213,7 @@ export default {
       fetch("http://127.0.0.1:5000/algorithms")
         .then(response => response.json())
         .then(function(data) {
-          if (data["response"] === "failure") {
+          if (data["result"] === "failure") {
             return
           }
           this.algorithms = this.extractAlgorithmNamesFromResponse(data)
@@ -216,7 +241,7 @@ export default {
       this.displayedModalButtons = dmb
       this.displayedModals = dm
       this.modalMessages = mm
-      this.displayedModalTimeouts = dmto
+      this.displayedModalButtonTimeouts = dmto
     },
     restartMonitorings(running_statuses) {
       for (let i = 0; i < running_statuses.length; i++) {
@@ -225,13 +250,27 @@ export default {
           Vue.set(this.selected, i, [running_statuses[i].benchmarkName])
         }
       }
-    }
-  },
-  computed: {
-    isDisabled() {
-      return this.runningComputation;
     },
-
+    runButtonIsDisabled(index) {
+      return this.runningComputation && index != this.runningIndex;
+    },
+    runButtonDisplaysStopMessage(index) {
+      return this.runningComputation && index == this.runningIndex;
+    },
+    runButtonText(index) {
+      if (this.runButtonDisplaysStopMessage(index)) {
+        return "STOP"
+      } else {
+        return "RUN"
+      }
+    },
+    runButtonColor(index) {
+      if (this.runButtonDisplaysStopMessage(index)) {
+        return "secondary"
+      } else {
+        return "primary"
+      }
+    }
   },
   watch: {
     progressOfAlgorithm: {

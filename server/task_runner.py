@@ -2,8 +2,10 @@ import os
 import rq
 import time
 from contextlib import redirect_stdout
+from logzero import logger
 from pathlib import Path
 from redis import Redis
+from rq.command import send_stop_job_command
 from time import gmtime, strftime
 
 def get_timestamp():
@@ -29,6 +31,7 @@ def run_benchmark(algorithm_name, benchmark_name):
         job.save_meta()
         print(f"{i}. second - {algorithm_name}")
         time.sleep(1)
+        f.flush()
   job.meta['progress'] = 100.0
   job.meta['finished'] = True
   job.save_meta()
@@ -50,6 +53,16 @@ def has_job_finished(job):
   except:
     return False
 
+def has_job_started(job: rq.job.Job):
+  try:
+    job.refresh()
+    return "finished" in job.meta
+  except Exception as e:
+    return False
+
 def get_job_log_file(job):
   job.refresh()
   return job.meta["storage_file"]
+
+def task_runner_stop_job(job:rq.job.Job):
+  send_stop_job_command(Redis.from_url('redis://'), job.get_id())
