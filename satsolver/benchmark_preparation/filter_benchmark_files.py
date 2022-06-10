@@ -4,12 +4,11 @@ from argparse import ArgumentParser
 from os import listdir, remove
 from os.path import isfile, join
 
-def filter_files(dir_name):
+def filter_files(dir_name, number_of_files_to_keep):
     total_number_of_files = sum([1 for f in listdir(dir_name) if isfile(join(dir_name, f))])
-    to_keep = random.sample(list(range(total_number_of_files)), total_number_of_files // 10)
+    to_keep = random.sample(list(range(total_number_of_files)), number_of_files_to_keep)
     
     for i, file in enumerate(listdir(dir_name)):
-        total_number_of_files += 1
         if isfile(join(dir_name, file)) and i not in to_keep:
             remove(join(dir_name, file))
 

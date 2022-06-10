@@ -3,6 +3,7 @@ te.sh
 test_sat.sh
 test_unsat.sh
 **/dpll/test_data
+**/benchmarks/
 
 .DS_Store
 node_modules
