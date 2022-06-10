@@ -156,6 +156,9 @@ export default {
         body: JSON.stringify({algorithm: this.algorithms[index].name, benchmark: this.runningBenchmark})
       }).then(response => response.json())
         .then(function(data) {
+          if (data['response'] === "failure") {
+            return
+          }
           Vue.set(this.modalMessages, index, data["result"])
           Vue.set(this.displayedModals, index, true)
         }.bind(this))
@@ -185,6 +188,9 @@ export default {
       fetch("http://127.0.0.1:5000/algorithms")
         .then(response => response.json())
         .then(function(data) {
+          if (data["response"] === "failure") {
+            return
+          }
           this.algorithms = this.extractAlgorithmNamesFromResponse(data)
           this.displayModalFor = data["benchmarked_result_availability"]
           this.populatePlaceholders()
