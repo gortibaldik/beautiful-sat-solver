@@ -1,8 +1,11 @@
-from flask import Flask, jsonify, request
+import asyncio
+import server.getters
+
+from flask import Flask, jsonify
 from flask_cors import CORS
 from logzero import logger
 
-import server.getters
+from satsolver.benchmark_preparation.benchmark_downloader import download_all_not_downloaded_benchmarks
 from server.task_runner import get_benchmark_progress, start_algorithm_on_benchmark
 from server.app_utils import get_post_data, get_environ, retrieve_log_file, get_running_status, get_benchmark_names, save_job, stop_job
 
@@ -71,6 +74,7 @@ def get_result():
     return jsonify({ 'result': 'failure'})
 
 if __name__ == '__main__':
+  asyncio.run(download_all_not_downloaded_benchmarks())
   algorithms = server.getters.get_modules()
   algorithms_infos = [a.get_info() for a in algorithms.values()]
   saved_jobs = {}

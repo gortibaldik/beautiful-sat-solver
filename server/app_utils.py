@@ -17,7 +17,7 @@ def get_environ(name):
 def retrieve_log_file(job_dict):
   if job_dict["logs"] is None:
     job = job_dict["job"]
-    if not has_job_finished(job):
+    if not job_dict["interrupted"] and not has_job_finished(job):
       return "<strong>No log file yet!</strong>"
     log_file = get_job_log_file(job)
     logs = ""
@@ -32,7 +32,7 @@ def find_running_benchmark(algo_name, saved_jobs):
   for key in saved_jobs.keys():
     if algo_name in key:
       job = saved_jobs[key]["job"]
-      if not has_job_finished(job):
+      if not saved_jobs[key]["interrupted"] and not has_job_finished(job):
         benchmark_name = key.split(',')[1]
         return {
           "running": True,
@@ -55,28 +55,19 @@ def saved_job_index(algorithm_name, benchmark_name):
 def save_job(job, algorithm_name, benchmark_name, saved_jobs):
   saved_jobs[saved_job_index(algorithm_name, benchmark_name)] = {
     "job": job,
-    "logs": None 
+    "logs": None,
+    "interrupted": False 
   }
 
 def stop_job(algorithm_name, benchmark_name, saved_jobs):
   job = saved_jobs[saved_job_index(algorithm_name, benchmark_name)]["job"]
   if has_job_started(job) and not has_job_finished(job):
     task_runner_stop_job(job)
-    saved_jobs.pop(saved_job_index(algorithm_name, benchmark_name))
+    saved_jobs[saved_job_index(algorithm_name, benchmark_name)]["interrupted"] = True
     return True
   logger.warning("Job cannot be stopped!")
   return False
 
 def get_benchmark_names():
-  return [
-    'firstBenchmark',
-    'secondBenchmark',
-    '3Benchmark',
-    '4Benchmark',
-    '5Benchmark',
-    '6Benchmark',
-    '7Benchmark',
-    '8Benchmark',
-    '9Benchmark',
-    '10Benchmark',
-  ]
+  benchmark_root = get_environ("SATSMT_BENCHMARK_ROOT")
+  return list(os.listdir(benchmark_root))

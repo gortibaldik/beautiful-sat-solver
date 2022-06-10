@@ -2,12 +2,14 @@ import aiohttp
 import asyncio
 import os
 import tarfile
+import zipfile
 
 from logzero import logger
 from pathlib import Path
 from satsolver.benchmark_preparation.filter_benchmark_files import filter_files
 
 satlib_benchmark_urls = [
+  ("http://ktiml.mff.cuni.cz/~kucerap/satsmt/practical/task1.zip", 5),
   ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/RND3SAT/uf20-91.tar.gz", 100),
   ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/RND3SAT/uf50-218.tar.gz", 50),
   ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/RND3SAT/uuf50-218.tar.gz", 50),
@@ -20,10 +22,10 @@ satlib_benchmark_urls = [
 def _construct_filename(base_filename, suffix_int, suffix_targz):
   return f"{base_filename}{suffix_int}{suffix_targz}"
 
-def get_free_tmp_file():
+def get_free_tmp_file(index):
   base_filename = "tmp"
   suffix_int = 1
-  suffix_targz = ".tar.gz"
+  suffix_targz = ".zip" if satlib_benchmark_urls[index][0].endswith(".zip") else ".tar.gz"
   while os.path.isfile(_construct_filename(base_filename, suffix_int, suffix_targz)):
     suffix_int += 1
   
@@ -55,20 +57,26 @@ def remove_intermediate_folder(location_where_to_save):
   for il in intermediate_locations:
     os.rmdir(il)
 
+def extract(archive_file, location_where_to_save):
+  if archive_file.endswith(".tar.gz"):
+    with tarfile.open(archive_file) as file:
+      file.extractall(location_where_to_save)
+  elif archive_file.endswith(".zip"):
+    with zipfile.ZipFile(archive_file, 'r') as zip_ref:
+      zip_ref.extractall(location_where_to_save)
 
 def process_downloaded_benchmark(downloaded_benchmark, benchmark_index, location_where_to_save):
   # the directory where the benchmark will be saved
   Path(location_where_to_save).mkdir(parents=True, exist_ok=True)
   
   # download the benchmark
-  tmp_archive_file = get_free_tmp_file()
+  tmp_archive_file = get_free_tmp_file(benchmark_index)
   with open(tmp_archive_file, 'wb') as f:
     f.write(downloaded_benchmark)
 
   logger.info(f"Downloaded {satlib_benchmark_urls[benchmark_index][0]} to {tmp_archive_file}")
 
-  with tarfile.open(tmp_archive_file) as file:
-    file.extractall(location_where_to_save)
+  extract(tmp_archive_file, location_where_to_save)
 
   os.remove(tmp_archive_file)
   remove_intermediate_folder(location_where_to_save)
@@ -107,6 +115,7 @@ async def download_all_not_downloaded_benchmarks():
   benchmarks_to_be_downloaded = filter_downloaded_benchmarks(benchmark_root)
   logger.info(f"Going to download: {benchmarks_to_be_downloaded}")
 
+  # download all the benchmarks to memory
   async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=False)) as session:
     tasks = []
     for i, _, _ in benchmarks_to_be_downloaded:
@@ -114,6 +123,7 @@ async def download_all_not_downloaded_benchmarks():
 
     all_downloaded_benchmarks = await asyncio.gather(*tasks)
   
+  # process benchmarks and extract them to benchmark_root
   for downloaded_benchmark, index in all_downloaded_benchmarks:
     benchmark_dir = os.path.join(
       benchmark_root,
