@@ -2,7 +2,6 @@ import os
 import rq
 import time
 from contextlib import redirect_stdout
-from logzero import logger
 from pathlib import Path
 from redis import Redis
 from rq.command import send_stop_job_command
@@ -37,12 +36,12 @@ def run_benchmark(algorithm_name, benchmark_name):
   job.save_meta()
   return job
 
-def start_algorithm_on_benchmark(algorithm_name, benchmark_name):
+def task_runner_start_algorithm_on_benchmark(algorithm_name, benchmark_name):
   queue = rq.Queue(os.getenv('REDIS_QUEUE_NAME'), connection=Redis.from_url('redis://'))
   job = queue.enqueue('server.task_runner.run_benchmark', algorithm_name, benchmark_name)
   return job
 
-def get_benchmark_progress(job):
+def task_runner_get_benchmark_progress(job):
   job.refresh()
   return job.meta['progress']
 

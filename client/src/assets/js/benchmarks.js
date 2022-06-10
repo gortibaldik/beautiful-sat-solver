@@ -210,7 +210,7 @@ export default {
       return algorithmNames
     },
     getAlgorithms() {
-      fetch("http://127.0.0.1:5000/algorithms")
+      fetch("http://127.0.0.1:5000/benchmarks")
         .then(response => response.json())
         .then(function(data) {
           if (data["result"] === "failure") {
