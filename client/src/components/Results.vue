@@ -9,7 +9,7 @@
           <mdb-card-body>
             <mdb-scrollbar height="70vh">
               <mdb-tbl>
-                <mdb-tbl-head class="sticky-top z-depth-3">
+                <mdb-tbl-head class="sticky-top z-depth-2">
                   <tr>
                     <th
                     v-for="colHeader in data.columns"
@@ -18,7 +18,7 @@
                     @mouseleave="unsetHovered(hovered_headers, colHeader.field)"
                     @click="sortRowsByIndex(colHeader.field)"
                     :style=hovered_headers[colHeader.field]>
-                      {{colHeader.label}}  
+                      <strong>{{colHeader.label}}</strong>    
                         <mdb-icon icon="sort" fas size="sm"
                           :style=hovered_sorts[colHeader.field]></mdb-icon></th>
                   </tr>
@@ -27,7 +27,7 @@
                       @mouseenter="uniques[index] != null ? setHovered(hovered_filters, colHeader.field) : () => {}"
                       @mouseleave="unsetHovered(hovered_filters, colHeader.field)"
                       :style=hovered_filters[colHeader.field]>
-                      <select v-if="uniques[index] != null" class="browser-default custom-select" v-model="selected_values[colHeader.field]" v-on:change="filterRows(colHeader.field, selected_values[colHeader.field])">
+                      <select v-if="uniques[index] != null" class="browser-default custom-select" v-model="selected_values[colHeader.field]" v-on:change="filterRows()">
                         <option v-for="(val, indexUniques) in uniques[index]" :key="indexUniques">{{val}}</option>
                       </select>
                     </th>
@@ -160,10 +160,17 @@ export default {
         Vue.set(this.headers_sorted, index, "desc")
       }
     },
-    filterRows(index, value) {
+    filterRows() {
       let filtered_rows = []
       for (let i = 0; i < this.data.rows.length; i++) {
-        if (this.data.rows[i][index] === value) {
+        let equal_on_everything = true
+        for (let j = 0; j < this.data.columns.length; j++) {
+          if (this.selected_values[this.data.columns[j].field] != "Show all" && this.data.rows[i][this.data.columns[j].field] != this.selected_values[this.data.columns[j].field]) {
+            equal_on_everything = false
+            break
+          }
+        }
+        if (equal_on_everything) {
           filtered_rows.push(this.data.rows[i])
         }
       }
