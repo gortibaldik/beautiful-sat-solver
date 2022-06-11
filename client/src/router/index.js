@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import Router from 'vue-router';
 import Benchmarks from '@/components/Benchmarks'
+import Results from '@/components/Results'
 import BadGateway from '@/components/BadGateway'
 
 
@@ -15,6 +16,12 @@ export default new Router({
       component: Benchmarks,
       props: { page: 1 },
       alias: '/'
+    },
+    {
+      path: '/results',
+      name: 'Results',
+      component: Results,
+      props: { page: 2 }
     },
     {
       path: '/404',

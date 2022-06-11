@@ -9,6 +9,7 @@ from flask_cors import CORS
 from satsolver.benchmark_preparation.benchmark_downloader import download_all_not_downloaded_benchmarks
 from server.views.benchmark_dashboard.page import benchmark_page
 from server.views.benchmark_dashboard.utils import set_algorithms_infos, set_saved_jobs
+from server.views.benchmark_results.page import results_page
 
 # configuration
 DEBUG = True
@@ -17,6 +18,7 @@ DEBUG = True
 app = Flask(__name__)
 app.config.from_object(__name__)
 app.register_blueprint(benchmark_page, url_prefix='/benchmarks')
+app.register_blueprint(results_page, url_prefix='/results')
 
 # enable CORS
 CORS(app, resources={r'/*': {'origins': '*'}})

@@ -16,6 +16,16 @@
             />Benchmarks</mdb-list-group-item
           >
         </router-link>
+        <router-link to="/results" @click.native="activeItem = 2">
+          <mdb-list-group-item
+            :action="true"
+            :class="activeItem === 2 && 'active'"
+            ><mdb-icon
+              icon="clipboard-list"
+              class="mr-3"
+            />Results</mdb-list-group-item
+          >
+        </router-link>
         <router-link to="/404" @click.native="activeItem = 5">
           <mdb-list-group-item
             :action="true"

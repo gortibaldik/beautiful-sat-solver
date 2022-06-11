@@ -54,3 +54,4 @@
 - [Using fetch API](https://flaviocopes.com/fetch-api/)
 - [Redis Message Queue for long running tasks](https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-xxii-background-jobs)
 - [official Docker tutorial - Docker compose part](https://docs.docker.com/get-started/08_using_compose/)
+- [better selectors for tables](https://mdbootstrap.com/education/bootstrap/admin-dashboard-lesson-6/)
