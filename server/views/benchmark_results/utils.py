@@ -1,10 +1,12 @@
 import random
 
-def create_col(label, field, sort_asc=True):
+def create_col(label, field, sort_asc=True, should_be_displayed=True, should_be_categorized=True):
   return {
     "label": label,
     "field": field,
-    "sort": "asc" if sort_asc else "desc"
+    "sort": "asc" if sort_asc else "desc",
+    "categorized": should_be_categorized,
+    "displayed": should_be_displayed
   }
 
 def create_row(algo, benchmark, time):
@@ -40,7 +42,7 @@ def get_data():
     "columns": [
       create_col("Algorithm", ALGO),
       create_col("Benchmark", BENCHMARK),
-      create_col("Average Time of Execution", AVERAGE_TIME)
+      create_col("Average Time of Execution", AVERAGE_TIME, should_be_categorized=False)
     ],
     "rows": spawn_rows(80)
   }
