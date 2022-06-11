@@ -95,7 +95,7 @@ export default {
         this.clickStopComputation(algorithmName, selectedBenchmark, selectedIndex)
         return
       }
-      fetch("http://127.0.0.1:5000/start_algorithm", {
+      fetch("http://127.0.0.1:5000/benchmarks/start", {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
@@ -118,7 +118,7 @@ export default {
     },
     pollComputation(algorithmName, benchmarkName) {
       // here call to the backend 
-      fetch("http://127.0.0.1:5000/get_progress", {
+      fetch("http://127.0.0.1:5000/benchmarks/progress", {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
@@ -141,7 +141,7 @@ export default {
         }.bind(this))
     },
     clickStopComputation(algorithmName, benchmarkName) {
-      fetch("http://127.0.0.1:5000/stop_algorithm", {
+      fetch("http://127.0.0.1:5000/benchmarks/stop", {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
@@ -172,7 +172,7 @@ export default {
       }
     },
     clickDisplayModalButton(index) {
-      fetch("http://127.0.0.1:5000/get_result", {
+      fetch("http://127.0.0.1:5000/benchmarks/result", {
         method: 'POST',
         headers: {
           'Accept': 'application/json',

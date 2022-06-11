@@ -16,7 +16,7 @@ DEBUG = True
 # instantiate the app
 app = Flask(__name__)
 app.config.from_object(__name__)
-app.register_blueprint(benchmark_page)
+app.register_blueprint(benchmark_page, url_prefix='/benchmarks')
 
 # enable CORS
 CORS(app, resources={r'/*': {'origins': '*'}})

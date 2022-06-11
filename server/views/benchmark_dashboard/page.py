@@ -21,7 +21,7 @@ from server.views.benchmark_dashboard.utils import (
 
 benchmark_page = Blueprint('benchmark_page', __name__)
 
-@benchmark_page.route('/benchmarks', methods=['GET'])
+@benchmark_page.route('/', methods=['GET'])
 def algorithm_index():
   try:
     with redis.Redis.from_url('redis://') as connection:
@@ -42,7 +42,7 @@ def algorithm_index():
     logger.warning(traceback.format_exc())
     return jsonify({ 'result': 'failure'})
 
-@benchmark_page.route('/start_algorithm', methods=['POST'])
+@benchmark_page.route('/start', methods=['POST'])
 def start_algorithm():
   try:
     saved_jobs = get_saved_jobs()
@@ -55,7 +55,7 @@ def start_algorithm():
     return jsonify({ 'result': 'failure'})
   return jsonify({ 'result': 'success' })
 
-@benchmark_page.route('/stop_algorithm', methods=['POST'])
+@benchmark_page.route('/stop', methods=['POST'])
 def stop_algorithm():
   try:
     saved_jobs = get_saved_jobs()
@@ -67,7 +67,7 @@ def stop_algorithm():
     logger.warning(traceback.format_exc())
   return jsonify({'result': 'failure'})
 
-@benchmark_page.route('/get_progress', methods=['POST'])
+@benchmark_page.route('/progress', methods=['POST'])
 def get_progress():
   try:
     algorithm_name, benchmark_name = get_post_data()
@@ -78,7 +78,7 @@ def get_progress():
     return jsonify({'result': 'failure'})
   return jsonify({'result': progress})
 
-@benchmark_page.route('/get_result', methods=['POST'])
+@benchmark_page.route('/result', methods=['POST'])
 def get_result():
   try:
     algorithm_name, benchmark_name = get_post_data()
