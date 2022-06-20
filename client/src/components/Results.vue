@@ -7,7 +7,7 @@
             <h4 class="h4-responsive text-white">Results of Past Benchmark Runs</h4>
           </mdb-view>
           <mdb-card-body>
-            <mdb-scrollbar height="70vh" class="border rounded-lg">
+            <mdb-scrollbar :style="`height: ${calculatedTableHeight};`" class="border rounded-lg">
               <mdb-tbl style="background-color: white;">
                 <mdb-tbl-head class="sticky-top z-depth-2">
                   <tr>

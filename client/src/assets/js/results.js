@@ -88,7 +88,8 @@ export default {
       chartBorderColors: [
         'rgba(255,99,132,1)',
         'rgba(75, 192, 192, 1)'
-      ]
+      ],
+      calculatedTableHeight: 0,
     }
   },
   created() {
@@ -141,6 +142,7 @@ export default {
           this.uniques = uniques
           this.selected_values = selected_values
           this.filtered_rows = filtered_rows
+          this.calculateTableHeight()
         }.bind(this))
     },
     setHovered(array, index) {
@@ -178,6 +180,7 @@ export default {
         }
       }
       this.filtered_rows = filtered_rows
+      this.calculateTableHeight()
     },
     checkCheckbox(index, value=null) {
       let oldValue = this.filtered_rows[index]
@@ -249,6 +252,22 @@ export default {
       this.showBarChart = true
       this.barChartHeight = 80 + checked.length * 50
       console.log(this.barChartHeight)
+    },
+    getViewportHeight() {
+      const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0)
+      return vh
+    },
+    calculateTableHeightInPx() {
+      return 130 + this.filtered_rows.length * 70
+    },
+    calculateTableHeight() {
+      let tblHeightInPx = this.calculateTableHeightInPx()
+      if (tblHeightInPx < (0.7 * this.getViewportHeight())) {
+        this.calculatedTableHeight = `${tblHeightInPx}px`
+      } else {
+        this.calculatedTableHeight = "70vh"
+      }
+      console.log(this.calculatedTableHeight)
     }
   }
 }
