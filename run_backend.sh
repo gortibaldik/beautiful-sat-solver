@@ -6,10 +6,9 @@ export SATSMT_BENCHMARK_ROOT="benchmarks/"
 export BENCHMARKED_RESULTS_AVAILABILITY="35000"
 echo "redis queue name: \"$REDIS_QUEUE_NAME\""
 rq worker ${REDIS_QUEUE_NAME} > rq_log_file 2> rq_error_log_file &
-rq_worker_job_id=$!
 
-python3 -m server.app
+export FLASK_APP=app.py
+flask run
 
 # clean up
-kill $rq_worker_job_id
 scripts/stop_redis.sh

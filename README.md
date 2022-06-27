@@ -35,6 +35,18 @@
 1. In one terminal window: Run flask backend server and redis queue: `./run_backend.sh`
 2. In another terminal window: Run npm frontend dev server: `./run_frontend.sh`
 
+
+#### Configure postgresql
+
+
+Start postgresql: `scripts/start_postgres.sh`
+
+Connect to the container: `scripts/connect_to_postgres.sh`
+
+Connect to psql: `psql -h localhost -p 5432 -U postgres -W`
+
+List all databases: `\list`
+
 ### Run in docker container
 
 1. Build docker container: `docker build -t satsmt:latest .`
@@ -55,3 +67,7 @@
 - [Redis Message Queue for long running tasks](https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-xxii-background-jobs)
 - [official Docker tutorial - Docker compose part](https://docs.docker.com/get-started/08_using_compose/)
 - [better selectors for tables](https://mdbootstrap.com/education/bootstrap/admin-dashboard-lesson-6/)
+
+https://realpython.com/python-sqlite-sqlalchemy/#working-with-sqlalchemy-and-python-objects
+https://realpython.com/flask-by-example-part-2-postgres-sqlalchemy-and-alembic/
+https://www.digitalocean.com/community/tutorials/how-to-use-a-postgresql-database-in-a-flask-application

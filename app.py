@@ -1,5 +1,4 @@
 import asyncio
-import pickle
 import redis
 import server.getters
 
