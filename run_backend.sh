@@ -7,7 +7,8 @@ echo "redis queue name: \"$REDIS_QUEUE_NAME\""
 
 rq worker ${REDIS_QUEUE_NAME} > "rq_logs/rq_log_file" 2> "rq_logs/rq_error_log_file" &
 
-export FLASK_APP=app.py
+export FLASK_APP="server:app"
+python3 -m server.before_app
 flask run
 
 # clean up
