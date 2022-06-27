@@ -71,3 +71,4 @@ List all databases: `\list`
 https://realpython.com/python-sqlite-sqlalchemy/#working-with-sqlalchemy-and-python-objects
 https://realpython.com/flask-by-example-part-2-postgres-sqlalchemy-and-alembic/
 https://www.digitalocean.com/community/tutorials/how-to-use-a-postgresql-database-in-a-flask-application
+https://www.learndatasci.com/tutorials/using-databases-python-postgres-sqlalchemy-and-alembic/

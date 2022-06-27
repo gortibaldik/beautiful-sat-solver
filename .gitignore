@@ -4,6 +4,7 @@ test_sat.sh
 test_unsat.sh
 **/dpll/test_data
 **/benchmarks/
+**/rq_logs/
 
 .DS_Store
 node_modules

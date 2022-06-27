@@ -19,7 +19,7 @@ def ensure_storage_file(algorithm_name, benchmark_name):
 
 def run_benchmark(algorithm_name, benchmark_name):
   job = rq.get_current_job()
-  seconds = 25
+  seconds = Config.DUMMY_RUNTIME
   storage_file = ensure_storage_file(algorithm_name, benchmark_name)
   job.meta['finished'] = False
   job.meta['storage_file'] = storage_file
