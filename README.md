@@ -49,13 +49,12 @@
 - [Redis Message Queue for long running tasks](https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-xxii-background-jobs)
 - [official Docker tutorial - Docker compose part](https://docs.docker.com/get-started/08_using_compose/)
 - [better selectors for tables](https://mdbootstrap.com/education/bootstrap/admin-dashboard-lesson-6/)
-
-https://realpython.com/python-sqlite-sqlalchemy/#working-with-sqlalchemy-and-python-objects
-https://realpython.com/flask-by-example-part-2-postgres-sqlalchemy-and-alembic/
-https://www.digitalocean.com/community/tutorials/how-to-use-a-postgresql-database-in-a-flask-application
-https://www.learndatasci.com/tutorials/using-databases-python-postgres-sqlalchemy-and-alembic/
-https://stackoverflow.com/questions/3582552/what-is-the-format-for-the-postgresql-connection-string-url
-https://stackoverflow.blog/2020/10/14/improve-database-performance-with-connection-pooling/
+- [sql alchemy 1](https://realpython.com/python-sqlite-sqlalchemy/#working-with-sqlalchemy-and-python-objects)
+- [sql alchemy 2](https://realpython.com/flask-by-example-part-2-postgres-sqlalchemy-and-alembic/)
+- [sql alchemy 3](https://www.digitalocean.com/community/tutorials/how-to-use-a-postgresql-database-in-a-flask-application)
+- [sql alchemy 4](https://www.learndatasci.com/tutorials/using-databases-python-postgres-sqlalchemy-and-alembic/)
+- [postgres connection string](https://stackoverflow.com/questions/3582552/what-is-the-format-for-the-postgresql-connection-string-url)
+- [postgres pooling](https://stackoverflow.blog/2020/10/14/improve-database-performance-with-connection-pooling/)
 
 #### Problems with installation of `psycopg2`
 
