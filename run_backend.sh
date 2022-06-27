@@ -8,9 +8,9 @@ echo "redis queue name: \"$REDIS_QUEUE_NAME\""
 echo "db ip address: \"$DB_IP_ADDRESS\""
 echo "db migrations dir: \"$DB_MIGRATIONS_DIR\""
 
-[ ! -d "rq_logs" ] && mkdir rq_logs
+[ ! -d "server/rq_logs" ] && mkdir server/rq_logs
 
-rq worker ${REDIS_QUEUE_NAME} > "rq_logs/rq_log_file" 2> "rq_logs/rq_error_log_file" &
+rq worker ${REDIS_QUEUE_NAME} > "server/rq_logs/rq_log_file" 2> "server/rq_logs/rq_error_log_file" &
 
 export FLASK_APP="server:app"
 python3 -m server.before_app

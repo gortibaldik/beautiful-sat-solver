@@ -6,6 +6,7 @@ import zipfile
 
 from logzero import logger
 from pathlib import Path
+from server.config import Config
 from satsolver.benchmark_preparation.filter_benchmark_files import filter_files
 
 satlib_benchmark_urls = [
@@ -108,7 +109,7 @@ def filter_downloaded_benchmarks(benchmark_root):
   return filtered_benchmarks
 
 async def download_all_not_downloaded_benchmarks():
-  benchmark_root = os.getenv("SATSMT_BENCHMARK_ROOT")
+  benchmark_root = Config.SATSMT_BENCHMARK_ROOT
   if not benchmark_root:
     benchmark_root = "benchmarks/"
   
