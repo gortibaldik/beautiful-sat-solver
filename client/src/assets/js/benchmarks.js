@@ -63,6 +63,7 @@ export default {
       ],
       selected: [],
       displayedModalButtons: [],
+      displayedModalButtonsBenchmarks: [],
       displayedModals: [],
       displayedModalButtonTimeouts: [],
       modalMessages:[],
@@ -134,6 +135,7 @@ export default {
           }
           else if (this.progressOfAlgorithm == 100) {
             clearInterval(this.pollingInterval)
+            Vue.set(this.displayedModalButtonsBenchmarks, this.runningIndex, benchmarkName)
             Vue.set(this.displayedModalButtonTimeouts, this.runningIndex, setTimeout(this.cooldownDisplayModalButton.bind(this, this.runningIndex), this.displayModalFor))
             Vue.set(this.displayedModalButtons, this.runningIndex, true)
             this.resetPollingParameters()
@@ -155,6 +157,7 @@ export default {
           }
           else {
             clearInterval(this.pollingInterval)
+            Vue.set(this.displayedModalButtonsBenchmarks, this.runningIndex, benchmarkName)
             Vue.set(this.displayedModalButtonTimeouts, this.runningIndex, setTimeout(this.cooldownDisplayModalButton.bind(this, this.runningIndex), this.displayModalFor))
             Vue.set(this.displayedModalButtons, this.runningIndex, true)
             this.resetPollingParameters()
@@ -178,7 +181,7 @@ export default {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({algorithm: this.algorithms[index].name, benchmark: this.runningBenchmark})
+        body: JSON.stringify({algorithm: this.algorithms[index].name, benchmark: this.displayedModalButtonsBenchmarks[index]})
       }).then(response => response.json())
         .then(function(data) {
           if (data['result'] === "failure") {
@@ -227,18 +230,21 @@ export default {
     populatePlaceholders() {
       let s = []
       let dmb = []
+      let dmbb = []
       let dm = []
       let mm = []
       let dmto = []
       for (let i = 0; i < this.algorithms.length; i++) {
         s.push([])
         dmb.push(null)
+        dmbb.push("")
         dm.push(false)
         mm.push("")
         dmto.push(null)
       }
       this.selected = s
       this.displayedModalButtons = dmb
+      this.displayedModalButtonsBenchmarks = dmbb
       this.displayedModals = dm
       this.modalMessages = mm
       this.displayedModalButtonTimeouts = dmto
