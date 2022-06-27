@@ -1,11 +1,15 @@
 import os
+import random
 import rq
 import time
+
 from contextlib import redirect_stdout
 from pathlib import Path
 from redis import Redis
 from rq.command import send_stop_job_command
+from server import db
 from server.config import Config
+from server.models.job import SATJob
 from time import gmtime, strftime
 
 def get_timestamp():
@@ -16,6 +20,21 @@ def ensure_storage_file(algorithm_name, benchmark_name):
   Path(storage_folder).mkdir(parents=True, exist_ok=True)
   storage_file = os.path.join(storage_folder, f"{algorithm_name}_{benchmark_name}_{get_timestamp()}")
   return storage_file
+
+def create_sat_job(algorithm_name, benchmark_name, log_file):
+  max_time = 250
+  max_derivs = 30
+  max_unit_props = 200
+  sat_job = SATJob(
+    unit_prop_vals  = random.random() * max_unit_props,
+    decision_vars   = random.random() * max_derivs,
+    time            = random.random() * max_time,
+    algorithm       = algorithm_name,
+    benchmark       = benchmark_name,
+    log_file        = log_file
+  )
+  return sat_job
+
 
 def run_benchmark(algorithm_name, benchmark_name):
   job = rq.get_current_job()
@@ -32,9 +51,13 @@ def run_benchmark(algorithm_name, benchmark_name):
         print(f"{i}. second - {algorithm_name}")
         time.sleep(1)
         f.flush()
+  sat_job = create_sat_job(algorithm_name, benchmark_name, storage_file)
+  db.session.add(sat_job)
+  db.session.commit()
   job.meta['progress'] = 100.0
   job.meta['finished'] = True
   job.save_meta()
+
   return job
 
 def task_runner_start_algorithm_on_benchmark(algorithm_name, benchmark_name):
@@ -64,5 +87,13 @@ def get_job_log_file(job):
   job.refresh()
   return job.meta["storage_file"]
 
-def task_runner_stop_job(job:rq.job.Job):
+def task_runner_stop_job(job:rq.job.Job, algorithm_name, benchmark_name):
+  try:
+    job.refresh()
+    storage_file = job.meta["storage_file"]
+  except:
+    storage_file = "ERROR"
   send_stop_job_command(Redis.from_url('redis://'), job.get_id())
+  sat_job = create_sat_job(algorithm_name, benchmark_name, storage_file)
+  db.session.add(sat_job)
+  db.session.commit()

@@ -72,3 +72,9 @@ https://realpython.com/python-sqlite-sqlalchemy/#working-with-sqlalchemy-and-pyt
 https://realpython.com/flask-by-example-part-2-postgres-sqlalchemy-and-alembic/
 https://www.digitalocean.com/community/tutorials/how-to-use-a-postgresql-database-in-a-flask-application
 https://www.learndatasci.com/tutorials/using-databases-python-postgres-sqlalchemy-and-alembic/
+https://stackoverflow.com/questions/3582552/what-is-the-format-for-the-postgresql-connection-string-url
+https://stackoverflow.blog/2020/10/14/improve-database-performance-with-connection-pooling/
+
+#### Problems with installation of `psycopg2`
+
+- [stack overflow](https://stackoverflow.com/questions/19843945/psycopg-python-h-no-such-file-or-directory)
