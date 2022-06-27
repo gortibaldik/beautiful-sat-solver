@@ -4,10 +4,10 @@ import traceback
 from flask import Blueprint, jsonify
 from logzero import logger
 
+from server.config import Config
 from server.views.benchmark_dashboard.utils import (
   get_benchmark_names,
   get_benchmark_progress,
-  get_environ,
   get_algorithms_infos,
   get_post_data,
   get_saved_jobs,
@@ -30,7 +30,7 @@ def algorithm_index():
     # logger.info(algorithms_infos)
     # logger.info(saved_jobs)
     benchmarkable_algorithms = [a for a in algorithms_infos if a["benchmarkable"]]
-    benchmarked_result_availability = int(get_environ("BENCHMARKED_RESULTS_AVAILABILITY"))
+    benchmarked_result_availability = Config.BENCHMARKED_RESULTS_AVAILABILITY
     return jsonify({
       "result": "success",
       "benchmarks": get_benchmark_names(),

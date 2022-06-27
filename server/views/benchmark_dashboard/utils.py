@@ -5,6 +5,7 @@ import rq
 from flask import request
 from logzero import logger
 
+from server.config import Config
 from server.task_runner import get_job_log_file, has_job_finished, has_job_started, task_runner_get_benchmark_progress, task_runner_start_algorithm_on_benchmark, task_runner_stop_job
 
 def get_post_data():
@@ -13,9 +14,6 @@ def get_post_data():
   algorithm_name = post_data.get('algorithm')
   benchmark_name = post_data.get('benchmark')
   return algorithm_name, benchmark_name
-
-def get_environ(name):
-  return os.getenv(name)
 
 def retrieve_log_file(algorithm_name, benchmark_name, saved_jobs):
   job_dict = saved_jobs[saved_job_index(algorithm_name, benchmark_name)]
@@ -73,7 +71,7 @@ def stop_job(algorithm_name, benchmark_name, saved_jobs):
   return False
 
 def get_benchmark_names():
-  benchmark_root = get_environ("SATSMT_BENCHMARK_ROOT")
+  benchmark_root = Config.SATSMT_BENCHMARK_ROOT
   return list(os.listdir(benchmark_root))
 
 def get_benchmark_progress(algorithm_name, benchmark_name, saved_jobs):

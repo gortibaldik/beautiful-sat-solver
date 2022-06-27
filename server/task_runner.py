@@ -5,13 +5,14 @@ from contextlib import redirect_stdout
 from pathlib import Path
 from redis import Redis
 from rq.command import send_stop_job_command
+from server.config import Config
 from time import gmtime, strftime
 
 def get_timestamp():
   return strftime("%Y_%m_%d_%H_%M_%S", gmtime())
 
 def ensure_storage_file(algorithm_name, benchmark_name):
-  storage_folder = os.getenv('SATSMT_RESULT_LOGS')
+  storage_folder = Config.SATSMT_RESULT_LOGS
   Path(storage_folder).mkdir(parents=True, exist_ok=True)
   storage_file = os.path.join(storage_folder, f"{algorithm_name}_{benchmark_name}_{get_timestamp()}")
   return storage_file
