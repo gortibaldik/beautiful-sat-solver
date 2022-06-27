@@ -32,27 +32,9 @@
 
 ### Run development server for both frontend and backend
 
-1. In one terminal window: Run flask backend server and redis queue: `./run_backend.sh`
-2. In another terminal window: Run npm frontend dev server: `./run_frontend.sh`
-
-
-#### Configure postgresql
-
-
-Start postgresql: `scripts/start_postgres.sh`
-
-Connect to the container: `scripts/connect_to_postgres.sh`
-
-Connect to psql: `psql -h localhost -p 5432 -U postgres -W`
-
-List all databases: `\list`
-
-### Run in docker container
-
-1. Build docker container: `docker build -t satsmt:latest .`
-2. Run docker container: `docker run -d --name satsmt-container -e "PORT=8765" -p 8007:8765 satsmt:latest`
-3. When finished your experiments: `docker stop satsmt-container`
-4. Remove container to be able to rebuild: `docker rm satsmt-container`
+1. Initialize the database: `scripts/prepare_database.sh "initial_migration"`
+2. In one terminal window: Run flask backend server and redis queue: `./run_backend.sh`
+3. In another terminal window: Run npm frontend dev server: `./run_frontend.sh`
 
 -----
 
@@ -78,3 +60,10 @@ https://stackoverflow.blog/2020/10/14/improve-database-performance-with-connecti
 #### Problems with installation of `psycopg2`
 
 - [stack overflow](https://stackoverflow.com/questions/19843945/psycopg-python-h-no-such-file-or-directory)
+
+#### Run in docker container
+
+1. Build docker container: `docker build -t satsmt:latest .`
+2. Run docker container: `docker run -d --name satsmt-container -e "PORT=8765" -p 8007:8765 satsmt:latest`
+3. When finished your experiments: `docker stop satsmt-container`
+4. Remove container to be able to rebuild: `docker rm satsmt-container`
