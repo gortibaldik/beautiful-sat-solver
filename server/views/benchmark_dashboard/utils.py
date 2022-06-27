@@ -2,6 +2,7 @@ import os
 import pickle
 import redis
 import rq
+import traceback
 from flask import request
 from logzero import logger
 
@@ -10,13 +11,16 @@ from server.task_runner import get_job_log_file, has_job_finished, has_job_start
 
 def get_post_data():
   post_data = request.get_json()
-  logger.info(f"received: {post_data}")
   algorithm_name = post_data.get('algorithm')
   benchmark_name = post_data.get('benchmark')
   return algorithm_name, benchmark_name
 
 def retrieve_log_file(algorithm_name, benchmark_name, saved_jobs):
-  job_dict = saved_jobs[saved_job_index(algorithm_name, benchmark_name)]
+  try:
+    job_dict = saved_jobs[saved_job_index(algorithm_name, benchmark_name)]
+  except:
+    logger.warning(saved_jobs)
+    raise
   if job_dict["logs"] is None:
     job = rq.job.Job.fetch(saved_jobs[saved_job_index(algorithm_name, benchmark_name)]["job"], connection=redis.Redis.from_url('redis://'))
     if not job_dict["interrupted"] and not has_job_finished(job):
@@ -31,9 +35,14 @@ def retrieve_log_file(algorithm_name, benchmark_name, saved_jobs):
   return job_dict["logs"]
 
 def find_running_benchmark(algo_name, saved_jobs):
+  # finds all the jobs running algorithm algo_name and
+  # checks whether they're still running
   for key in saved_jobs.keys():
     if algo_name in key:
-      job = rq.job.Job.fetch(saved_jobs[key]["job"], connection=redis.Redis.from_url('redis://'))
+      try:
+        job = rq.job.Job.fetch(saved_jobs[key]["job"], connection=redis.Redis.from_url('redis://'))
+      except:
+        continue
       if not saved_jobs[key]["interrupted"] and not has_job_finished(job):
         benchmark_name = key.split(',')[1]
         return {
