@@ -4,7 +4,7 @@ from sqlalchemy import Column, Integer, String, Float
 from sqlalchemy.types import DateTime
 
 class SATJobConfig:
-  id = "ID"
+  id              = "ID"
   unit_prop_vals  = "Unit Propagations"
   decision_vars   = "Derivations of Decision Variables"
   time            = "Time of Execution"

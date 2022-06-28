@@ -9,7 +9,13 @@ import {
   mdbTblBody,
   mdbScrollbar,
   mdbIcon,
-  mdbHorizontalBarChart
+  mdbHorizontalBarChart,
+  mdbBtn,
+  mdbModal,
+  mdbModalBody,
+  mdbModalFooter,
+  mdbModalHeader,
+  mdbModalTitle,
 } from 'mdbvue'
 import Vue from 'vue'
 
@@ -26,7 +32,13 @@ export default {
     mdbTblBody,
     mdbScrollbar,
     mdbIcon,
-    mdbHorizontalBarChart
+    mdbHorizontalBarChart,
+    mdbBtn,
+    mdbModal,
+    mdbModalBody,
+    mdbModalFooter,
+    mdbModalHeader,
+    mdbModalTitle,
   },
   data () {
     return {
@@ -42,6 +54,9 @@ export default {
       uniques: [],
       selected_values: [],
       checked_rows: [],
+      show_log_file_styles: [],
+      displayed_modals: [],
+      modal_messages: [],
       all_checked: false,
       unhovered_style: "background-color: #f9a825",
       button_unhovered_style: "background-color: #f9b74c",
@@ -49,6 +64,8 @@ export default {
       select_all_style: "background-color: #f9b74c",
       unhovered_compute_graph_style: "background-color: #1452b6",
       hovered_compute_graph_style: "background-color: #5595fb",
+      hovered_show_log_file_style: "background-color: #ceefff",
+      unhovered_show_log_file_style: "background-color: #e8f7ff",
       compute_graph_style: "background-color: #1452b6",
       showBarChart: false,
       barChartData: {
@@ -107,6 +124,9 @@ export default {
           let uniques = []
           let selected_values = {}
           let filtered_rows = []
+          let show_log_file_styles = []
+          let displayed_modals = []
+          let modal_messages = []
           for (let i = 0; i < data.columns.length; i++) {
             hovered_sorts[data.columns[i].field] = "color: #e65100;"
             hovered_headers[data.columns[i].field] = this.unhovered_style
@@ -134,6 +154,10 @@ export default {
             data.rows[i].checked = "is_unchecked"
             data.rows[i].originalIndex = i
             filtered_rows.push(data.rows[i])
+
+            show_log_file_styles.push(this.unhovered_show_log_file_style)
+            displayed_modals.push(false)
+            modal_messages.push(false)
           }
           this.data = data
           this.hovered_sorts = hovered_sorts
@@ -142,6 +166,9 @@ export default {
           this.uniques = uniques
           this.selected_values = selected_values
           this.filtered_rows = filtered_rows
+          this.show_log_file_styles = show_log_file_styles
+          this.displayed_modals = displayed_modals
+          this.modal_messages = modal_messages
           this.calculateTableHeight()
         }.bind(this))
     },
@@ -268,6 +295,32 @@ export default {
         this.calculatedTableHeight = "70vh"
       }
       console.log(this.calculatedTableHeight)
+    },
+    closeModal(index) {
+      Vue.set(this.displayed_modals, index, false)
+    },
+    showLogFile(index) {
+      fetch("http://127.0.0.1:5000/results/get_log_file", {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({log_file: this.data.rows[index]["Log File"]})
+      }).then(response => response.json())
+      .then(function(data) {
+        if (data["result"] === "failure") {
+          return
+        }
+        Vue.set(this.displayed_modals, index, true)
+        Vue.set(this.modal_messages, index, data["result"])
+      }.bind(this))
+    },
+    setShowLogFileHovered(index) {
+      Vue.set(this.show_log_file_styles, index, this.hovered_show_log_file_style)
+    },
+    unsetShowLogFileHovered(index) {
+      Vue.set(this.show_log_file_styles, index, this.unhovered_show_log_file_style)
     }
   }
 }

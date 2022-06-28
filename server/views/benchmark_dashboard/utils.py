@@ -15,6 +15,15 @@ def get_post_data():
   benchmark_name = post_data.get('benchmark')
   return algorithm_name, benchmark_name
 
+def read_log_file(log_file):
+  logs = ""
+  with open(log_file, 'r') as l:
+    for line in l:
+      line = line.strip()
+      logs += f"{line}</br>"
+  
+  return logs
+
 def retrieve_log_file(algorithm_name, benchmark_name, saved_jobs):
   try:
     job_dict = saved_jobs[saved_job_index(algorithm_name, benchmark_name)]
@@ -26,12 +35,7 @@ def retrieve_log_file(algorithm_name, benchmark_name, saved_jobs):
     if not job_dict["interrupted"] and not has_job_finished(job):
       return "<strong>No log file yet!</strong>"
     log_file = get_job_log_file(job)
-    logs = ""
-    with open(log_file, 'r') as l:
-      for line in l:
-        line = line.strip()
-        logs += f"{line}</br>"
-    job_dict["logs"] = logs
+    job_dict["logs"] = read_log_file(log_file)
   return job_dict["logs"]
 
 def find_running_benchmark(algo_name, saved_jobs):

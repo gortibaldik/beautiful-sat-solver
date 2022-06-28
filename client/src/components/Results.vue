@@ -71,12 +71,30 @@
                 </mdb-tbl-head>
                 <mdb-tbl-body>
                   <tr v-for="(row, index) in filtered_rows" :key="index">
-                    <td v-for="(colHeader, indexC) in data.columns" :key="indexC" class="text-monospace h6" style="color: #455a64;">{{row[colHeader.field]}}</td>
+                    <td
+                      v-for="(colHeader, indexC) in data.columns"
+                      :key="indexC"
+                      class="text-monospace h6"
+                      :style="`color: #455a64; ${colHeader.can_be_pressed ? show_log_file_styles[index] : ''}`"
+                      @click="colHeader.can_be_pressed ? showLogFile(index) : () => {}"
+                      @mouseenter="colHeader.can_be_pressed ? setShowLogFileHovered(index) : () => {}"
+                      @mouseleave="colHeader.can_be_pressed ? unsetShowLogFileHovered(index) : () => {}"
+                    >{{colHeader.can_be_pressed ? "Show Log File" : row[colHeader.field]}}</td>
                     <td>
                       <div class="input_wrapper" style="scale: 0.75">
                         <input type="checkbox" class="switch_4" @change="checkCheckbox(index)" :checked="row.checked === 'is_checked'">
                       </div>
                     </td>
+                    <mdb-modal :show="displayed_modals[index]" @close="closeModal(index)" scrollable>
+                      <mdb-modal-header>
+                        <mdb-modal-title>Algorithm result</mdb-modal-title>
+                      </mdb-modal-header>
+                      <mdb-modal-body v-html="modal_messages[index]">
+                      </mdb-modal-body>
+                      <mdb-modal-footer>
+                        <mdb-btn color="secondary" @click.native="closeModal(index)">Close</mdb-btn>
+                      </mdb-modal-footer>
+                    </mdb-modal>
                   </tr>
                 </mdb-tbl-body>
               </mdb-tbl>
