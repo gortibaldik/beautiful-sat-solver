@@ -1,5 +1,3 @@
-from server.config import Config
-
 from flask import Flask
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
@@ -7,6 +5,7 @@ from flask_migrate import Migrate
 from logzero import logger
 
 from server.config import Config
+from server.database import Base
 
 # configuration
 DEBUG = True
@@ -22,7 +21,7 @@ logger.debug(f"DATABASE URI: {app.config['SQLALCHEMY_DATABASE_URI']}")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # instantiate the database
-db = SQLAlchemy(app)
+db = SQLAlchemy(app, model_class=Base)
 
 # fighting circular imports
 from server.views.benchmark_dashboard.page import benchmark_page

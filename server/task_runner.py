@@ -7,7 +7,7 @@ from contextlib import redirect_stdout
 from pathlib import Path
 from redis import Redis
 from rq.command import send_stop_job_command
-from server import db
+from server.database import SessionLocal
 from server.config import Config
 from server.models.job import SATJob
 from time import gmtime, strftime
@@ -35,6 +35,12 @@ def create_sat_job(algorithm_name, benchmark_name, log_file):
   )
   return sat_job
 
+def create_n_commit_satjob(algorithm_name, benchmark_name, storage_file):
+  with SessionLocal() as db:
+    sat_job = create_sat_job(algorithm_name, benchmark_name, storage_file)
+    db.add(sat_job)
+    db.commit()
+
 
 def run_benchmark(algorithm_name, benchmark_name):
   job = rq.get_current_job()
@@ -51,9 +57,7 @@ def run_benchmark(algorithm_name, benchmark_name):
         print(f"{i}. second - {algorithm_name}")
         time.sleep(1)
         f.flush()
-  sat_job = create_sat_job(algorithm_name, benchmark_name, storage_file)
-  db.session.add(sat_job)
-  db.session.commit()
+  create_n_commit_satjob(algorithm_name, benchmark_name, storage_file)
   job.meta['progress'] = 100.0
   job.meta['finished'] = True
   job.save_meta()
@@ -94,6 +98,4 @@ def task_runner_stop_job(job:rq.job.Job, algorithm_name, benchmark_name):
   except:
     storage_file = "ERROR"
   send_stop_job_command(Redis.from_url('redis://'), job.get_id())
-  sat_job = create_sat_job(algorithm_name, benchmark_name, storage_file)
-  db.session.add(sat_job)
-  db.session.commit()
+  create_n_commit_satjob(algorithm_name, benchmark_name, storage_file)

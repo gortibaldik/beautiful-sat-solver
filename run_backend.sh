@@ -3,7 +3,7 @@ scripts/start_postgres.sh
 
 export REDIS_QUEUE_NAME="satsmt_background_worker_queue"
 export DB_IP_ADDRESS="$(scripts/get_ip_address_of_docker_postgres.sh)"
-export DB_MIGRATIONS_DIR="server/migrations"
+export DB_MIGRATIONS_DIR="server/database/migrations"
 echo "redis queue name: \"$REDIS_QUEUE_NAME\""
 echo "db ip address: \"$DB_IP_ADDRESS\""
 echo "db migrations dir: \"$DB_MIGRATIONS_DIR\""
