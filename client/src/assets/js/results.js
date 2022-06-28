@@ -216,7 +216,7 @@ export default {
         datasets: []
       }
       for (let j = 0; j < this.data.columns.length; j++) {
-        if (! this.data.columns[j].categorized) {
+        if (this.data.columns[j].plotted) {
           barChartData.datasets.push({
             label: this.data.columns[j].label,
             data: [],
@@ -236,10 +236,10 @@ export default {
         return
       }
       for (let i = 0; i < checked.length; i++) {
-        barChartData.labels.push(`${checked[i]["algo"]} ${checked[i]["benchmark"]}`)
+        barChartData.labels.push(`${checked[i]["Algorithm"]} ${checked[i]["Benchmark"]}`)
         let k = 0
         for (let j = 0; j < this.data.columns.length; j++) {
-          if (! this.data.columns[j].categorized) {
+          if (this.data.columns[j].plotted) {
             barChartData.datasets[k].data.push(Math.floor(checked[i][this.data.columns[j].field]))
             barChartData.datasets[k].backgroundColor.push(this.chartColors[k])
             barChartData.datasets[k].borderColor.push(this.chartBorderColors[k])
@@ -258,7 +258,7 @@ export default {
       return vh
     },
     calculateTableHeightInPx() {
-      return 130 + this.filtered_rows.length * 70
+      return 200 + this.filtered_rows.length * 70
     },
     calculateTableHeight() {
       let tblHeightInPx = this.calculateTableHeightInPx()

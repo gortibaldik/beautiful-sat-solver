@@ -18,7 +18,7 @@
                     @mouseleave="unsetHovered(hovered_headers, colHeader.field)"
                     @click="sortRowsByIndex(colHeader.field)"
                     :style="`${hovered_headers[colHeader.field]}; padding-top: 0.75rem; padding-bottom: 0rem`"
-                    class="h6 text-monospace">
+                    class="h6 text-monospace responsive">
                     <ul class="list-inline">
                       <li class="list-inline-item">
                         {{colHeader.label}}   

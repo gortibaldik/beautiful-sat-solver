@@ -1,58 +1,59 @@
 import random
 
-def create_col(label, field, sort_asc=True, should_be_displayed=True, should_be_categorized=True):
+from logzero import logger
+from server.models.job import SATJob, SATJobConfig
+
+def create_col(label, sort_asc=True, should_be_displayed=True, should_be_categorized=True, should_be_plotted=False):
   return {
     "label": label,
-    "field": field,
+    "field": label,
     "sort": "asc" if sort_asc else "desc",
     "categorized": should_be_categorized,
-    "displayed": should_be_displayed
+    "displayed": should_be_displayed,
+    "plotted": should_be_plotted
   }
 
-def create_row(algo, benchmark, time, derivations, unit_props):
+def create_row(row):
   return {
-    ALGO: algo,
-    BENCHMARK: benchmark,
-    AVERAGE_TIME: time,
-    AVERAGE_DERIVATIONS: derivations,
-    AVERAGE_UNIT_PROPS: unit_props
+    SATJobConfig.algorithm:       getattr(row, "algorithm"),
+    SATJobConfig.benchmark:       getattr(row, "benchmark"),
+    SATJobConfig.time:            getattr(row, "time"),
+    SATJobConfig.decision_vars:   getattr(row, "decision_vars"),
+    SATJobConfig.unit_prop_vals:  getattr(row, "unit_prop_vals"),
+    SATJobConfig.log_file:        getattr(row, "log_file"),
+    SATJobConfig.date:            getattr(row, "date"),
   }
 
-def spawn_rows(number_of_rows: int):
-  possible_algos = [ "dppl", "cdcl", "watching literals", "look forward"]
-  possible_benchmarks = ["A", "B", "C", "D", "E"]
-  max_time = 250
-  max_derivs = 30
-  max_unit_props = 200
+should_be_categorized = {
+  SATJobConfig.algorithm,
+  SATJobConfig.benchmark
+}
 
-  rows = []
-  for _ in range(number_of_rows):
-    rows.append(
-      create_row(
-        random.choice(possible_algos),
-        random.choice(possible_benchmarks),
-        random.random() * max_time,
-        random.random() * max_derivs,
-        random.random() * max_unit_props
-      )
-    )
-  
-  return rows
+shouldnt_be_displayed = {
+  SATJobConfig.id
+}
 
-ALGO="algo"
-BENCHMARK="benchmark"
-AVERAGE_TIME="average_time"
-AVERAGE_DERIVATIONS="average_derivations"
-AVERAGE_UNIT_PROPS="average_unit_props"
+should_be_plotted = {
+  SATJobConfig.decision_vars,
+  SATJobConfig.time,
+  SATJobConfig.unit_prop_vals
+}
 
 def get_data():
+  colDefs = SATJob.metadata.tables["sat_jobs"].columns
+  columns = []
+  for col in colDefs.keys():
+    if col in shouldnt_be_displayed:
+      continue
+    columns.append(create_col(
+      col,
+      should_be_categorized=col in should_be_categorized,
+      should_be_plotted=col in should_be_plotted
+    ))
+  rows = []
+  for row in SATJob.query.all():
+    rows.append(create_row(row))
   return {
-    "columns": [
-      create_col("Algorithm", ALGO),
-      create_col("Benchmark", BENCHMARK),
-      create_col("Average Time of Execution", AVERAGE_TIME, should_be_categorized=False),
-      create_col("Average Number of Derivations", AVERAGE_DERIVATIONS, should_be_categorized=False),
-      create_col("Average Number of Unit Propagations", AVERAGE_UNIT_PROPS, should_be_categorized=False),
-    ],
-    "rows": spawn_rows(5)
+    "columns": columns,
+    "rows": rows
   }

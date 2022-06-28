@@ -12,3 +12,5 @@ base = declarative_base()
 
 class Base(base):
     __abstract__ = True
+    query = None
+    query_class = None

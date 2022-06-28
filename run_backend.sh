@@ -13,6 +13,7 @@ echo "db migrations dir: \"$DB_MIGRATIONS_DIR\""
 rq worker ${REDIS_QUEUE_NAME} > "server/rq_logs/rq_log_file" 2> "server/rq_logs/rq_error_log_file" &
 
 export FLASK_APP="server:app"
+export FLASK_ENV="development"
 python3 -m server.before_app
 flask run
 
