@@ -55,6 +55,7 @@ export default {
       selected_values: [],
       checked_rows: [],
       show_log_file_styles: [],
+      delete_button_styles: [],
       displayed_modals: [],
       modal_messages: [],
       all_checked: false,
@@ -125,6 +126,7 @@ export default {
           let selected_values = {}
           let filtered_rows = []
           let show_log_file_styles = []
+          let delete_button_styles = []
           let displayed_modals = []
           let modal_messages = []
           for (let i = 0; i < data.columns.length; i++) {
@@ -156,6 +158,7 @@ export default {
             filtered_rows.push(data.rows[i])
 
             show_log_file_styles.push(this.unhovered_show_log_file_style)
+            delete_button_styles.push(this.unhovered_show_log_file_style)
             displayed_modals.push(false)
             modal_messages.push(false)
           }
@@ -167,6 +170,7 @@ export default {
           this.selected_values = selected_values
           this.filtered_rows = filtered_rows
           this.show_log_file_styles = show_log_file_styles
+          this.delete_button_styles = delete_button_styles
           this.displayed_modals = displayed_modals
           this.modal_messages = modal_messages
           this.calculateTableHeight()
@@ -306,7 +310,7 @@ export default {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({log_file: this.data.rows[index]["Log File"]})
+        body: JSON.stringify({log_file: this.filtered_rows[index]["Log File"]})
       }).then(response => response.json())
       .then(function(data) {
         if (data["result"] === "failure") {
@@ -321,6 +325,39 @@ export default {
     },
     unsetShowLogFileHovered(index) {
       Vue.set(this.show_log_file_styles, index, this.unhovered_show_log_file_style)
+    },
+    removeLogFileFromDataRows(index) {
+      let log_file = this.filtered_rows[index]["Log File"]
+      let theIndex = -1
+      for (let i = 0; i < this.data.rows.length; i++) {
+        if (this.data.rows[i]["Log File"] === log_file) {
+          theIndex = i
+        }
+      }
+      this.data.rows.splice(theIndex, 1)
+    },
+    deleteLogFile(index) {
+      fetch("http://127.0.0.1:5000/results/remove_log_file", {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({log_file: this.filtered_rows[index]["Log File"]})
+      }).then(response => response.json())
+      .then(function(data) {
+        if (data["result"] === "failure") {
+          return
+        }
+        this.removeLogFileFromDataRows(index)
+        this.filtered_rows.splice(index, 1)
+      }.bind(this))
+    },
+    setDeleteHovered(index) {
+      Vue.set(this.delete_button_styles, index, this.hovered_show_log_file_style)
+    },
+    unsetDeleteHovered(index) {
+      Vue.set(this.delete_button_styles, index, this.unhovered_show_log_file_style)
     }
   }
 }

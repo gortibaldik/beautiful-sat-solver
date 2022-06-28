@@ -1,6 +1,8 @@
+import os
 import traceback
 
 from logzero import logger
+from server import db
 from server.models.job import SATJob, SATJobConfig
 
 def create_col(
@@ -84,3 +86,19 @@ def get_log_file_content(log_file_name):
     return read_log_file(log_file_name)
   except:
     logger.warning(traceback.format_exc())
+
+def remove_log_file(log_file):
+  at_least_one = False
+  # the only place where something is added to the database
+  # is the task_runner, therefore we know that if the log_file
+  # is present as the log_file of some job it must exist and it
+  # must be associated to it
+  #
+  # no need for additional sanity checks (but we at least check
+  # whether the log_file is an actual file)
+  for row in SATJob.query.filter_by(log_file=log_file):
+    at_least_one = True
+    db.session.delete(row)
+  db.session.commit()
+  if at_least_one and os.path.isfile(log_file):
+    os.remove(log_file)

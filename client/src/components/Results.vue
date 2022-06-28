@@ -29,6 +29,7 @@
                       </li>
                     </ul>
                     </th>
+                    <th :style="`${unhovered_style}`"/>
                     <th :style="`${unhovered_style}; padding-top: 0.75rem; padding-bottom: 0rem`"
                       class="h6 text-monospace">
                       <ul class="list-inline">
@@ -56,6 +57,7 @@
                           class="text-monospace">{{val}}</option>
                       </select>
                     </th>
+                    <th :style="`${unhovered_style}`"/>
                     <th :style="`${select_all_style}; padding: 0.25rem; padding-bottom: 0.75rem; padding-left: 0.75rem; color: #455a64`"
                       class="h6 text-monospace"
                       @mouseenter="select_all_style=hovered_style"
@@ -80,6 +82,15 @@
                       @mouseenter="colHeader.can_be_pressed ? setShowLogFileHovered(index) : () => {}"
                       @mouseleave="colHeader.can_be_pressed ? unsetShowLogFileHovered(index) : () => {}"
                     >{{colHeader.can_be_pressed ? "Show Log File" : row[colHeader.field]}}</td>
+                    <td
+                      class="text-monospace h6"
+                      :style="`color: #455a64; ${delete_button_styles[index]}`"
+                      @click="deleteLogFile(index)"
+                      @mouseenter="setDeleteHovered(index)"
+                      @mouseleave="unsetDeleteHovered(index)"
+                    >
+                      Delete
+                    </td>
                     <td>
                       <div class="input_wrapper" style="scale: 0.75">
                         <input type="checkbox" class="switch_4" @change="checkCheckbox(index)" :checked="row.checked === 'is_checked'">
