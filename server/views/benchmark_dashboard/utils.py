@@ -80,9 +80,20 @@ def stop_job(algorithm_name, benchmark_name, saved_jobs):
   logger.warning("Job cannot be stopped!")
   return False
 
+def benchmark_name_sorting_criterion(x):
+  if "uuf" in x:
+    value = int(x[3:].split('-')[0]) + 10_000
+  elif "uf" in x:
+    value = int(x[2:].split('-')[0])
+  elif "task" in x:
+    value = 1
+  return value
+
 def get_benchmark_names():
   benchmark_root = Config.SATSMT_BENCHMARK_ROOT
-  return list(os.listdir(benchmark_root))
+  benchmark_names = list(os.listdir(benchmark_root))
+  sorted_benchmark_names = sorted(benchmark_names, key=benchmark_name_sorting_criterion)
+  return sorted_benchmark_names
 
 def get_benchmark_progress(algorithm_name, benchmark_name, saved_jobs):
   return task_runner_get_benchmark_progress(rq.job.Job.fetch(saved_jobs[saved_job_index(algorithm_name, benchmark_name)]["job"], connection=redis.Redis.from_url('redis://')))
