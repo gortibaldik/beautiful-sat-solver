@@ -96,7 +96,7 @@
                         <input type="checkbox" class="switch_4" @change="checkCheckbox(index)" :checked="row.checked === 'is_checked'">
                       </div>
                     </td>
-                    <mdb-modal :show="displayed_modals[index]" @close="closeModal(index)" scrollable>
+                    <mdb-modal size="fluid" :show="displayed_modals[index]" @close="closeModal(index)" scrollable>
                       <mdb-modal-header>
                         <mdb-modal-title>Algorithm result</mdb-modal-title>
                       </mdb-modal-header>

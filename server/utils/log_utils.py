@@ -13,7 +13,7 @@ def is_correct_log_file(log_file):
   return os.path.exists(os.path.join(log_dir, filename))
 
 def read_log_file(log_file):
-  logs = ""
+  logs = "<code>"
   if not is_correct_log_file(log_file):
     logs = "<strong>Incorrect filename returned</strong></br>"
   else:
@@ -22,6 +22,8 @@ def read_log_file(log_file):
         line = line.strip()
         logs += f"{line}</br>"
   
+  logs += " </code>"
+
   return logs
 
 def get_log_file_content(log_file_name):

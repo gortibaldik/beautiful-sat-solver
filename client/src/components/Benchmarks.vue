@@ -42,7 +42,7 @@
                   <div aria-valuemax="100" aria-valuemin="0" :aria-valuenow="progressBarValue" class="progress-bar bg-primary" role="progressbar"
                     :style="progressBarStyle"></div>
                 </div>
-                <mdb-modal :show="displayedModals[index]" @close="closeModal(index)" scrollable>
+                <mdb-modal size="lg" :show="displayedModals[index]" @close="closeModal(index)" scrollable>
                   <mdb-modal-header>
                     <mdb-modal-title>Algorithm result</mdb-modal-title>
                   </mdb-modal-header>
