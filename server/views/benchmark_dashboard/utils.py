@@ -2,12 +2,18 @@ import os
 import pickle
 import redis
 import rq
-import traceback
 from flask import request
 from logzero import logger
 
 from server.config import Config
-from server.task_runner import get_job_log_file, has_job_finished, has_job_started, task_runner_get_benchmark_progress, task_runner_start_algorithm_on_benchmark, task_runner_stop_job
+from server.task_runner import (
+  get_job_log_file,
+  has_job_finished,
+  has_job_started,
+  task_runner_get_benchmark_progress,
+  task_runner_start_algorithm_on_benchmark,
+  task_runner_stop_job
+)
 
 def get_post_data():
   post_data = request.get_json()
@@ -47,7 +53,8 @@ def find_running_benchmark(algo_name, saved_jobs):
         job = rq.job.Job.fetch(saved_jobs[key]["job"], connection=redis.Redis.from_url('redis://'))
       except:
         continue
-      if not saved_jobs[key]["interrupted"] and not has_job_finished(job):
+      
+      if ('interrupted' not in job.meta or not job.meta['interrupted'] ) and not has_job_finished(job):
         benchmark_name = key.split(',')[1]
         return {
           "running": True,
@@ -92,29 +99,3 @@ def get_benchmark_progress(algorithm_name, benchmark_name, saved_jobs):
 
 def start_algorithm_on_benchmark(algorithm_name, benchmark_name):
   return task_runner_start_algorithm_on_benchmark(algorithm_name, benchmark_name)
-
-def get_key(key, connection=None):
-  if not connection:
-    with redis.Redis.from_url('redis://') as connection:
-      return pickle.loads(connection.get(key))
-  return pickle.loads(connection.get(key))
-
-def get_saved_jobs(connection=None):
-  return get_key('saved_jobs', connection)
-
-def get_algorithms_infos(connection=None):
-  return get_key('algorithms_infos', connection)
-
-def set_key(key, value, connection=None):
-  svalue = pickle.dumps(value)
-  if not connection:
-    with redis.Redis.from_url('redis://') as connection:
-      print(f"{key}: {svalue}")
-      connection.set(key, svalue)
-  connection.set(key, svalue)
-
-def set_saved_jobs(value, connection=None):
-  set_key('saved_jobs', value, connection)
-
-def set_algorithms_infos(value, connection=None):
-  set_key('algorithms_infos', value, connection)
