@@ -2,7 +2,8 @@ import traceback
 
 from flask import Blueprint, jsonify, request
 from logzero import logger
-from server.views.benchmark_results.utils import get_data, get_log_file_content, remove_log_file
+from server.utils.log_utils import get_log_file_content, remove_log_file
+from server.views.benchmark_results.utils import get_data
 
 results_page = Blueprint('results_page', __name__)
 

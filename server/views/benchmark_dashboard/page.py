@@ -5,16 +5,18 @@ from flask import Blueprint, jsonify
 from logzero import logger
 
 from server.config import Config
+from server.utils.redis_utils import (
+  get_algorithms_infos,
+  get_saved_jobs,
+  set_saved_jobs
+)
 from server.views.benchmark_dashboard.utils import (
   get_benchmark_names,
   get_benchmark_progress,
-  get_algorithms_infos,
   get_post_data,
-  get_saved_jobs,
   get_running_status,
   retrieve_log_file,
   save_job,
-  set_saved_jobs,
   start_algorithm_on_benchmark,
   stop_job
 )

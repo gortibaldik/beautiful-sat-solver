@@ -14,21 +14,13 @@ from server.task_runner import (
   task_runner_start_algorithm_on_benchmark,
   task_runner_stop_job
 )
+from server.utils.log_utils import get_log_file_content
 
 def get_post_data():
   post_data = request.get_json()
   algorithm_name = post_data.get('algorithm')
   benchmark_name = post_data.get('benchmark')
   return algorithm_name, benchmark_name
-
-def read_log_file(log_file):
-  logs = ""
-  with open(log_file, 'r') as l:
-    for line in l:
-      line = line.strip()
-      logs += f"{line}</br>"
-  
-  return logs
 
 def retrieve_log_file(algorithm_name, benchmark_name, saved_jobs):
   try:
@@ -38,10 +30,8 @@ def retrieve_log_file(algorithm_name, benchmark_name, saved_jobs):
     raise
   if job_dict["logs"] is None:
     job = rq.job.Job.fetch(saved_jobs[saved_job_index(algorithm_name, benchmark_name)]["job"], connection=redis.Redis.from_url('redis://'))
-    if not job_dict["interrupted"] and not has_job_finished(job):
-      return "<strong>No log file yet!</strong>"
     log_file = get_job_log_file(job)
-    job_dict["logs"] = read_log_file(log_file)
+    job_dict["logs"] = "<strong>No log file yet!</strong>" if not log_file else get_log_file_content(log_file)
   return job_dict["logs"]
 
 def find_running_benchmark(algo_name, saved_jobs):

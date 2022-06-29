@@ -12,7 +12,9 @@ from rq.command import send_stop_job_command
 from server.database import SessionLocal
 from server.config import Config
 from server.models.job import SATJob
+from server.utils.redis_utils import get_algorithms_infos
 from time import gmtime, strftime
+
 
 def get_timestamp():
   return strftime("%Y_%m_%d_%H_%M_%S", gmtime())
@@ -47,10 +49,13 @@ def benchmark(file, algorithm_name, benchmark_name):
   try:
     seconds = Config.DUMMY_RUNTIME
     job = rq.get_current_job()
+    job.meta["progress"] = 0
+    job.save_meta()
+    algorithms_infos = get_algorithms_infos()
+    logzero.logger.info(algorithms_infos)
     for i in range(seconds):
       job.meta['progress'] = i * 100 / seconds
       job.save_meta()
-      print(f"{i}. second - {algorithm_name}")
       logzero.logger.info(f"This should be written to the same file!")
       time.sleep(1)
       file.flush()
@@ -88,6 +93,8 @@ def task_runner_start_algorithm_on_benchmark(algorithm_name, benchmark_name):
 
 def task_runner_get_benchmark_progress(job):
   job.refresh()
+  if 'interrupted' in job.meta and job.meta['interrupted']:
+    return 100
   if not 'progress' in job.meta:
     raise RuntimeError("Caught no progress exception!")
   return job.meta['progress']
@@ -108,6 +115,8 @@ def has_job_started(job: rq.job.Job):
 
 def get_job_log_file(job):
   job.refresh()
+  if 'storage_file' not in job.meta:
+    return None
   return job.meta["storage_file"]
 
 def task_runner_stop_job(job:rq.job.Job, algorithm_name, benchmark_name):

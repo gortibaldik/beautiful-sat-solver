@@ -2,7 +2,7 @@ import asyncio
 import redis
 import server.getters
 
-from server.views.benchmark_dashboard.utils import set_algorithms_infos, set_saved_jobs
+from server.utils.redis_utils import set_algorithms_infos, set_saved_jobs
 from satsolver.benchmark_preparation.benchmark_downloader import download_all_not_downloaded_benchmarks
 
 if __name__ == '__main__':
