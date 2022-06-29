@@ -1,9 +1,9 @@
 import logzero
 
-def set_debug_level(args):
-    if args.warning:
+def set_debug_level(*, warning=False, debug=False):
+    if warning:
         logzero.loglevel(logzero.WARNING)
-    elif args.debug:
+    elif debug:
         logzero.loglevel(logzero.DEBUG)
     else:
         logzero.loglevel(logzero.INFO)
