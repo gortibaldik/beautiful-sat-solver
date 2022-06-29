@@ -7,7 +7,7 @@ def read_stats(input_file, sat):
     with open(input_file, 'r') as f:
         for line in f:
             line = line.strip()
-            if "task2_controller" in line:
+            if "check" in line:
                 if line[-2:] != "OK" and sat:
                     raise RuntimeError(f"Not valid!: {line}")
                 elif "UNSAT" not in line and not sat:

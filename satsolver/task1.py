@@ -5,6 +5,9 @@ from logzero import logger
 from satsolver.tseitin_encoding.ast_tree import ASTAbstractNode
 from satsolver.tseitin_encoding.parsing_utils import create_abstract_syntax_tree
 from satsolver.tseitin_encoding.tseitin_transformation import turn_nnf_to_tseitin
+from satsolver.utils.file_utils import read_formula
+from satsolver.utils.logging_utils import set_debug_level
+from satsolver.utils.parser_utils import add_parser_debug_levels
 
 def transform_to_numbers(tseitin_ast_tree_root: ASTAbstractNode, mapping):
     subformulas = []
@@ -76,29 +79,6 @@ def create_parser():
     parser.add_argument('output', nargs='?', default=None, type=str)
     parser.add_argument('--only_left_to_right', action='store_true', help="If specified, the input should be in NNF, and only left to right implications are used")
     return parser
-
-def add_parser_debug_levels(parser: ArgumentParser):
-    parser.add_argument('--debug', action='store_true')
-    parser.add_argument('--warning', action='store_true')
-
-
-def read_formula(input_file):
-    formula = ""
-    if input_file is None:
-        formula = sys.stdin.read()
-    else:
-        with open(input_file, 'r') as f:
-            formula = f.read()
-    logger.debug(f"read formula: {formula}")
-    return formula
-
-def set_debug_level(*, warning=False, debug=False):
-    if warning:
-        logzero.loglevel(logzero.WARNING)
-    elif debug:
-        logzero.loglevel(logzero.DEBUG)
-    else:
-        logzero.loglevel(logzero.INFO)
 
 def main():
     parser = create_parser()

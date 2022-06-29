@@ -3,6 +3,9 @@ import sys
 
 from argparse import ArgumentParser
 from logzero import logger
+from satsolver.utils.file_utils import read_formula
+from satsolver.utils.logging_utils import set_debug_level
+from satsolver.utils.parser_utils import add_parser_debug_levels
 
 
 def read_dimacs(formula: str, assignment):
@@ -27,14 +30,20 @@ def read_dimacs(formula: str, assignment):
             if symbol in assignment:
                 at_least_one = True
         if not at_least_one:
-            raise RuntimeError(f"Invalid assignment UNSAT: {line}")
+            raise RuntimeError("Invalid assignment UNSAT: \n\tformula:{}\n\tassignment:{}".format(line, assignment))
 
 def read_assignment(file):
     assignment = set()
     with open(file, 'r') as f:
         for line in f:
             line = line.strip()
-            assignment.add(line)
+            parts = line.split(":")
+            if len(parts) == 1:
+                assignment.add(line)
+            elif len(parts) == 2:
+                assignment_true = parts[1].strip() == "True"
+                if assignment_true:
+                    assignment.add(parts[0])
     return assignment
 
 def create_parser():
@@ -42,31 +51,6 @@ def create_parser():
     parser.add_argument("input_file")
     parser.add_argument("assignment_file")
     return parser
-
-# ----
-# duplicated code from task1 because of relative import errors in python
-def read_formula(input_file):
-    formula = ""
-    if input_file is None:
-        formula = sys.stdin.read()
-    else:
-        with open(input_file, 'r') as f:
-            formula = f.read()
-    logger.debug(f"read formula: {formula}")
-    return formula
-
-def set_debug_level(args):
-    if args.warning:
-        logzero.loglevel(logzero.WARNING)
-    elif args.debug:
-        logzero.loglevel(logzero.DEBUG)
-    else:
-        logzero.loglevel(logzero.INFO)
-
-def add_parser_debug_levels(parser: ArgumentParser):
-    parser.add_argument('--debug', action='store_true')
-    parser.add_argument('--warning', action='store_true')
-# ----
 
 def main():
     parser = create_parser()
