@@ -1,9 +1,11 @@
+import traceback
+import logzero
 import os
 import random
 import rq
 import time
 
-from contextlib import redirect_stdout
+from contextlib import redirect_stdout, redirect_stderr
 from pathlib import Path
 from redis import Redis
 from rq.command import send_stop_job_command
@@ -41,25 +43,40 @@ def create_n_commit_satjob(algorithm_name, benchmark_name, storage_file):
     db.add(sat_job)
     db.commit()
 
+def benchmark(file, algorithm_name, benchmark_name):
+  try:
+    seconds = Config.DUMMY_RUNTIME
+    job = rq.get_current_job()
+    for i in range(seconds):
+      job.meta['progress'] = i * 100 / seconds
+      job.save_meta()
+      print(f"{i}. second - {algorithm_name}")
+      logzero.logger.info(f"This should be written to the same file!")
+      time.sleep(1)
+      file.flush()
+  except:
+    logzero.logger.warning(traceback.format_exc())
+    return False
+  return True
 
 def run_benchmark(algorithm_name, benchmark_name):
   job = rq.get_current_job()
-  seconds = Config.DUMMY_RUNTIME
   storage_file = ensure_storage_file(algorithm_name, benchmark_name)
   job.meta['finished'] = False
   job.meta['storage_file'] = storage_file
   job.save_meta()
   with open(storage_file, 'w') as f:
     with redirect_stdout(f):
-      for i in range(seconds):
-        job.meta['progress'] = i * 100 / seconds
-        job.save_meta()
-        print(f"{i}. second - {algorithm_name}")
-        time.sleep(1)
-        f.flush()
+      with redirect_stderr(f):
+        logzero.logfile(storage_file)
+        result = benchmark(f, algorithm_name, benchmark_name)
+        logzero.logfile(None)
   create_n_commit_satjob(algorithm_name, benchmark_name, storage_file)
-  job.meta['progress'] = 100.0
-  job.meta['finished'] = True
+  if not result:
+    job.meta['interrupted'] = True
+  else:
+    job.meta['progress'] = 100.0
+    job.meta['finished'] = True
   job.save_meta()
 
   return job
@@ -71,6 +88,8 @@ def task_runner_start_algorithm_on_benchmark(algorithm_name, benchmark_name):
 
 def task_runner_get_benchmark_progress(job):
   job.refresh()
+  if not 'progress' in job.meta:
+    raise RuntimeError("Caught no progress exception!")
   return job.meta['progress']
 
 def has_job_finished(job):
