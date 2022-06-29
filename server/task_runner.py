@@ -3,6 +3,7 @@ import logzero
 import os
 import random
 import rq
+import server.getters
 import time
 
 from contextlib import redirect_stdout, redirect_stderr
@@ -12,7 +13,6 @@ from rq.command import send_stop_job_command
 from server.database import SessionLocal
 from server.config import Config
 from server.models.job import SATJob
-from server.utils.redis_utils import get_algorithms_infos
 from time import gmtime, strftime
 
 
@@ -25,44 +25,132 @@ def ensure_storage_file(algorithm_name, benchmark_name):
   storage_file = os.path.join(storage_folder, f"{algorithm_name}_{benchmark_name}_{get_timestamp()}")
   return storage_file
 
-def create_sat_job(algorithm_name, benchmark_name, log_file):
-  max_time = 250
-  max_derivs = 30
-  max_unit_props = 200
+def create_sat_job(
+  *,
+  algorithm_name,
+  benchmark_name,
+  log_file,
+  avg_time=-1,
+  avg_derivs=-1,
+  avg_unit_props=-1):
   sat_job = SATJob(
-    unit_prop_vals  = random.random() * max_unit_props,
-    decision_vars   = random.random() * max_derivs,
-    time            = random.random() * max_time,
+    unit_prop_vals  = avg_unit_props,
+    decision_vars   = avg_derivs,
+    time            = avg_time,
     algorithm       = algorithm_name,
     benchmark       = benchmark_name,
     log_file        = log_file
   )
   return sat_job
 
-def create_n_commit_satjob(algorithm_name, benchmark_name, storage_file):
+def create_n_commit_satjob(
+  *,
+  algorithm_name,
+  benchmark_name,
+  storage_file,
+  avg_time=0,
+  avg_derivs=0,
+  avg_unit_props=0
+):
   with SessionLocal() as db:
-    sat_job = create_sat_job(algorithm_name, benchmark_name, storage_file)
+    sat_job = create_sat_job(
+      algorithm_name=algorithm_name,
+      benchmark_name=benchmark_name,
+      log_file=storage_file,
+      avg_time=avg_time,
+      avg_derivs=avg_derivs,
+      avg_unit_props=avg_unit_props
+    )
     db.add(sat_job)
     db.commit()
 
+def retrieve_algorithm(algorithms, algorithm_name):
+  for _, algo_module in algorithms.items():
+    task_info = algo_module.get_info()
+    if task_info["name"] == algorithm_name:
+      return algo_module
+  return None
+
+def retrieve_benchmark_filenames(benchmark_name):
+  all_benchmarks_basedir = Config.SATSMT_BENCHMARK_ROOT
+  benchmark_name = os.path.basename(benchmark_name)
+  benchmark_basedir = os.path.join(all_benchmarks_basedir, benchmark_name)
+  
+  if not os.path.isdir(benchmark_basedir):
+    return None
+  
+  benchmark_filenames = []
+  for f in os.listdir(benchmark_basedir):
+    benchmark_filenames.append(os.path.join(benchmark_basedir, f))
+  
+  return benchmark_filenames
+
+def init_cumulative_stats():
+  return {
+    "ndecs": 0,
+    "nunit": 0,
+    "time": 0,
+    "total": 0,
+  }
+
+def update_cumulative_stats(
+  *,
+  cumulative_stats,
+  result
+):
+  cumulative_stats["total"] += 1
+  cumulative_stats["ndecs"] += result["number_of_decisions"]
+  cumulative_stats["nunit"] += result["number_of_unit_props"]
+  cumulative_stats["time"] += result["time"]
+
+def avg_cumulative_stats(cumulative_stats):
+  cumulative_stats["ndecs"] /= cumulative_stats["total"]
+  cumulative_stats["nunit"] /= cumulative_stats["total"]
+  cumulative_stats["time"] /= cumulative_stats["total"]
+  
+
 def benchmark(file, algorithm_name, benchmark_name):
   try:
-    seconds = Config.DUMMY_RUNTIME
     job = rq.get_current_job()
     job.meta["progress"] = 0
     job.save_meta()
-    algorithms_infos = get_algorithms_infos()
-    logzero.logger.info(algorithms_infos)
-    for i in range(seconds):
-      job.meta['progress'] = i * 100 / seconds
+    algorithms = server.getters.get_modules()
+    algo_module = retrieve_algorithm(algorithms, algorithm_name)
+
+    if algo_module is None:
+      logzero.logger.warning(f"Algorithm with name: {algorithm_name} not found, EXITING!")
+      return
+
+    benchmark_filenames = retrieve_benchmark_filenames(benchmark_name)
+    if benchmark_filenames is None:
+      logzero.logger.warning(f"Benchmark with name: {benchmark_name} not found, EXITING!")
+      return
+
+    total_number_of_benchmarks = len(benchmark_filenames)
+    cumulative_stats = init_cumulative_stats()
+
+    for i, filename in enumerate(benchmark_filenames):
+      job.meta['progress'] = i * 100 / total_number_of_benchmarks
       job.save_meta()
-      logzero.logger.info(f"This should be written to the same file!")
-      time.sleep(1)
+      result = algo_module.find_model(
+        input_file=filename,
+        warning=True
+      )
+      logzero.loglevel(Config.DEFAULT_LOGLEVEL)
+      if result is None:
+        break
+      update_cumulative_stats(
+        cumulative_stats=cumulative_stats,
+        result=result
+      )
       file.flush()
+    avg_cumulative_stats(cumulative_stats)
+    logzero.logger.info(cumulative_stats)
   except:
     logzero.logger.warning(traceback.format_exc())
-    return False
-  return True
+    return None
+  
+  return cumulative_stats
 
 def run_benchmark(algorithm_name, benchmark_name):
   job = rq.get_current_job()
@@ -76,12 +164,21 @@ def run_benchmark(algorithm_name, benchmark_name):
         logzero.logfile(storage_file)
         result = benchmark(f, algorithm_name, benchmark_name)
         logzero.logfile(None)
-  create_n_commit_satjob(algorithm_name, benchmark_name, storage_file)
-  if not result:
+  if result is None:
+    result = init_cumulative_stats()
     job.meta['interrupted'] = True
   else:
     job.meta['progress'] = 100.0
     job.meta['finished'] = True
+
+  create_n_commit_satjob(
+    algorithm_name=algorithm_name,
+    benchmark_name=benchmark_name,
+    storage_file=storage_file,
+    avg_derivs=result["ndecs"],
+    avg_unit_props=result["nunit"],
+    avg_time=result["time"]
+    )
   job.save_meta()
 
   return job
@@ -94,6 +191,8 @@ def task_runner_start_algorithm_on_benchmark(algorithm_name, benchmark_name):
 def task_runner_get_benchmark_progress(job):
   job.refresh()
   if 'interrupted' in job.meta and job.meta['interrupted']:
+    return 100
+  if 'finished' in job.meta and job.meta['finished']:
     return 100
   if not 'progress' in job.meta:
     raise RuntimeError("Caught no progress exception!")

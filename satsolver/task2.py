@@ -72,18 +72,19 @@ def read_dimacs(formula: str):
 def create_parser():
     parser = ArgumentParser()
     parser.add_argument("input_file", type=str, help="Input file in DIMACS (.cnf) or in SMTLIB (.sat) format.")
+    parser.add_argument("--output_to_stdout", action="store_true")
     return parser
 
-def read_tree(args):
-    extension = recognize_file_extension(args.input_file)
-    formula = read_formula(args.input_file)
+def read_tree(input_file):
+    extension = recognize_file_extension(input_file)
+    formula = read_formula(input_file)
     if extension == Extensions.SMTLIB:
         return tseitin_encoding(formula, nnf_reduce_implications=True)
     elif extension == Extensions.DIMACS:
         return read_dimacs(formula)
 
-def print_model(model, args):
-    extension = recognize_file_extension(args.input_file)
+def print_model(model, input_file, output_to_stdout):
+    extension = recognize_file_extension(input_file)
     array_to_write = []
     if extension == Extensions.DIMACS:
         for variable, value in model.items():
@@ -93,17 +94,21 @@ def print_model(model, args):
             array_to_write.append(int_var)
         array_to_write = sorted(array_to_write, key=abs)
         for i in array_to_write:
-            print(i)
+            logger.info(i)
+            if output_to_stdout:
+                print(i)
     else:
         array_to_write = sorted(list(model.items()))
         for variable, value in array_to_write:
             if "__spec__" not in variable:
-                print(f"{variable}: {value}")
+                logger.info(f"{variable}: {value}")
+                if output_to_stdout:
+                    print(f"{variable}: {value}")
 
-def print_result(result, model, ndecs, nunit, time, args):
+def print_result(result, model, ndecs, nunit, time, input_file, output_to_stdout):
     if result == "SAT":
         logger.warning(f"SAT; decs: {ndecs}; unit: {nunit}; time: {time}")
-        print_model(model, args)
+        print_model(model, input_file, output_to_stdout)
     else:
         logger.warning(f"UNSAT; decs: {ndecs}; unit: {nunit}; time: {time}")
 
@@ -114,13 +119,52 @@ def get_info():
         "benchmarkable": True
     }
 
+def pack_result_to_dict(
+    *,
+    result,
+    model,
+    ndecs,
+    nunit,
+    time
+):
+    return {
+        "result": result,
+        "model": model,
+        "number_of_decisions": ndecs,
+        "number_of_unit_props": nunit,
+        "time": time
+    }
+
+def find_model(
+    *,
+    input_file=None,
+    warning=False,
+    debug=False,
+    output_to_stdout=False
+):
+    if input_file is None:
+        return None
+    set_debug_level(warning=warning, debug=debug)
+    ast_tree_root = read_tree(input_file)
+    start = timer()
+    result, model, ndecs, nunit = dpll(ast_tree_root)
+    end = timer()
+    print_result(result, model, ndecs, nunit, end - start, input_file, output_to_stdout)
+    return pack_result_to_dict(
+        result=result,
+        model=model,
+        ndecs=ndecs,
+        nunit=nunit,
+        time=end - start
+    )
+
 if __name__ == "__main__":
     parser = create_parser()
     add_parser_debug_levels(parser)
     args = parser.parse_args()
-    set_debug_level(args)
-    ast_tree_root = read_tree(args)
-    start = timer()
-    result, model, ndecs, nunit = dpll(ast_tree_root)
-    end = timer()
-    print_result(result, model, ndecs, nunit, end - start, args)
+    find_model(
+        input_file=args.input_file,
+        warning=args.warning,
+        debug=args.debug,
+        output_to_stdout=args.output_to_stdout
+    )
