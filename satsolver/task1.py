@@ -5,7 +5,7 @@ from logzero import logger
 from satsolver.tseitin_encoding.ast_tree import ASTAbstractNode
 from satsolver.tseitin_encoding.parsing_utils import create_abstract_syntax_tree
 from satsolver.tseitin_encoding.tseitin_transformation import turn_nnf_to_tseitin
-from satsolver.utils.file_utils import read_formula
+from satsolver.utils.file_utils import read_from_input
 from satsolver.utils.logging_utils import set_debug_level
 from satsolver.utils.parser_utils import add_parser_debug_levels
 
@@ -42,36 +42,53 @@ def get_sorting_item(x: str):
         return (1, int(val))
     return (0, x)
 
-def _print_to_dmacs(tseitin_ast_tree_root: ASTAbstractNode, file):
+def print_or_save_to_content(line, file=None, content=None, should_be_printed=True):
+    if should_be_printed:
+        print(line, file=file)
+    else:
+        return content + line + "\n"
+
+def _print_to_dmacs(tseitin_ast_tree_root: ASTAbstractNode, file, should_be_printed=True):
     count_stats = tseitin_ast_tree_root.count()
     variables = sorted(list(count_stats["variables"]), key=get_sorting_item)
     mapping = {}
+    content = ""
     for i, var in enumerate(variables):
         mapping[var] = i + 1
         if i == len(variables) - 1:
-            print(f"c MAIN {i + 1} {var}", file=file)
+            line = f"c MAIN {i + 1} {var}"
         else:
-            print(f"c {i + 1} {var}", file=file)
+            line = f"c {i + 1} {var}"
+        content = print_or_save_to_content(line, file, content, should_be_printed)
 
     subformulas = transform_to_numbers(tseitin_ast_tree_root, mapping)
 
     # len(subformulas) + 1 because we add special __spec__n variable as a separate clause
-    print(f"p cnf {len(count_stats['variables'])} {len(subformulas)}", file=file)
+    line = f"p cnf {len(count_stats['variables'])} {len(subformulas)}"
+    content = print_or_save_to_content(line, file, content, should_be_printed)
     for sf in subformulas:
-        print(" ".join([str(tk) for tk in sf]) + " 0", file=file)
+        line = " ".join([str(tk) for tk in sf]) + " 0"
+        content = print_or_save_to_content(line, file, content, should_be_printed)
+    
+    return content, mapping
 
-def print_to_dmacs(tseitin_ast_tree_root: ASTAbstractNode, file):
+def print_to_dmacs(tseitin_ast_tree_root: ASTAbstractNode, file=None, should_be_printed=True):
     if file is not None:
         with open(file, 'w') as f:
-            _print_to_dmacs(tseitin_ast_tree_root, f)
+            content, mapping = _print_to_dmacs(tseitin_ast_tree_root, f)
     else:
-        _print_to_dmacs(tseitin_ast_tree_root, None)
+        content, mapping = _print_to_dmacs(tseitin_ast_tree_root, None, should_be_printed=should_be_printed)
+    return content, mapping
 
-def tseitin_encoding(formula: str, nnf_reduce_implications: bool):
+def tseitin_encoding(formula: str, nnf_reduce_implications: bool=False):
     ast_tree_root = create_abstract_syntax_tree(formula)
     tseitin_ast_tree_root = turn_nnf_to_tseitin(ast_tree_root, nnf_reduce_implications)
 
     return tseitin_ast_tree_root
+
+def dimacs_tseitin_encoding(formula :str, nnf_reduce_implications=True):
+    tseitin_ast_tree_root = tseitin_encoding(formula, nnf_reduce_implications=nnf_reduce_implications)
+    return print_to_dmacs(tseitin_ast_tree_root, should_be_printed=False)
 
 def create_parser():
     parser = ArgumentParser("Accepts input formula in NNF in SMT-LIB format and transforms it to Tseitin encoding in DIMACS format")
@@ -86,7 +103,7 @@ def main():
     args = parser.parse_args()
 
     set_debug_level(warning=args.warning, deubg=args.debug)
-    formula = read_formula(args.input)
+    formula = read_from_input(args.input)
     tseitin_ast_tree_root = tseitin_encoding(formula, nnf_reduce_implications=args.only_left_to_right)
     print_to_dmacs(tseitin_ast_tree_root, args.output)
 

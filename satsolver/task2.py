@@ -7,7 +7,7 @@ from satsolver.task1 import tseitin_encoding
 from satsolver.tseitin_encoding.ast_tree import ASTNaryNode, ASTUnaryNode, ASTVariableNode
 from satsolver.tseitin_encoding.symbols import Symbols
 from satsolver.tseitin_encoding.tseitin_transformation import log_node_info
-from satsolver.utils.file_utils import read_formula
+from satsolver.utils.file_utils import read_from_input
 from satsolver.utils.logging_utils import set_debug_level
 from satsolver.utils.parser_utils import add_parser_debug_levels
 from timeit import default_timer as timer
@@ -80,7 +80,7 @@ def create_parser():
 
 def read_tree(input_file):
     extension = recognize_file_extension(input_file)
-    formula = read_formula(input_file)
+    formula = read_from_input(input_file)
     if extension == Extensions.SMTLIB:
         return tseitin_encoding(formula, nnf_reduce_implications=True)
     elif extension == Extensions.DIMACS:

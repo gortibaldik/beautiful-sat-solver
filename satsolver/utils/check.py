@@ -1,6 +1,7 @@
 from argparse import ArgumentParser
 from logzero import logger
-from satsolver.utils.file_utils import read_formula
+from satsolver.task1 import dimacs_tseitin_encoding
+from satsolver.utils.file_utils import read_from_input
 from satsolver.utils.logging_utils import set_debug_level
 from satsolver.utils.parser_utils import add_parser_debug_levels
 
@@ -31,9 +32,9 @@ def check_if_assignment_satisfies_formula(formula: str, assignment, is_satisfiab
             if symbol in assignment:
                 at_least_one = True
         if not at_least_one:
-            raise RuntimeError("Invalid assignment UNSAT (expected SAT): \n\tformula:{}\n\tassignment:{}".format(line, assignment))
+            raise RuntimeError("Invalid assignment UNSAT (expected SAT): \n\tformula:{}\n\tassignment:{}\n\tsymbols:{}".format(line, sorted(assignment), symbols))
 
-def read_assignment_from_file(file):
+def read_assignment_from_file(file, mapping):
     assignment = set()
     with open(file, 'r') as f:
         for line in f:
@@ -47,11 +48,21 @@ def read_assignment_from_file(file):
                     assignment.add(parts[0])
     return assignment
 
-def read_assignment_from_model(model):
+def read_assignment_from_model(model, mapping):
     assignment = set()
+    if model is None:
+        return assignment
     for var, val in model.items():
         if val:
-            assignment.add(var)
+            if mapping is not None:
+                assignment.add(str(mapping[var]))
+            else:
+                assignment.add(str(var))
+        else:
+            if mapping is not None:
+                assignment.add(str(-mapping[var]))
+            else:
+                assignment.add(str(-int(var)))
     return assignment
 
 def check_assignment(
@@ -64,11 +75,14 @@ def check_assignment(
     is_satisfiable=True
 ):
     set_debug_level(warning=warning, debug=debug)
+    formula = read_from_input(input_file)
+    mapping = None
+    if input_file.endswith(".sat"):
+        formula, mapping = dimacs_tseitin_encoding(formula)
     if read_from_file:
-        assignment = read_assignment_from_file(assignment_source)
+        assignment = read_assignment_from_file(assignment_source, mapping)
     else:
-        assignment = read_assignment_from_model(assignment_source)
-    formula = read_formula(input_file)
+        assignment = read_assignment_from_model(assignment_source, mapping)
     check_if_assignment_satisfies_formula(formula, assignment, is_satisfiable)
     logger.warning("OK")
     return True

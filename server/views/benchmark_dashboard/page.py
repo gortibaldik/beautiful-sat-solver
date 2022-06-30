@@ -63,6 +63,7 @@ def stop_algorithm():
     saved_jobs = get_saved_jobs()
     algorithm_name, benchmark_name = get_post_data()
     if stop_job(algorithm_name, benchmark_name, saved_jobs):
+      logger.info(saved_jobs)
       set_saved_jobs(saved_jobs)
       return jsonify({'result': 'success'})
   except:

@@ -46,6 +46,7 @@ def find_running_benchmark(algo_name, saved_jobs):
       
       if ('interrupted' not in job.meta or not job.meta['interrupted'] ) and not has_job_finished(job):
         benchmark_name = key.split(',')[1]
+        logger.warning(job.meta)
         return {
           "running": True,
           "benchmarkName": benchmark_name
@@ -75,7 +76,8 @@ def stop_job(algorithm_name, benchmark_name, saved_jobs):
   job = rq.job.Job.fetch(saved_jobs[saved_job_index(algorithm_name, benchmark_name)]["job"], connection=redis.Redis.from_url('redis://'))
   if has_job_started(job) and not has_job_finished(job):
     task_runner_stop_job(job, algorithm_name, benchmark_name)
-    saved_jobs[saved_job_index(algorithm_name, benchmark_name)]["interrupted"] = True
+    job.meta["interrupted"] = True
+    job.save_meta()
     return True
   logger.warning("Job cannot be stopped!")
   return False

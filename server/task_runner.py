@@ -3,6 +3,7 @@ import logzero
 import os
 import random
 import rq
+from satsolver.utils.check import check_assignment
 import server.getters
 import time
 
@@ -136,6 +137,13 @@ def benchmark(file, algorithm_name, benchmark_name):
         input_file=filename,
         warning=True
       )
+      check_assignment(
+        input_file=filename,
+        assignment_source=result["model"],
+        warning=True,
+        read_from_file=False,
+        is_satisfiable="uuf" not in filename
+      )
       logzero.loglevel(Config.DEFAULT_LOGLEVEL)
       if result is None:
         break
@@ -147,6 +155,8 @@ def benchmark(file, algorithm_name, benchmark_name):
     avg_cumulative_stats(cumulative_stats)
     logzero.logger.info(cumulative_stats)
   except:
+    if filename is not None:
+      logzero.logger.warning(f"Filename with error: {filename}")
     logzero.logger.warning(traceback.format_exc())
     return None
   
@@ -178,7 +188,7 @@ def run_benchmark(algorithm_name, benchmark_name):
     avg_derivs=result["ndecs"],
     avg_unit_props=result["nunit"],
     avg_time=result["time"]
-    )
+  )
   job.save_meta()
 
   return job
@@ -222,7 +232,11 @@ def task_runner_stop_job(job:rq.job.Job, algorithm_name, benchmark_name):
   try:
     job.refresh()
     storage_file = job.meta["storage_file"]
+    job.meta["interrupted"] = True
+    send_stop_job_command(Redis.from_url('redis://'), job.get_id())
   except:
     storage_file = "ERROR"
-  send_stop_job_command(Redis.from_url('redis://'), job.get_id())
-  create_n_commit_satjob(algorithm_name, benchmark_name, storage_file)
+  create_n_commit_satjob(
+    algorithm_name=algorithm_name,
+    benchmark_name=benchmark_name,
+    storage_file=storage_file)
