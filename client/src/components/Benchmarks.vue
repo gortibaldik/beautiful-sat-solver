@@ -32,6 +32,23 @@
                     {{value}}
                   </option>
                 </select>
+                <div class="text-center" style="margin-top: 10px;">
+                  <!-- Default inline 1-->
+                  <div class="custom-control custom-radio custom-control-inline">
+                    <input type="radio" :name="`radioLogLevel__${index}`" class="custom-control-input" :id="`${index}__LogLevelDebug`" value="DEBUG" v-model="selectedLogLevels[index]">
+                    <label class="custom-control-label" :for="`${index}__LogLevelDebug`">DEBUG</label>
+                  </div>
+                  <!-- Default inline 2-->
+                  <div class="custom-control custom-radio custom-control-inline">
+                    <input type="radio" :name="`radioLogLevel__${index}`" class="custom-control-input" :id="`${index}__LogLevelInfo`" value="INFO" v-model="selectedLogLevels[index]">
+                    <label class="custom-control-label" :for="`${index}__LogLevelInfo`">INFO</label>
+                  </div>
+                  <!-- Default inline 3-->
+                  <div class="custom-control custom-radio custom-control-inline">
+                    <input type="radio" :name="`radioLogLevel__${index}`" class="custom-control-input" :id="`${index}__LogLevelWarning`" value="WARNING" v-model="selectedLogLevels[index]">
+                    <label class="custom-control-label" :for="`${index}__LogLevelWarning`">WARNING</label>
+                  </div>
+                </div>
                 <div class="text-center">
                   <mdb-btn :color="runButtonColor(index)" class="runButton" @click="runBenchmarkClicked(algorithm.name,selected[index][0], index)" :disabled="runButtonIsDisabled(index)">{{runButtonText(index)}}</mdb-btn>
                 </div>

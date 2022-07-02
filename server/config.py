@@ -9,3 +9,4 @@ class Config:
   DB_CONNECTION_STRING="postgresql://postgres:{}@{}:5432/satsolverdb".format(os.getenv("DB_PASSWORD") or "password", os.getenv("DB_IP_ADDRESS"))
   MIGRATIONS_DIR=os.getenv("DB_MIGRATIONS_DIR")
   DEFAULT_LOGLEVEL=logzero.INFO
+  NNF_REDUCE_IMPLICATIONS=True

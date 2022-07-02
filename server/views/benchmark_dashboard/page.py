@@ -14,6 +14,7 @@ from server.views.benchmark_dashboard.utils import (
   get_benchmark_names,
   get_benchmark_progress,
   get_post_data,
+  get_post_debug_level,
   get_running_status,
   retrieve_log_file,
   save_job,
@@ -49,7 +50,8 @@ def start_algorithm():
   try:
     saved_jobs = get_saved_jobs()
     algorithm_name, benchmark_name = get_post_data()
-    job = start_algorithm_on_benchmark(algorithm_name, benchmark_name)
+    debug_level = get_post_debug_level()
+    job = start_algorithm_on_benchmark(algorithm_name, benchmark_name, debug_level)
     save_job(job, algorithm_name, benchmark_name, saved_jobs)
     set_saved_jobs(saved_jobs)
   except:

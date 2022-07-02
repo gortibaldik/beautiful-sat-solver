@@ -78,11 +78,11 @@ def create_parser():
     parser.add_argument("--output_to_stdout", action="store_true")
     return parser
 
-def read_tree(input_file):
+def read_tree(input_file, nnf_reduce_implications=True):
     extension = recognize_file_extension(input_file)
     formula = read_from_input(input_file)
     if extension == Extensions.SMTLIB:
-        return tseitin_encoding(formula, nnf_reduce_implications=True)
+        return tseitin_encoding(formula, nnf_reduce_implications=nnf_reduce_implications)
     elif extension == Extensions.DIMACS:
         return read_dimacs(formula)
 
@@ -143,12 +143,13 @@ def find_model(
     input_file=None,
     warning=False,
     debug=False,
-    output_to_stdout=False
+    output_to_stdout=False,
+    nnf_reduce_implications=True
 ):
     if input_file is None:
         return None
     set_debug_level(warning=warning, debug=debug)
-    ast_tree_root = read_tree(input_file)
+    ast_tree_root = read_tree(input_file, nnf_reduce_implications=nnf_reduce_implications)
     start = timer()
     result, model, ndecs, nunit = dpll(ast_tree_root)
     end = timer()

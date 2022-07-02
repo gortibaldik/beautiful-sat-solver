@@ -66,7 +66,8 @@ export default {
       displayedModalButtonsBenchmarks: [],
       displayedModals: [],
       displayedModalButtonTimeouts: [],
-      modalMessages:[],
+      modalMessages: [],
+      selectedLogLevels: [],
       runningComputation: false,
       runningIndex: null,
       runningBenchmark: null,
@@ -85,6 +86,7 @@ export default {
       let dm = []
       let mm = []
       let dmto = []
+      let sll = []
       for (let i = 0; i < this.algorithms.length; i++) {
         s.push([])
         dmb.push(null)
@@ -92,6 +94,7 @@ export default {
         dm.push(false)
         mm.push("")
         dmto.push(null)
+        sll.push("WARNING")
       }
       this.selected = s
       this.displayedModalButtons = dmb
@@ -99,6 +102,7 @@ export default {
       this.displayedModals = dm
       this.modalMessages = mm
       this.displayedModalButtonTimeouts = dmto
+      this.selectedLogLevels = sll
     },
     getAlgorithms() {
       fetch("http://127.0.0.1:5000/benchmarks")
@@ -170,7 +174,11 @@ export default {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({algorithm: algorithmName, benchmark: selectedBenchmark})
+        body: JSON.stringify({
+          algorithm: algorithmName,
+          benchmark: selectedBenchmark,
+          logLevel: this.selectedLogLevels[selectedIndex]
+        })
       })
         .then(response => response.json())
         .then(function(data) {

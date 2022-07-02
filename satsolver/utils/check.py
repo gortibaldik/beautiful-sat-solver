@@ -53,16 +53,13 @@ def read_assignment_from_model(model, mapping):
     if model is None:
         return assignment
     for var, val in model.items():
-        if val:
-            if mapping is not None:
-                assignment.add(str(mapping[var]))
-            else:
-                assignment.add(str(var))
+        multiplier = 1
+        if not val:
+            multiplier = -1
+        if mapping is not None:
+            assignment.add(str(multiplier * mapping[var]))
         else:
-            if mapping is not None:
-                assignment.add(str(-mapping[var]))
-            else:
-                assignment.add(str(-int(var)))
+            assignment.add(str(multiplier * int(var)))
     return assignment
 
 def check_assignment(
@@ -72,13 +69,20 @@ def check_assignment(
     warning=False,
     debug=False,
     read_from_file=True,
-    is_satisfiable=True
+    is_satisfiable=True,
+    nnf_reduce_implications=False
 ):
+    """
+    Checks whether the assignment provided by assignment_source satisfies the formula
+    provided in input_file
+    
+    input_file should be in .sat (satlib format) form or in .cnf form (dimacs format)
+    """
     set_debug_level(warning=warning, debug=debug)
     formula = read_from_input(input_file)
     mapping = None
     if input_file.endswith(".sat"):
-        formula, mapping = dimacs_tseitin_encoding(formula)
+        formula, mapping = dimacs_tseitin_encoding(formula, nnf_reduce_implications=nnf_reduce_implications)
     if read_from_file:
         assignment = read_assignment_from_file(assignment_source, mapping)
     else:

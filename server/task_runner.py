@@ -108,9 +108,22 @@ def avg_cumulative_stats(cumulative_stats):
   cumulative_stats["ndecs"] /= cumulative_stats["total"]
   cumulative_stats["nunit"] /= cumulative_stats["total"]
   cumulative_stats["time"] /= cumulative_stats["total"]
-  
 
-def benchmark(file, algorithm_name, benchmark_name):
+def log_level_per_debug_level(debug_level):
+  debug, info, warning = False, False, False
+  if debug_level == "INFO":
+    logzero.logger.info("Selected log level: INFO")
+    info = True
+  if debug_level == "DEBUG":
+    logzero.logger.info("Selected log level: DEBUG")
+    debug = True
+  if debug_level == "WARNING":
+    logzero.logger.info("Selected log level: WARNING")
+    warning = True
+  
+  return debug, info, warning
+
+def benchmark(file, algorithm_name, benchmark_name, debug_level):
   try:
     job = rq.get_current_job()
     job.meta["progress"] = 0
@@ -129,20 +142,25 @@ def benchmark(file, algorithm_name, benchmark_name):
 
     total_number_of_benchmarks = len(benchmark_filenames)
     cumulative_stats = init_cumulative_stats()
+    debug, info, warning = log_level_per_debug_level(debug_level)
 
     for i, filename in enumerate(benchmark_filenames):
       job.meta['progress'] = i * 100 / total_number_of_benchmarks
       job.save_meta()
       result = algo_module.find_model(
         input_file=filename,
-        warning=True
+        debug=debug,
+        warning=warning,
+        nnf_reduce_implications=Config.NNF_REDUCE_IMPLICATIONS
       )
       check_assignment(
         input_file=filename,
         assignment_source=result["model"],
-        warning=True,
+        debug=debug,
+        warning=warning,
         read_from_file=False,
-        is_satisfiable="uuf" not in filename
+        is_satisfiable="uuf" not in filename,
+        nnf_reduce_implications=Config.NNF_REDUCE_IMPLICATIONS
       )
       logzero.loglevel(Config.DEFAULT_LOGLEVEL)
       if result is None:
@@ -162,7 +180,7 @@ def benchmark(file, algorithm_name, benchmark_name):
   
   return cumulative_stats
 
-def run_benchmark(algorithm_name, benchmark_name):
+def run_benchmark(algorithm_name, benchmark_name, debug_level):
   job = rq.get_current_job()
   storage_file = ensure_storage_file(algorithm_name, benchmark_name)
   job.meta['finished'] = False
@@ -172,7 +190,7 @@ def run_benchmark(algorithm_name, benchmark_name):
     with redirect_stdout(f):
       with redirect_stderr(f):
         logzero.logfile(storage_file)
-        result = benchmark(f, algorithm_name, benchmark_name)
+        result = benchmark(f, algorithm_name, benchmark_name, debug_level)
         logzero.logfile(None)
   if result is None:
     result = init_cumulative_stats()
@@ -193,9 +211,9 @@ def run_benchmark(algorithm_name, benchmark_name):
 
   return job
 
-def task_runner_start_algorithm_on_benchmark(algorithm_name, benchmark_name):
+def task_runner_start_algorithm_on_benchmark(algorithm_name, benchmark_name, debug_level):
   queue = rq.Queue(os.getenv('REDIS_QUEUE_NAME'), connection=Redis.from_url('redis://'))
-  job = queue.enqueue('server.task_runner.run_benchmark', algorithm_name, benchmark_name)
+  job = queue.enqueue('server.task_runner.run_benchmark', algorithm_name, benchmark_name, debug_level)
   return job
 
 def task_runner_get_benchmark_progress(job):

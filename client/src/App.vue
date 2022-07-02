@@ -5,7 +5,7 @@
       <a class="logo-wrapper"
         ><img alt="" class="img-fluid" src="./assets/logo-mdb-vue-small.png"
       /></a>
-      <mdb-list-group class="list-group-flush">
+      <mdb-list-group :class="`list-group-flush ${sideBarHorizontalClass}`">
         <router-link to="/benchmarks" @click.native="activeItem = 1">
           <mdb-list-group-item
             :action="true"
@@ -72,12 +72,30 @@ export default {
   },
   data() {
     return {
-      activeItem: 1
+      activeItem: 1,
+      sideBarHorizontalClass: ""
     };
   },
   beforeMount() {
     this.activeItem = this.$route.matched[0].props.default.page;
   },
+  methods: {
+    onResize() {
+      if (window.innerWidth > 1199.98) {
+        this.sideBarHorizontalClass = ""
+      } else {
+        this.sideBarHorizontalClass = "list-group-horizontal"
+      }
+    }
+  },
+  created() {
+    window.addEventListener('resize', this.onResize)
+    this.onResize();
+  },
+  beforeDestroy() {
+    window.removeEventListener('resize', this.onResize)
+  },
+
   mixins: [waves]
 };
 </script>
@@ -137,6 +155,14 @@ main {
 
 @media (max-width: 1199.98px) {
   .sidebar-fixed {
+    height: 50px;
+    width: 100%;
+    padding: 0;
+  }
+  .sidebar-fixed .list-group-item {
+    margin-top: 1px;
+  }
+  .sidebar-fixed .logo-wrapper {
     display: none;
   }
   .flexible-content {
@@ -144,6 +170,9 @@ main {
   }
   .flexible-navbar {
     padding-left: 10px;
+  }
+  main {
+    margin-top: 70px;
   }
 }
 </style>

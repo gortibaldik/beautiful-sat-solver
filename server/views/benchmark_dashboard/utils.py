@@ -22,6 +22,10 @@ def get_post_data():
   benchmark_name = post_data.get('benchmark')
   return algorithm_name, benchmark_name
 
+def get_post_debug_level():
+  post_data = request.get_json()
+  return post_data.get('logLevel')
+
 def retrieve_log_file(algorithm_name, benchmark_name, saved_jobs):
   try:
     job_dict = saved_jobs[saved_job_index(algorithm_name, benchmark_name)]
@@ -100,5 +104,5 @@ def get_benchmark_names():
 def get_benchmark_progress(algorithm_name, benchmark_name, saved_jobs):
   return task_runner_get_benchmark_progress(rq.job.Job.fetch(saved_jobs[saved_job_index(algorithm_name, benchmark_name)]["job"], connection=redis.Redis.from_url('redis://')))
 
-def start_algorithm_on_benchmark(algorithm_name, benchmark_name):
-  return task_runner_start_algorithm_on_benchmark(algorithm_name, benchmark_name)
+def start_algorithm_on_benchmark(algorithm_name, benchmark_name, debug_level):
+  return task_runner_start_algorithm_on_benchmark(algorithm_name, benchmark_name, debug_level)
