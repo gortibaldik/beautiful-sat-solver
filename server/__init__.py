@@ -1,3 +1,6 @@
+import logging
+import logzero
+
 from flask import Flask
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
@@ -34,3 +37,10 @@ CORS(app, resources={r'/*': {'origins': '*'}})
 
 from server.models import job
 migrate = Migrate(app, db, directory=Config.MIGRATIONS_DIR)
+
+try:
+  gunicorn_logger = logging.getLogger('gunicorn.error')
+  logger.handlers = gunicorn_logger.handlers
+  logger.setLevel(logzero.loglevel.INFO)
+except:
+  print("gunicorn not available")
