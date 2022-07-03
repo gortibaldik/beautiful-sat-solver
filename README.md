@@ -30,6 +30,12 @@
 | uff75-325  | 3.36  | 2 814.0                   | 1076.0             |
 | uff100-430 | 39.98 | 27 209.3                  | 10 294.0           |
 
+### Run in docker container
+
+1. Build the base image for the docker container `scripts/build_base_image.sh`
+2. Build the infrastructure `docker-compose build --no-cache`
+3. Start containers: `docker-compose up -d`
+
 ### Run development server for both frontend and backend
 
 1. Initialize the database: `scripts/prepare_database.sh "initial_migration"`
@@ -59,10 +65,3 @@
 #### Problems with installation of `psycopg2`
 
 - [stack overflow](https://stackoverflow.com/questions/19843945/psycopg-python-h-no-such-file-or-directory)
-
-#### Run in docker container
-
-1. Build docker container: `docker build -t satsmt:latest .`
-2. Run docker container: `docker run -d --name satsmt-container -e "PORT=8765" -p 8007:8765 satsmt:latest`
-3. When finished your experiments: `docker stop satsmt-container`
-4. Remove container to be able to rebuild: `docker rm satsmt-container`

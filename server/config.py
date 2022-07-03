@@ -10,3 +10,5 @@ class Config:
   MIGRATIONS_DIR=os.getenv("DB_MIGRATIONS_DIR")
   DEFAULT_LOGLEVEL=logzero.INFO
   NNF_REDUCE_IMPLICATIONS=True
+  APP_ENVIRONMENT=os.getenv("APP_ENVIRONMENT")
+  REDIS_HOSTNAME="redis" if os.getenv("APP_ENVIRONMENT") == "PROD" else "localhost"

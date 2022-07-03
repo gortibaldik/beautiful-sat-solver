@@ -8,7 +8,8 @@ from server.config import Config
 from server.utils.redis_utils import (
   get_algorithms_infos,
   get_saved_jobs,
-  set_saved_jobs
+  set_saved_jobs,
+  get_redis_connection,
 )
 from server.views.benchmark_dashboard.utils import (
   get_benchmark_names,
@@ -27,7 +28,7 @@ benchmark_page = Blueprint('benchmark_page', __name__)
 @benchmark_page.route('/', methods=['GET'])
 def algorithm_index():
   try:
-    with redis.Redis.from_url('redis://') as connection:
+    with get_redis_connection() as connection:
       algorithms_infos = get_algorithms_infos(connection)
       saved_jobs = get_saved_jobs(connection)
     # logger.info(algorithms_infos)

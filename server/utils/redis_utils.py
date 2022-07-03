@@ -1,9 +1,14 @@
 import pickle
 import redis
 
+from server.config import Config
+
+def get_redis_connection():
+  return redis.Redis(host=Config.REDIS_HOSTNAME, port=6379)
+
 def get_key(key, connection=None):
   if not connection:
-    with redis.Redis.from_url('redis://') as connection:
+    with get_redis_connection() as connection:
       return pickle.loads(connection.get(key))
   return pickle.loads(connection.get(key))
 
@@ -16,7 +21,7 @@ def get_algorithms_infos(connection=None):
 def set_key(key, value, connection=None):
   svalue = pickle.dumps(value)
   if not connection:
-    with redis.Redis.from_url('redis://') as connection:
+    with get_redis_connection() as connection:
       print(f"{key}: {svalue}")
       connection.set(key, svalue)
   connection.set(key, svalue)
