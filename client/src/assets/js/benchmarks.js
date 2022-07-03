@@ -106,7 +106,7 @@ export default {
       this.selectedLogLevels = sll
     },
     getAlgorithms() {
-      fetch(`${this.serverAddress}/benchmarks`)
+      fetch(`${this.serverAddress}/benchmarks/`)
         .then(response => response.json())
         .then(function(data) {
           if (data["result"] === "failure") {

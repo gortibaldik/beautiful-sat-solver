@@ -118,7 +118,7 @@ export default {
   },
   methods: {
     fetchBenchmarkResults() {
-      fetch(`${this.serverAddress}/results`)
+      fetch(`${this.serverAddress}/results/`)
         .then(response => response.json())
         .then(function(data) {
           let hovered_sorts = {}
