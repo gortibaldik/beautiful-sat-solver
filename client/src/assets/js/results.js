@@ -68,6 +68,7 @@ export default {
       hovered_show_log_file_style: "background-color: #ceefff",
       unhovered_show_log_file_style: "background-color: #e8f7ff",
       compute_graph_style: "background-color: #1452b6",
+      serverAddress: "",
       showBarChart: false,
       barChartData: {
         labels: [],
@@ -111,11 +112,13 @@ export default {
     }
   },
   created() {
+    this.serverAddress = process.env.VUE_APP_SERVER_ADDRESS
+    console.log(`server address: ${this.serverAddress}`)
     this.fetchBenchmarkResults()
   },
   methods: {
     fetchBenchmarkResults() {
-      fetch("http://localhost:5000/results")
+      fetch(`${this.serverAddress}/results`)
         .then(response => response.json())
         .then(function(data) {
           let hovered_sorts = {}
@@ -304,7 +307,7 @@ export default {
       Vue.set(this.displayed_modals, index, false)
     },
     showLogFile(index) {
-      fetch("http://127.0.0.1:5000/results/get_log_file", {
+      fetch(`${this.serverAddress}/results/get_log_file`, {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
@@ -337,7 +340,7 @@ export default {
       this.data.rows.splice(theIndex, 1)
     },
     deleteLogFile(index) {
-      fetch("http://127.0.0.1:5000/results/remove_log_file", {
+      fetch(`${this.serverAddress}/results/remove_log_file`, {
         method: 'POST',
         headers: {
           'Accept': 'application/json',

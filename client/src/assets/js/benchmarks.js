@@ -68,6 +68,7 @@ export default {
       displayedModalButtonTimeouts: [],
       modalMessages: [],
       selectedLogLevels: [],
+      serverAddress: "",
       runningComputation: false,
       runningIndex: null,
       runningBenchmark: null,
@@ -105,7 +106,7 @@ export default {
       this.selectedLogLevels = sll
     },
     getAlgorithms() {
-      fetch("http://127.0.0.1:5000/benchmarks")
+      fetch(`${this.serverAddress}/benchmarks`)
         .then(response => response.json())
         .then(function(data) {
           if (data["result"] === "failure") {
@@ -168,7 +169,7 @@ export default {
         this.clickStopComputation(algorithmName, selectedBenchmark, selectedIndex)
         return
       }
-      fetch("http://127.0.0.1:5000/benchmarks/start", {
+      fetch(`${this.serverAddress}/benchmarks/start`, {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
@@ -200,7 +201,7 @@ export default {
       this.pollingInterval = setInterval(this.pollComputation.bind(this, algorithmName, selectedBenchmark), 1000)
     },
     clickStopComputation(algorithmName, benchmarkName) {
-      fetch("http://127.0.0.1:5000/benchmarks/stop", {
+      fetch(`${this.serverAddress}/benchmarks/stop`, {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
@@ -230,7 +231,7 @@ export default {
     },
     pollComputation(algorithmName, benchmarkName) {
       // here call to the backend 
-      fetch("http://127.0.0.1:5000/benchmarks/progress", {
+      fetch(`${this.serverAddress}/benchmarks/progress`, {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
@@ -273,7 +274,7 @@ export default {
       }
     },
     clickDisplayModalButton(index) {
-      fetch("http://127.0.0.1:5000/benchmarks/result", {
+      fetch(`$${this.serverAddress}/benchmarks/result`, {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
@@ -304,6 +305,8 @@ export default {
     },
   },
   created() {
+    this.serverAddress = process.env.VUE_APP_SERVER_ADDRESS
+    console.log(`server address: ${this.serverAddress}`)
     this.getAlgorithms()
   }
 }
