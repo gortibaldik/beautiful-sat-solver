@@ -14,7 +14,29 @@ services:
         environment:
           - PORT=8765
           - APP_ENVIRONMENT=PROD
+          - REDIS_QUEUE_NAME=satsmt_background_worker_queue
         ports:
             - '5000:8765'
         depends_on:
           - redis
+        volumes:
+          - satsolver_worker_volume:/app/server/result_logs
+    
+    redis-worker:
+      image: redis-worker:latest
+      container_name: redis-worker
+      build:
+        context: .
+        dockerfile: dockerfile.worker
+      environment:
+        - REDIS_QUEUE_NAME=satsmt_background_worker_queue
+      volumes:
+        - satsolver_worker_volume:/app/server/result_logs
+        - satsolver_rq_logs:/app/server/rq_logs/
+      depends_on:
+        - redis
+volumes:
+    satsolver_worker_volume:
+      external: false
+    satsolver_rq_logs:
+      external: false

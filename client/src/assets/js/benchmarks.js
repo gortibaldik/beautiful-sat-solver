@@ -306,7 +306,7 @@ export default {
   },
   created() {
     this.serverAddress = process.env.VUE_APP_SERVER_ADDRESS
-    console.log(`server address: ${this.serverAddress}`)
+    console.log(`server address: "${this.serverAddress}"`)
     this.getAlgorithms()
   }
 }

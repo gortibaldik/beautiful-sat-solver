@@ -1,5 +1,6 @@
 FROM base_image:latest as production
 WORKDIR /app
+COPY --from=frontend_base_image:latest /app/dist /usr/share/nginx/html
 COPY ./server/nginx/default.conf /etc/nginx/conf.d/default.conf
 COPY ./server ./server
 COPY ./satsolver ./satsolver
