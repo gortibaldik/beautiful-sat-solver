@@ -1,19 +1,17 @@
 import traceback
 import logzero
 import os
-import random
 import rq
-from satsolver.utils.check import check_assignment
 import server.getters
-import time
 
 from contextlib import redirect_stdout, redirect_stderr
 from pathlib import Path
-from redis import Redis
 from rq.command import send_stop_job_command
+from satsolver.utils.check import check_assignment
 from server.database import SessionLocal
 from server.config import Config
 from server.models.job import SATJob
+from server.utils.redis_utils import get_redis_connection
 from time import gmtime, strftime
 
 
@@ -198,25 +196,31 @@ def run_benchmark(algorithm_name, benchmark_name, debug_level):
   else:
     job.meta['progress'] = 100.0
     job.meta['finished'] = True
-
-  create_n_commit_satjob(
-    algorithm_name=algorithm_name,
-    benchmark_name=benchmark_name,
-    storage_file=storage_file,
-    avg_derivs=result["ndecs"],
-    avg_unit_props=result["nunit"],
-    avg_time=result["time"]
-  )
   job.save_meta()
+
+  try:
+    create_n_commit_satjob(
+      algorithm_name=algorithm_name,
+      benchmark_name=benchmark_name,
+      storage_file=storage_file,
+      avg_derivs=result["ndecs"],
+      avg_unit_props=result["nunit"],
+      avg_time=result["time"]
+    )
+  except:
+    logzero.logfile(storage_file)
+    logzero.logger.warning("Caught exception when saving results to the database")
+    logzero.logfile(None)
 
   return job
 
 def task_runner_start_algorithm_on_benchmark(algorithm_name, benchmark_name, debug_level):
-  queue = rq.Queue(os.getenv('REDIS_QUEUE_NAME'), connection=Redis.from_url('redis://'))
+  queue = rq.Queue(Config.REDIS_WORKER_QUEUE_NAME, connection=get_redis_connection())
   job = queue.enqueue('server.task_runner.run_benchmark', algorithm_name, benchmark_name, debug_level)
   return job
 
-def task_runner_get_benchmark_progress(job):
+def task_runner_get_benchmark_progress(job_info):
+  job = task_runner_get_job(job_info)
   job.refresh()
   if 'interrupted' in job.meta and job.meta['interrupted']:
     return 100
@@ -247,14 +251,21 @@ def get_job_log_file(job):
   return job.meta["storage_file"]
 
 def task_runner_stop_job(job:rq.job.Job, algorithm_name, benchmark_name):
+  job.refresh()
+  storage_file = job.meta["storage_file"]
+  send_stop_job_command(get_redis_connection(), job.get_id())
+  job.meta["interrupted"] = True
+  job.save_meta()
   try:
-    job.refresh()
-    storage_file = job.meta["storage_file"]
-    job.meta["interrupted"] = True
-    send_stop_job_command(Redis.from_url('redis://'), job.get_id())
+    create_n_commit_satjob(
+      algorithm_name=algorithm_name,
+      benchmark_name=benchmark_name,
+      storage_file=storage_file
+    )
   except:
-    storage_file = "ERROR"
-  create_n_commit_satjob(
-    algorithm_name=algorithm_name,
-    benchmark_name=benchmark_name,
-    storage_file=storage_file)
+    logzero.logfile(storage_file)
+    logzero.logger.warning("Caught exception when saving results to the database")
+    logzero.logfile(None)
+
+def task_runner_get_job(job_info):
+  return rq.job.Job.fetch(job_info["job"], connection=get_redis_connection())

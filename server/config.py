@@ -12,3 +12,4 @@ class Config:
   NNF_REDUCE_IMPLICATIONS=True
   APP_ENVIRONMENT=os.getenv("APP_ENVIRONMENT")
   REDIS_HOSTNAME="redis" if os.getenv("APP_ENVIRONMENT") == "PROD" else "localhost"
+  REDIS_WORKER_QUEUE_NAME=os.getenv("REDIS_QUEUE_NAME")

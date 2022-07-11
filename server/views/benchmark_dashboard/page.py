@@ -77,8 +77,7 @@ def stop_algorithm():
 def get_progress():
   try:
     algorithm_name, benchmark_name = get_post_data()
-    saved_jobs = get_saved_jobs()
-    progress = get_benchmark_progress(algorithm_name, benchmark_name, saved_jobs)
+    progress = get_benchmark_progress(algorithm_name, benchmark_name)
   except:
     logger.warning(traceback.format_exc())
     return jsonify({'result': 'failure'})
@@ -88,8 +87,8 @@ def get_progress():
 def get_result():
   try:
     algorithm_name, benchmark_name = get_post_data()
-    saved_jobs = get_saved_jobs()
-    return jsonify({ "result" : retrieve_log_file(algorithm_name, benchmark_name, saved_jobs) })
+    log_file = retrieve_log_file(algorithm_name, benchmark_name)
+    return jsonify({ "result" : log_file })
   except:
     logger.warning(traceback.format_exc())
     return jsonify({ 'result': 'failure'})
