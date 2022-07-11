@@ -274,7 +274,7 @@ export default {
       }
     },
     clickDisplayModalButton(index) {
-      fetch(`$${this.serverAddress}/benchmarks/result`, {
+      fetch(`${this.serverAddress}/benchmarks/result`, {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
