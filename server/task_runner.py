@@ -209,7 +209,7 @@ def run_benchmark(algorithm_name, benchmark_name, debug_level):
     )
   except:
     logzero.logfile(storage_file)
-    logzero.logger.warning("Caught exception when saving results to the database")
+    logzero.logger.warning(traceback.format_exc())
     logzero.logfile(None)
 
   return job

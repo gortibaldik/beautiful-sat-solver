@@ -33,8 +33,8 @@
 ### Run in docker container
 
 1. Build the base image for the docker container `scripts/build_base_image.sh`
-2. Build the infrastructure `docker-compose build --no-cache`
-3. Start containers: `docker-compose up -d`
+2. Build the frontend image for the docker container `scripts/build_frontend.sh`
+3. Start containers: `docker-compose up -d --force-recreate --build`
 
 ### Run development server for both frontend and backend
 
