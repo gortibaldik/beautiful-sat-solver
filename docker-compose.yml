@@ -41,6 +41,7 @@ services:
     env_file:
       - dockerfiles/common_vars.env
     volumes:
+      - ./satsolver/:/app/satsolver/
       - ./server/:/app/server/
       - satsolver_logs:/app/logs/
     depends_on:
