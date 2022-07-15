@@ -215,7 +215,11 @@ def run_benchmark(algorithm_name, benchmark_name, debug_level):
   return job
 
 def task_runner_start_algorithm_on_benchmark(algorithm_name, benchmark_name, debug_level):
-  queue = rq.Queue(Config.REDIS_WORKER_QUEUE_NAME, connection=get_redis_connection())
+  queue = rq.Queue(
+    Config.REDIS_WORKER_QUEUE_NAME,
+    connection=get_redis_connection(),
+    default_timeout=3600
+   )
   job = queue.enqueue('server.task_runner.run_benchmark', algorithm_name, benchmark_name, debug_level)
   return job
 

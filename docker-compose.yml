@@ -28,6 +28,7 @@ services:
       - prepare_satdb_on_first_run
     volumes:
       - ./server/:/app/server/
+      - satsolver_logs:/app/logs/
   
   redis-worker:
     image: redis-worker:latest
@@ -41,6 +42,7 @@ services:
       - dockerfiles/common_vars.env
     volumes:
       - ./server/:/app/server/
+      - satsolver_logs:/app/logs/
     depends_on:
       - redis
   
@@ -70,5 +72,7 @@ services:
       - satsolver_db_volume:/var/lib/postgresql/data
 volumes:
   satsolver_db_volume:
+    external: false
+  satsolver_logs:
     external: false
 
