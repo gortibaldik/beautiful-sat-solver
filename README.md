@@ -13,17 +13,17 @@
 -------------------
 
 ## Task 1: Tseitin Encoding and DIMACS format
-- [executable](task1.py)
-- [sources](tseitin_encoding/)
+- [executable](satsolver/task1.py)
+- [sources](satsolver/tseitin_encoding/)
 
 ----------------------
 
 ## Task 2: DPLL
-- [executable](task2.py)
-- [sources](dpll/)
+- [executable](satsolver/task2.py)
+- [sources](satsolver/dpll/)
 
 ### Results
-- the DPLL solver was run on [randomly selected](dpll/task2_filter.py) tenth of all the examples from each test split (e.g on tenth of `uf50-218`, on tenth of `uuf50-218` etc.), with the exception of 100-430 where it was a 1 / 100th of the test set
+- the DPLL solver was run on [randomly selected](satsolver/benchmark_preparation/filter_benchmark_files.py) tenth of all the examples from each test split (e.g on tenth of `uf50-218`, on tenth of `uuf50-218` etc.), with the exception of 100-430 where it was a 1 / 100th of the test set
 - reported times are averages over all the runs
 - I stopped the experiment on 100 variables, 430 clauses test set, because of too high computational requirements
 
