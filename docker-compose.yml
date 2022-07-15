@@ -27,6 +27,7 @@ services:
       - satdb
       - prepare_satdb_on_first_run
     volumes:
+      - ./satsolver/:/app/satsolver/
       - ./server/:/app/server/
       - satsolver_logs:/app/logs/
   
