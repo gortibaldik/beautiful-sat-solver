@@ -1,1 +1,1 @@
-docker exec -it postgres-satsolver bash
+docker exec -it satsolver_db bash

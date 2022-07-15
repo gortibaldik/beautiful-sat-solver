@@ -11,6 +11,8 @@ from server.config import Config
 from server.database import Base
 
 # configuration
+logzero.logfile("_defaultLogfile")
+logzero.loglevel(logzero.INFO)
 DEBUG = True
 
 # instantiate the app
@@ -37,10 +39,3 @@ CORS(app, resources={r'/*': {'origins': '*'}})
 
 from server.models import job
 migrate = Migrate(app, db, directory=Config.MIGRATIONS_DIR)
-
-try:
-  gunicorn_logger = logging.getLogger('gunicorn.error')
-  logger.handlers = gunicorn_logger.handlers
-  logger.setLevel(logzero.loglevel.INFO)
-except:
-  print("gunicorn not available")

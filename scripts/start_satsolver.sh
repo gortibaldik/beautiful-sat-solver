@@ -1,1 +1,0 @@
-docker run -d --name satsolver --rm -e "PORT=8765" -p 8000:8765 satsolver:latest

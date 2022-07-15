@@ -1,5 +1,4 @@
 import asyncio
-import redis
 
 from satsolver.benchmark_preparation.benchmark_downloader import download_all_not_downloaded_benchmarks
 from server.config import Config

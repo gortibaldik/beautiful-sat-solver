@@ -1,1 +1,1 @@
-docker stop postgres-satsolver
+docker stop satsolver_db_dev

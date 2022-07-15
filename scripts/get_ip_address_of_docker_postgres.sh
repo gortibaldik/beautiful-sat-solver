@@ -1,1 +1,0 @@
-docker inspect postgres-satsolver | grep "IPAddress\"" | head -n 1 | cut -d ':' -f 2 | sed 's/[\", ]//g'

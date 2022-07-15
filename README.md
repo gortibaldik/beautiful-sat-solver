@@ -17,15 +17,15 @@
 
 -------------------------
 
-### Run in docker container
+### Run release in docker container
 
-1. Start containers: `docker-compose up -d --force-recreate --build`
+1. Start containers: `docker compose up -d --force-recreate --build`
+2. Stop containers: `docker compose stop`
 
-### Run development server for both frontend and backend
+### Run development server for both frontend and backend in docker container
 
-1. Initialize the database: `scripts/prepare_database.sh "initial_migration"`
-2. In one terminal window: Run flask backend server and redis queue: `./run_backend.sh`
-3. In another terminal window: Run npm frontend dev server: `./run_frontend.sh`
+1. Start containers:`docker compose -f docker-compose.dev.yml --project-name satsolver_dev up -d --force-recreate --build`
+2. Stop containers: `docker compose -f docker-compose.dev.yml --project-name satsolver_dev stop`
 
 -----
 

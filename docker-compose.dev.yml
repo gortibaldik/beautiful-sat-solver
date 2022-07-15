@@ -1,0 +1,95 @@
+version: '3'
+services:
+  redis:
+    image: redis/redis-stack:latest
+    container_name: redis-stack-server_dev
+    ports:
+      - '6379:6379'
+
+  flask-backend:
+    image: satsolver_backend_dev:latest
+    container_name: satsolver_backend_dev
+    build:
+      context: .
+      dockerfile: dockerfiles/dockerfile.main.dev
+    restart: always
+    environment:
+      - PORT=8765
+      - FLASK_ENV=development
+      - FLASK_APP=server:app
+      - FLASK_RUN_PORT=5000
+      - REDIS_QUEUE_NAME=satsmt_background_worker_queue
+    env_file:
+      - dockerfiles/common_vars.env
+    ports:
+        - '5000:8765'
+    depends_on:
+      - redis
+      - satdb
+      - prepare_satdb_on_first_run
+    volumes:
+      - ./server/:/app/server/
+      - ./satsolver/:/app/satsolver/
+      - satsolver_logs_dev:/app/logs/
+  
+  npm-frontend:
+    image: npm_frontend_dev:latest
+    container_name: npm_frontend_dev
+    build:
+      context: .
+      dockerfile: dockerfiles/dockerfile.frontend.dev
+    restart: always
+    environment:
+      - PORT=8765
+    ports:
+      - '8080:8765'
+    volumes:
+      - ./client/:/app/client
+  
+  redis-worker:
+    image: redis-worker:latest
+    container_name: redis-worker_dev
+    build:
+      context: .
+      dockerfile: dockerfiles/dockerfile.worker
+    environment:
+      - REDIS_QUEUE_NAME=satsmt_background_worker_queue
+    env_file:
+      - dockerfiles/common_vars.env
+    volumes:
+      - ./satsolver/:/app/satsolver/
+      - ./server/:/app/server/
+      - satsolver_logs_dev:/app/logs/
+    depends_on:
+      - redis
+  
+  prepare_satdb_on_first_run:
+    build:
+      context: .
+      dockerfile: dockerfiles/dockerfile.prepare_db
+    environment:
+      - FLASK_APP=server:app
+      - MIGRATION_NAME=initial_migration
+    env_file:
+      - dockerfiles/common_vars.env
+    depends_on:
+      - satdb
+    volumes:
+      - ./server/:/app/server/
+
+  satdb:
+    image: postgres:latest
+    container_name: satsolver_db_dev
+    environment:
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=satsolverdb
+    ports:
+      - 5432:5432
+    volumes:
+      - satsolver_db_volume_dev:/var/lib/postgresql/data
+volumes:
+  satsolver_db_volume_dev:
+    external: false
+  satsolver_logs_dev:
+    external: false
+
