@@ -4,6 +4,8 @@
 - [executable](task1.py)
 - [sources](tseitin_encoding/)
 
+----------------------
+
 ## Task 2: DPLL
 - [executable](task2.py)
 - [sources](dpll/)
@@ -13,28 +15,11 @@
 - reported times are averages over all the runs
 - I stopped the experiment on 100 variables, 430 clauses test set, because of too high computational requirements
 
-#### SAT
-
-| Test set  | Time  | Unit Propagated Variables | Decision Variables |
-|-----------|-------|---------------------------|--------------------|
-| uf20-91   | 0.01  | 24.3                      | 9.5                |
-| uf50-218  | 0.16  | 210.9                     | 82.9               |
-| uf75-325  | 0.39  | 380.4                     | 130.2              |
-| uf100-430 | 13.59 | 10 843.4                  | 3 687.6            |
-
-#### UNSAT
-
-| Test set   | Time  | Unit Propagated Variables | Decision Variables |
-|------------|-------|---------------------------|--------------------|
-| uff50-218  | 0.42  | 428.3                     | 190.9              |
-| uff75-325  | 3.36  | 2 814.0                   | 1076.0             |
-| uff100-430 | 39.98 | 27 209.3                  | 10 294.0           |
+-------------------------
 
 ### Run in docker container
 
-1. Build the base image for the docker container `scripts/build_base_image.sh`
-2. Build the frontend image for the docker container `scripts/build_frontend.sh`
-3. Start containers: `docker-compose up -d --force-recreate --build`
+1. Start containers: `docker-compose up -d --force-recreate --build`
 
 ### Run development server for both frontend and backend
 
@@ -61,6 +46,8 @@
 - [sql alchemy 4](https://www.learndatasci.com/tutorials/using-databases-python-postgres-sqlalchemy-and-alembic/)
 - [postgres connection string](https://stackoverflow.com/questions/3582552/what-is-the-format-for-the-postgresql-connection-string-url)
 - [postgres pooling](https://stackoverflow.blog/2020/10/14/improve-database-performance-with-connection-pooling/)
+- [publishing docker images to docker repositories](https://docs.docker.com/docker-hub/repos/#pushing-a-docker-container-image-to-docker-hub)
+- [publishing docker images with github actions](https://docs.github.com/en/actions/publishing-packages/publishing-docker-images)
 
 #### Problems with installation of `psycopg2`
 

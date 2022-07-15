@@ -1,4 +1,4 @@
-FROM base_image:latest as production
+FROM gortibaldik/satsolver_base:0.11 as production
 WORKDIR /app
 COPY ./server ./server
 COPY ./satsolver ./satsolver
