@@ -1,5 +1,17 @@
 # Programming Tasks for NAIL094 - Decision Procedures And Verification
 
+### Run release in docker container
+
+1. Start containers: `docker compose up -d --force-recreate --build`
+2. Stop containers: `docker compose stop`
+
+### Run development server for both frontend and backend in docker container
+
+1. Start containers:`docker compose -f docker-compose.dev.yml --project-name satsolver_dev up -d --force-recreate --build`
+2. Stop containers: `docker compose -f docker-compose.dev.yml --project-name satsolver_dev stop`
+
+-------------------
+
 ## Task 1: Tseitin Encoding and DIMACS format
 - [executable](task1.py)
 - [sources](tseitin_encoding/)
@@ -14,18 +26,6 @@
 - the DPLL solver was run on [randomly selected](dpll/task2_filter.py) tenth of all the examples from each test split (e.g on tenth of `uf50-218`, on tenth of `uuf50-218` etc.), with the exception of 100-430 where it was a 1 / 100th of the test set
 - reported times are averages over all the runs
 - I stopped the experiment on 100 variables, 430 clauses test set, because of too high computational requirements
-
--------------------------
-
-### Run release in docker container
-
-1. Start containers: `docker compose up -d --force-recreate --build`
-2. Stop containers: `docker compose stop`
-
-### Run development server for both frontend and backend in docker container
-
-1. Start containers:`docker compose -f docker-compose.dev.yml --project-name satsolver_dev up -d --force-recreate --build`
-2. Stop containers: `docker compose -f docker-compose.dev.yml --project-name satsolver_dev stop`
 
 -----
 
