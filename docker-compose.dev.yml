@@ -42,7 +42,7 @@ services:
     ports:
       - '8000:8080'
     volumes:
-      - ./client/:/app/client
+      - ./client/src:/app/src
   
   redis-worker:
     image: redis-worker:latest

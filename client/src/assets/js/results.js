@@ -325,7 +325,7 @@ export default {
     },
     setShowLogFileHovered(index) {
       Vue.set(this.show_log_file_styles, index, this.hovered_show_log_file_style)
-    },
+    }, 
     unsetShowLogFileHovered(index) {
       Vue.set(this.show_log_file_styles, index, this.unhovered_show_log_file_style)
     },
@@ -335,6 +335,8 @@ export default {
       for (let i = 0; i < this.data.rows.length; i++) {
         if (this.data.rows[i]["Log File"] === log_file) {
           theIndex = i
+        } else if (theIndex != -1) {
+          this.data.rows[i].originalIndex = i - 1
         }
       }
       this.data.rows.splice(theIndex, 1)

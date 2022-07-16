@@ -7,8 +7,8 @@
 
 ### Run development server for both frontend and backend in docker container
 
-1. Start containers:`docker compose -f docker-compose.dev.yml --project-name satsolver_dev up -d --force-recreate --build`
-2. Stop containers: `docker compose -f docker-compose.dev.yml --project-name satsolver_dev stop`
+1. Start containers:`scripts/start_docker_dev.sh`
+2. Stop containers: `scripts/stop_docker_dev.sh`
 
 -------------------
 
