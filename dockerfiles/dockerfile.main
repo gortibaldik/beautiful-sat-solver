@@ -4,5 +4,6 @@ COPY --from=gortibaldik/satsolver_frontend_base:0.1 /app/dist /usr/share/nginx/h
 COPY ./server/nginx/default.conf /etc/nginx/conf.d/default.conf
 COPY ./satsolver ./satsolver
 COPY ./scripts ./scripts
+COPY ./server ./server
  
 CMD scripts/_docker_main.sh

@@ -28,7 +28,7 @@ services:
       - prepare_satdb_on_first_run
     volumes:
       - satsolver_benchmark_downloads:/app/benchmarks/
-      - ./server/:/app/server/
+      - satsolver_db_migrations:/app/server/database/migrations
       - satsolver_logs:/app/logs/
   
   redis-worker:
@@ -44,7 +44,7 @@ services:
       - dockerfiles/common_vars.env
     volumes:
       - satsolver_benchmark_downloads:/app/benchmarks/
-      - ./server/:/app/server/
+      - satsolver_db_migrations:/app/server/database/migrations
       - satsolver_logs:/app/logs/
     depends_on:
       - redis
@@ -61,7 +61,7 @@ services:
     depends_on:
       - satdb
     volumes:
-      - ./server/:/app/server/
+      - satsolver_db_migrations:/app/server/database/migrations
 
   satdb:
     image: postgres:latest
@@ -79,5 +79,7 @@ volumes:
   satsolver_logs:
     external: false
   satsolver_benchmark_downloads:
+    external: false
+  satsolver_db_migrations:
     external: false
 

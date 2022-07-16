@@ -2,5 +2,6 @@ FROM gortibaldik/satsolver_base:0.11 as production
 WORKDIR /app
 COPY ./satsolver ./satsolver
 COPY ./scripts ./scripts
+COPY ./server ./server
  
 CMD scripts/_docker_prepare_db.sh
