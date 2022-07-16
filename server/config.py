@@ -2,7 +2,7 @@ import logzero
 import os
 
 class Config:
-  SATSMT_BENCHMARK_ROOT="satsolver/benchmarks/"
+  SATSMT_BENCHMARK_ROOT="satsolver/benchmarks/" if os.getenv("APP_ENVIRONMENT") != "PROD" else "benchmarks/"
   BENCHMARKED_RESULTS_AVAILABILITY=35000 # milliseconds
   SATSMT_RESULT_LOGS="logs/result_logs/"
   DUMMY_RUNTIME=5 # seconds

@@ -181,6 +181,7 @@ def benchmark(file, algorithm_name, benchmark_name, debug_level):
 def run_benchmark(algorithm_name, benchmark_name, debug_level):
   job = rq.get_current_job()
   storage_file = ensure_storage_file(algorithm_name, benchmark_name)
+  logzero.logger.info(f"Selected storage file: {storage_file}")
   job.meta['finished'] = False
   job.meta['storage_file'] = storage_file
   job.save_meta()

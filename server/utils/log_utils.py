@@ -35,6 +35,7 @@ def get_log_file_content(log_file_name):
 def remove_log_file(log_file):
   at_least_one = False
   if not is_correct_log_file(log_file):
+    logger.warning(f"incorrect log file: {log_file}")
     return
   for row in SATJob.query.filter_by(log_file=log_file):
     at_least_one = True

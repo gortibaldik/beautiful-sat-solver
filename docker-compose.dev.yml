@@ -39,10 +39,8 @@ services:
       context: .
       dockerfile: dockerfiles/dockerfile.frontend.dev
     restart: always
-    environment:
-      - PORT=8765
     ports:
-      - '8080:8765'
+      - '8000:8080'
     volumes:
       - ./client/:/app/client
   

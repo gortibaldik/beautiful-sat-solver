@@ -27,7 +27,7 @@ services:
       - satdb
       - prepare_satdb_on_first_run
     volumes:
-      - ./satsolver/:/app/satsolver/
+      - satsolver_benchmark_downloads:/app/benchmarks/
       - ./server/:/app/server/
       - satsolver_logs:/app/logs/
   
@@ -39,10 +39,11 @@ services:
       dockerfile: dockerfiles/dockerfile.worker
     environment:
       - REDIS_QUEUE_NAME=satsmt_background_worker_queue
+      - APP_ENVIRONMENT=PROD
     env_file:
       - dockerfiles/common_vars.env
     volumes:
-      - ./satsolver/:/app/satsolver/
+      - satsolver_benchmark_downloads:/app/benchmarks/
       - ./server/:/app/server/
       - satsolver_logs:/app/logs/
     depends_on:
@@ -76,5 +77,7 @@ volumes:
   satsolver_db_volume:
     external: false
   satsolver_logs:
+    external: false
+  satsolver_benchmark_downloads:
     external: false
 
