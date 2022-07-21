@@ -3,6 +3,7 @@ WORKDIR /app
 ENV HOST=0.0.0.0
 COPY client/package*.json .
 RUN npm install
+COPY client/.env* .
  
 CMD echo "starting serve" && \
     npm run serve
