@@ -1,5 +1,1 @@
-
-# remove all compiled python
-find . -name "*.pyc" -delete
-
-docker build --no-cache -t frontend_base_image:latest -f dockerfiles/dockerfile.frontend .
+docker build --no-cache -t gortibaldik/satsolver_frontend_base:0.12 -f dockerfiles/dockerfile.frontend .

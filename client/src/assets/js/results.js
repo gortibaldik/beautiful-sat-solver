@@ -69,12 +69,13 @@ export default {
       unhovered_show_log_file_style: "background-color: #e8f7ff",
       compute_graph_style: "background-color: #1452b6",
       serverAddress: "",
+      textWrapClass: "text-nowrap",
       showBarChart: false,
       barChartData: {
         labels: [],
         datasets: [{
           label: '',
-          data: [12, 19, 3, 5, 2, 3],
+          data: [],
           backgroundColor: [],
           borderColor: [],
           borderWidth: 1,
@@ -112,6 +113,8 @@ export default {
     }
   },
   created() {
+    window.addEventListener('resize', this.onResize)
+    this.onResize()
     this.serverAddress = process.env.VUE_APP_SERVER_ADDRESS
     console.log(`server address: ${this.serverAddress}`)
     this.fetchBenchmarkResults()
@@ -133,11 +136,11 @@ export default {
           let displayed_modals = []
           let modal_messages = []
           for (let i = 0; i < data.columns.length; i++) {
-            hovered_sorts[data.columns[i].field] = "color: #e65100;"
-            hovered_headers[data.columns[i].field] = this.unhovered_style
-            hovered_filters[data.columns[i].field] = this.unhovered_style
-            headers_sorted[data.columns[i].field] = "none"
-            selected_values[data.columns[i].field] = "Show all"
+            hovered_sorts[data.columns[i].label] = "color: #e65100;"
+            hovered_headers[data.columns[i].label] = this.unhovered_style
+            hovered_filters[data.columns[i].label] = this.unhovered_style
+            headers_sorted[data.columns[i].label] = "none"
+            selected_values[data.columns[i].label] = "Show all"
 
             // each column has a special "categorized"
             // attribute which shows whether there should
@@ -153,7 +156,7 @@ export default {
           for (let i = 0; i < data.rows.length; i++) {
             for (let j = 0; j < data.columns.length; j++) {
               if (data.columns[j].categorized) {
-                uniques[j].add(data.rows[i][data.columns[j].field])
+                uniques[j].add(data.rows[i][data.columns[j].label])
               }
             }
             data.rows[i].checked = "is_unchecked"
@@ -202,7 +205,7 @@ export default {
       for (let i = 0; i < this.data.rows.length; i++) {
         let equal_on_everything = true
         for (let j = 0; j < this.data.columns.length; j++) {
-          if (this.selected_values[this.data.columns[j].field] != "Show all" && this.data.rows[i][this.data.columns[j].field] != this.selected_values[this.data.columns[j].field]) {
+          if (this.selected_values[this.data.columns[j].label] != "Show all" && this.data.rows[i][this.data.columns[j].label] != this.selected_values[this.data.columns[j].label]) {
             equal_on_everything = false
             break
           }
@@ -274,7 +277,7 @@ export default {
         let k = 0
         for (let j = 0; j < this.data.columns.length; j++) {
           if (this.data.columns[j].plotted) {
-            barChartData.datasets[k].data.push(Math.floor(checked[i][this.data.columns[j].field]))
+            barChartData.datasets[k].data.push(Math.floor(checked[i][this.data.columns[j].label]))
             barChartData.datasets[k].backgroundColor.push(this.chartColors[k])
             barChartData.datasets[k].borderColor.push(this.chartBorderColors[k])
 
@@ -290,6 +293,20 @@ export default {
     getViewportHeight() {
       const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0)
       return vh
+    },
+    getViewportWidth() {
+      return Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+    },
+    onResize() {
+      if (this.getViewportWidth() < 1200) {
+        this.textWrapClass = ""
+      } else {
+        this.textWrapClass = "text-nowrap"
+      }
+      console.log(` ${this.textWrapClass}, ${this.getViewportWidth()}`)
+    },
+    isFloat(n) {
+      return n === +n && n !== (n|0);
     },
     calculateTableHeightInPx() {
       return 200 + this.filtered_rows.length * 70

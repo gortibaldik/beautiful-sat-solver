@@ -39,8 +39,8 @@
       </mdb-list-group>
     </div>
     <!-- /Sidebar  -->
-    <main>
-      <div class="mt-5 p-5">
+    <main class="main-padding">
+      <div class="mt-5">
         <router-view></router-view>
       </div>
       <ftr color="primary-color-dark" class="text-center font-small darken-2">
@@ -115,6 +115,11 @@ main {
   background-color: #ededee;
 }
 
+.main-padding {
+  padding-left: 20px;
+  padding-right: 5px;
+}
+
 .flexible-content {
   transition: padding-left 0.3s;
   padding-left: 270px;
@@ -173,6 +178,10 @@ main {
   }
   main {
     margin-top: 70px;
+  }
+  .main-padding {
+    padding-top: 10px;
+    padding-left: 0px;
   }
 }
 </style>
