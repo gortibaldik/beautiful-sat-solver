@@ -26,6 +26,16 @@
             />Results</mdb-list-group-item
           >
         </router-link>
+        <router-link to="/redis_logs" @click.native="activeItem = 3">
+          <mdb-list-group-item
+            :action="true"
+            :class="activeItem === 3 && 'active'"
+            ><mdb-icon
+              icon="clipboard-list"
+              class="mr-3"
+            />Redis Logs</mdb-list-group-item
+          >
+        </router-link>
         <router-link to="/404" @click.native="activeItem = 5">
           <mdb-list-group-item
             :action="true"
