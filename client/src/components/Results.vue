@@ -125,15 +125,21 @@
         <mdb-card cascade narrow class="mt-5 border border-0 border-dark">
           <mdb-view class="gradient-card-header blue darken-2" style="padding: 0;">
             <ul class="list-inline" style="margin-bottom: 0px;">
-              <li class="list-inline-item" style="padding-top:13px; height: 50px;">
+              <li class="graph-li-class list-inline-item">
                 <h4 class="h4-responsive text-white">Graph</h4>
               </li>
-              <li class="list-inline-item"
-                :style="`float: right; ${compute_graph_style}; padding-top:13px; height: 50px; padding-right: 5px; padding-left: 5px`"
-                @mouseenter="compute_graph_style=hovered_compute_graph_style"
-                @mouseleave="compute_graph_style=unhovered_compute_graph_style"
+              <li :class="`header-button-style list-inline-item ${compute_graph_class}`"
+                @mouseenter="compute_graph_class=hovered_compute_graph_class"
+                @mouseleave="compute_graph_class=unhovered_compute_graph_class"
                 @click="toggleGraphCreation()">
                 <h4 class="h4-responsive text-white">Compute from Selected</h4>
+              </li>
+              <li :class="`header-button-style list-inline-item ${download_csv_class}`"
+                @mouseenter="download_csv_class=hovered_download_csv_class"
+                @mouseleave="download_csv_class=unhovered_download_csv_class"
+                @click="downloadCsv()"
+              >
+                <h4 class="h4-responsive text-white">Download .csv</h4>
               </li>
             </ul>
           </mdb-view>

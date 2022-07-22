@@ -40,9 +40,33 @@ td {
   overflow: hidden;
 }
 
+.header-button-style {
+  float: right;
+  padding-top:13px;
+  padding-left: 5px;
+  padding-right: 5px;
+  height: 50px;
+  border-style: solid;
+  border-color: black;
+  border-width: thin;
+}
+
+.dark-blue-background {
+  background-color: #1452b6;
+}
+
+.light-blue-background {
+  background-color: #5595fb
+}
+
 .results-row {
   margin-right: 5px;
   margin-left: 5px;
+}
+
+.graph-li-class {
+  padding-top:13px;
+  height: 50px;
 }
 
 /* CSS styles for checkboxes: https://www.sliderrevolution.com/resources/css-checkbox/

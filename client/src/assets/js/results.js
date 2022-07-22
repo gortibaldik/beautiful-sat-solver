@@ -63,11 +63,14 @@ export default {
       button_unhovered_style: "background-color: #f9b74c",
       hovered_style: 'background-color: #f57f17',
       select_all_style: "background-color: #f9b74c",
-      unhovered_compute_graph_style: "background-color: #1452b6",
-      hovered_compute_graph_style: "background-color: #5595fb",
+      unhovered_compute_graph_class: "dark-blue-background",
+      hovered_compute_graph_class: "light-blue-background",
+      unhovered_download_csv_class: "dark-blue-background",
+      hovered_download_csv_class: "light-blue-background",
       hovered_show_log_file_style: "background-color: #ceefff",
       unhovered_show_log_file_style: "background-color: #e8f7ff",
-      compute_graph_style: "background-color: #1452b6",
+      compute_graph_class: "dark-blue-background",
+      download_csv_class: "dark-blue-background",
       serverAddress: "",
       textWrapClass: "text-nowrap",
       showBarChart: false,
@@ -289,6 +292,51 @@ export default {
       this.showBarChart = true
       this.barChartHeight = 80 + checked.length * 50
       console.log(this.barChartHeight)
+    },
+    downloadCsv() {
+      // write headers
+      let csvContent = ""
+      for (let j = 0; j < this.data.columns.length; j++) {
+        csvContent += this.data.columns[j].label
+        if (j < this.data.columns.length - 1) {
+          csvContent += ", "
+        } else {
+          csvContent += "\n"
+        }
+      }
+
+      // select checked rows
+      let checked = []
+      for (let i = 0; i < this.filtered_rows.length; i++) {
+        if (this.filtered_rows[i].checked == "is_checked") {
+          checked.push(this.filtered_rows[i])
+        }
+      }
+
+      // write data
+      for (let i = 0; i < checked.length; i++) {
+        for (let j = 0; j < this.data.columns.length; j++) {
+          let content = String(checked[i][this.data.columns[j].label])
+          if (content.includes(",")) {
+            content = `"${content}"`
+          }
+          csvContent += content
+          if (j < this.data.columns.length - 1) {
+            csvContent += ", "
+          } else {
+            csvContent += "\n"
+          }
+        }
+      }
+
+      // download action
+      let hiddenElement = document.createElement('a');  
+      hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csvContent);  
+      hiddenElement.target = '_blank';  
+        
+      //provide the name for the CSV file to be downloaded  
+      hiddenElement.download = 'benchmark_data.csv';  
+      hiddenElement.click();  
     },
     getViewportHeight() {
       const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0)
