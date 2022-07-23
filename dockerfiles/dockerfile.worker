@@ -3,5 +3,5 @@ WORKDIR /app
 COPY ./server ./server
 COPY ./satsolver ./satsolver
  
-CMD if [ ! -d "logs/rq_logs" ]; then mkdir -p logs/rq_logs; fi && \
-    rq worker $REDIS_QUEUE_NAME --url redis://redis:6379 > "logs/rq_logs/rq_log_file" 2> "logs/rq_logs/rq_error_log_file"
+CMD if [ ! -d "$SATSOLVER_REDIS_LOGS" ]; then mkdir -p $SATSOLVER_REDIS_LOGS; fi && \
+    rq worker $REDIS_QUEUE_NAME --url redis://redis:6379 > "${SATSOLVER_REDIS_LOGS}${SATSOLVER_REDIS_STD_FILENAME}" 2> "${SATSOLVER_REDIS_LOGS}${SATSOLVER_REDIS_ERROR_FILENAME}"

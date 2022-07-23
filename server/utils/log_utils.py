@@ -12,10 +12,17 @@ def is_correct_log_file(log_file):
 
   return os.path.exists(os.path.join(log_dir, filename))
 
-def read_log_file(log_file):
+def is_correct_redis_log_file(log_file):
+  log_dir = Config.SATSOLVER_REDIS_LOGS
+  filename = os.path.basename(log_file)
+
+  return os.path.exists(os.path.join(log_dir, filename))
+
+def read_log_file(log_file, redis_log_file=False):
   logs = "<code>"
-  if not is_correct_log_file(log_file):
-    logs = "<strong>Incorrect filename returned</strong></br>"
+  if (not redis_log_file and not is_correct_log_file(log_file)) or \
+    (redis_log_file and not is_correct_redis_log_file(log_file)):
+    logs = f"<strong>Incorrect filename returned ({log_file})</strong></br>"
   else:
     with open(log_file, 'r') as l:
       for line in l:
@@ -26,9 +33,9 @@ def read_log_file(log_file):
 
   return logs
 
-def get_log_file_content(log_file_name):
+def get_log_file_content(log_file_name, redis_log_file=False):
   try:
-    return read_log_file(log_file_name)
+    return read_log_file(log_file_name, redis_log_file=redis_log_file)
   except:
     logger.warning(traceback.format_exc())
 

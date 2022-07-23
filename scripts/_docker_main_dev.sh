@@ -1,6 +1,6 @@
 CAN_CONNECT=1
 while [ $CAN_CONNECT -ne 0 ]; do
-  flask db current 2> /dev/null
+  flask db current
   CAN_CONNECT=$?
   echo "LAST RETURN CODE: \"$CAN_CONNECT\""
 done

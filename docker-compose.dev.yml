@@ -49,7 +49,7 @@ services:
     container_name: redis-worker_dev
     build:
       context: .
-      dockerfile: dockerfiles/dockerfile.worker
+      dockerfile: dockerfiles/dockerfile.worker.dev
     environment:
       - REDIS_QUEUE_NAME=satsmt_background_worker_queue
     env_file:
