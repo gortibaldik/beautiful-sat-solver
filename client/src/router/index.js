@@ -4,6 +4,7 @@ import Benchmarks from '@/components/Benchmarks'
 import Results from '@/components/Results'
 import BadGateway from '@/components/BadGateway'
 import RedisLogs from '@/components/RedisLogs'
+import CustomRun from '@/components/CustomRun'
 
 
 Vue.use(Router);
@@ -29,6 +30,12 @@ export default new Router({
       name: 'Redis Logs',
       component: RedisLogs,
       props: { page: 3 }
+    },
+    {
+      path: '/custom_run',
+      name: 'Custom Run',
+      props: { page: 4 },
+      component: CustomRun
     },
     {
       path: '/404',

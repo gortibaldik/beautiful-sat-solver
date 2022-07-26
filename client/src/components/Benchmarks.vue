@@ -7,7 +7,7 @@
         </h4>
       </mdb-card-body>
     </mdb-card>
-    <section class="mt-lg-5">
+    <section>
       <mdb-row>
         <mdb-col xl="4" md="6" class="mb-r" v-for="(algorithm, index) in algorithms" :key="algorithm.name">
           <mdb-card class="cascading-admin-card">

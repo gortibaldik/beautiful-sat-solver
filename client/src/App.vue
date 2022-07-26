@@ -36,14 +36,14 @@
             />Redis Logs</mdb-list-group-item
           >
         </router-link>
-        <router-link to="/404" @click.native="activeItem = 5">
+        <router-link to="/custom_run" @click.native="activeItem = 4">
           <mdb-list-group-item
             :action="true"
-            :class="activeItem === 5 && 'active'"
+            :class="activeItem === 4 && 'active'"
             ><mdb-icon
-              icon="exclamation"
+              icon="clipboard-list"
               class="mr-3"
-            />404</mdb-list-group-item
+            />Custom Run</mdb-list-group-item
           >
         </router-link>
       </mdb-list-group>
