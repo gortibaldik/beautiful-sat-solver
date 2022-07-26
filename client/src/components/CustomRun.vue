@@ -32,7 +32,7 @@
                       </strong>
                     </mdb-row>
                     <mdb-row class="taskNumber justify-content-end">
-                      {{selectedAlgorithm.task}}
+                      {{selectedAlgorithm.taskName}}
                     </mdb-row>
                   </section>
                 </div>

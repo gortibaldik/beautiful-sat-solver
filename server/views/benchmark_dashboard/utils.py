@@ -96,6 +96,8 @@ def benchmark_name_sorting_criterion(x):
     value = int(x[2:].split('-')[0])
   elif "task" in x:
     value = 1
+  else:
+    value = x
   return value
 
 def get_benchmark_names():

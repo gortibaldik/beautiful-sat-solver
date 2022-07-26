@@ -70,6 +70,14 @@ export default {
     showInputClicked(bench, benchIn) {
       this.showBenchmarkInputContent = true;
       this.benchmarkInputContent = `<code>Benchmark input content: ${bench}, ${benchIn}</code>`
+    },
+    fetchInfoFromServer() {
+      fetch(`${this.serverAddress}/custom_run/`)
+        .then(response => response.json())
+        .then(function(data) {
+          this.benchmarks = data.benchmarks
+          this.algorithms = data.algorithms
+        }.bind(this))
     }
   },
   computed: {
@@ -80,7 +88,7 @@ export default {
       }
       return {
         name: this.selectedAlgorithmName,
-        task: "TASK --none--"
+        taskName: "TASK --none--"
       }
     },
     selectedBenchmark: function() {
@@ -117,79 +125,13 @@ export default {
     },
   },
   created() {
-    this.benchmarks = [
-      {
-        name: "b1",
-        inputs: [
-          "i_b1_1",
-          "i_b1_2",
-          "i_b1_3",
-          "i_b1_4"
-        ]
-      },
-      {
-        name: "b2",
-        inputs: [
-          "i_b2_1",
-          "i_b2_2",
-          "i_b2_3",
-          "i_b2_4"
-        ]
-      },
-      {
-        name: "b3",
-        inputs: [
-          "i_b3_1",
-          "i_b3_2",
-          "i_b3_3",
-          "i_b3_4"
-        ]
-      },
-      {
-        name: "b4",
-        inputs: [
-          "i_b4_1",
-          "i_b4_2",
-          "i_b4_3",
-          "i_b4_4"
-        ]
-      },
-      {
-        name: "b5",
-        inputs: [
-          "i_b5_1",
-          "i_b5_2",
-          "i_b5_3",
-          "i_b5_4"
-        ]
-      },
-    ]
-    this.algorithms = [
-      {
-        name: "one",
-        task: "TASK 1"
-      },
-      {
-        name: "mouse",
-        task: "TASK 2"
-      },
-      {
-        name: "elephant",
-        task: "TASK 3"
-      },
-      {
-        name: "frog",
-        task: "TASK 4"
-      },
-      {
-        name: "spikey",
-        task: "TASK 5"
-      },
-    ]
-    this.benchmarks.push({
-      name: this.customInputName,
-      inputs: []
-    })
+    this.serverAddress = process.env.VUE_APP_SERVER_ADDRESS
+    this.fetchInfoFromServer()
+    // TODO: custom input
+    // this.benchmarks.push({
+    //   name: this.customInputName,
+    //   inputs: []
+    // })
     this.enquiryIfBenchmarkIsRunning()
   }
 }
