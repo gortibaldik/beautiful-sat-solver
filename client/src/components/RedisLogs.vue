@@ -70,6 +70,8 @@ import {
   mdbScrollbar,
 } from 'mdbvue'
 
+import redis_logs from '@/assets/js/get_redis_logs'
+
 export default {
   name: 'Profile',
   components: {
@@ -93,16 +95,10 @@ export default {
     }
   },
   methods: {
-    fetchRedisLogs() {
-      fetch(`${this.serverAddress}/redis_logs/`)
-        .then(response => response.json())
-        .then(function(data) {
-          if (! ("errorLogs" in data) || ! ("stdLogs" in data) || data.result === "failure") {
-            return
-          }
-          this.errorLogs = data.errorLogs
-          this.stdLogs = data.stdLogs
-        }.bind(this))
+    async fetchRedisLogs() {
+      let [errorLogs, stdLogs] = await redis_logs.fetch(this.serverAddress)
+      this.errorLogs = errorLogs
+      this.stdLogs = stdLogs
     }
   },
   created() {

@@ -81,7 +81,7 @@
                     </div>
                   </mdb-row>
                   <mdb-row v-show="showRunButton" class="justify-content-center">
-                    <mdb-btn :class="runButtonClass" @click="runButtonClicked(selectedAlgorithmName, selectedBenchmarkName, selectedBenchmarkInputName)">{{runButtonText}}</mdb-btn>
+                    <mdb-btn :class="runButtonClass" @click="runButtonClicked(selectedAlgorithmName, selectedBenchmarkName, selectedBenchmarkInputName, selectedLogLevel)">{{runButtonText}}</mdb-btn>
                     <mdb-btn class="run-button-start" @click="showInputClicked(selectedBenchmarkName, selectedBenchmarkInputName)">Show Benchmark Input</mdb-btn>
                   </mdb-row>
               </mdb-container>

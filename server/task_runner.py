@@ -26,7 +26,7 @@ def ensure_storage_file(algorithm_name, benchmark_name):
 
 def ensure_storage_file_custom_run():
   storage_folder = Config.SATSMT_RESULT_LOGS
-  Path(storage_folder).mkdir(parents=True, exists_ok=True)
+  Path(storage_folder).mkdir(parents=True, exist_ok=True)
   storage_file = os.path.join(storage_folder, Config.SATSOLVER_CUSTOM_RUN_FILENAME)
   return storage_file
 
@@ -86,13 +86,13 @@ def retrieve_benchmark_basedir(benchmark_name):
   
   return benchmark_basedir
 
-def retrieve_benchmark_filename(benchmark_name, benchmark_input_name):
+def retrieve_benchmark_filename(benchmark_name, entry_name):
   benchmark_basedir = retrieve_benchmark_basedir(benchmark_name)
   
   if not benchmark_basedir:
     return None
 
-  benchmark_filename = os.path.join(benchmark_basedir, benchmark_input_name)
+  benchmark_filename = os.path.join(benchmark_basedir, entry_name)
   if not os.path.isfile(benchmark_filename):
     return None
   return benchmark_filename
@@ -203,7 +203,13 @@ def benchmark(file, algorithm_name, benchmark_name, debug_level):
   
   return cumulative_stats
 
-def custom_run(file, algorithm_name, benchmark_name, benchmark_input_name, debug_level):
+def custom_run(
+  file,
+  algorithm_name,
+  benchmark_name,
+  entry_name,
+  debug_level
+):
   try:
     algorithms = server.getters.get_modules()
     algo_module = retrieve_algorithm(algorithms, algorithm_name)
@@ -212,7 +218,10 @@ def custom_run(file, algorithm_name, benchmark_name, benchmark_input_name, debug
       logzero.logger.warning(f"Algorithm with name: {algorithm_name} not found, EXITING!")
       return
 
-    benchmark_filename = retrieve_benchmark_filename(benchmark_name, benchmark_input_name)
+    benchmark_filename = retrieve_benchmark_filename(
+      benchmark_name,
+      entry_name
+    )
     if benchmark_filename is None:
       logzero.logger.warning(f"Benchmark with name: {benchmark_name} not found, EXITING!")
       return
@@ -278,7 +287,12 @@ def run_benchmark(algorithm_name, benchmark_name, debug_level):
 
   return job
 
-def run_custom_input(algorithm_name, benchmark_name, benchmark_input_name, debug_level):
+def run_custom_input(
+  algorithm_name,
+  benchmark_name,
+  entry_name,
+  debug_level
+):
   job = rq.get_current_job()
   storage_file = ensure_storage_file_custom_run()
   job.meta['finished'] = False
@@ -288,7 +302,13 @@ def run_custom_input(algorithm_name, benchmark_name, benchmark_input_name, debug
     with redirect_stdout(f):
       with redirect_stderr(f):
         logzero.logfile(storage_file)
-        custom_run(f, algorithm_name, benchmark_name, benchmark_input_name, debug_level)
+        custom_run(
+          f,
+          algorithm_name,
+          benchmark_name,
+          entry_name,
+          debug_level
+        )
         logzero.logfile(None)
   job.meta['finished'] = True
   job.save_meta()
@@ -304,13 +324,24 @@ def task_runner_start_algorithm_on_benchmark(algorithm_name, benchmark_name, deb
   job = queue.enqueue('server.task_runner.run_benchmark', algorithm_name, benchmark_name, debug_level)
   return job
 
-def task_runner_start_algorithm_on_custom_input(algorithm_name, benchmark_name, benchmark_input_name, debug_level):
+def task_runner_start_algorithm_on_custom_run(
+  algorithm_name,
+  benchmark_name,
+  entry_name,
+  debug_level
+):
   queue = rq.Queue(
     Config.REDIS_WORKER_QUEUE_NAME,
     connection=get_redis_connection(),
     default_timeout=3600
   )
-  job = queue.enqueue('server.task_runner.run_custom_input', algorithm_name, benchmark_name, benchmark_input_name, debug_level)
+  job = queue.enqueue(
+    'server.task_runner.run_custom_input',
+    algorithm_name,
+    benchmark_name,
+    entry_name,
+    debug_level
+  )
   return job
 
 def task_runner_get_benchmark_progress(job_info):
@@ -323,6 +354,13 @@ def task_runner_get_benchmark_progress(job_info):
   if not 'progress' in job.meta:
     raise RuntimeError("Caught no progress exception!")
   return job.meta['progress']
+
+def task_runner_is_custom_run_finished(job_info):
+  job = task_runner_get_job(job_info)
+  job.refresh()
+  if not 'finished' in job.meta:
+    return True
+  return job.meta['finished']
 
 def has_job_finished(job):
   try:
@@ -343,6 +381,17 @@ def get_job_log_file(job):
   if 'storage_file' not in job.meta:
     return None
   return job.meta["storage_file"]
+
+def get_custom_run_log_file():
+  log_filename = os.path.join(
+    Config.SATSMT_RESULT_LOGS,
+    Config.SATSOLVER_CUSTOM_RUN_FILENAME
+  )
+
+  if os.path.isfile(log_filename):
+    return log_filename
+  else:
+    return None
 
 def task_runner_stop_job(job:rq.job.Job, algorithm_name, benchmark_name):
   job.refresh()

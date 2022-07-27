@@ -11,6 +11,8 @@ import {
   mdbScrollbar,
 } from 'mdbvue'
 
+import redis_logs from '@/assets/js/get_redis_logs'
+
 export default {
   name: 'CustomRun',
   components: {
@@ -61,23 +63,92 @@ export default {
     enquiryIfBenchmarkIsRunning() {
       this.isBenchmarkRunning = false
     },
-    runButtonClicked(algo, bench, benchIn) {
+    async fetchStart(algo, bench, benchIn, logLevel) {
+      return await fetch(`${this.serverAddress}/custom_run/start`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          algorithm:  algo,
+          benchmark:  bench,
+          entry:      benchIn,
+          logLevel:   logLevel
+        })
+      }).then(response => response.json())
+    },
+    async pollCustomRun(algo, bench, benchIn) {
+      let [redisErrorLogs, redisStdLogs] = await redis_logs.fetch(this.serverAddress)
+      let stdLogs = await this.fetchCustomRunLogs(this.serverAddress)
+      let is_finished = await this.fetchProgress(this.serverAddress, algo, bench, benchIn)
+      if (redisErrorLogs  === 'failure' ||
+          stdLogs         === 'failure' ||
+          is_finished     === 'failure' ||
+          is_finished     === "yes") {
+        clearInterval(this.pollingInterval)
+        this.pollingInterval = undefined;
+      }
+      this.redisErrorLogs = redisErrorLogs
+      this.redisStdLogs = redisStdLogs
+      this.stdLogs = stdLogs
+    },
+    startMonitoringCustomRun(algo, bench, benchIn) {
+      this.pollingInterval = setInterval(this.pollCustomRun.bind(this, algo, bench, benchIn), 1000)
+    },
+    async runButtonClicked(algo, bench, benchIn, logLevel) {
       this.showRunResults = true;
-      this.stdLogs = `<code>STD LOGS: ${algo} is running</code>`
-      this.redisStdLogs = `<code>REDIS STD LOGS: ${bench} is running</code>`
-      this.redisErrorLogs = `<code>REDIS ERROR LOGS: ${benchIn} is running</code>`
+      this.startedAlgo = `${algo},${bench},${benchIn}`
+      if ( !algo || !bench || !benchIn) {
+        return
+      }
+      let data = await this.fetchStart(algo, bench, benchIn, logLevel)
+
+      if (data.result !== "success") {
+        return
+      }
+      this.startMonitoringCustomRun(algo, bench, benchIn)
     },
     showInputClicked(bench, benchIn) {
       this.showBenchmarkInputContent = true;
       this.benchmarkInputContent = `<code>Benchmark input content: ${bench}, ${benchIn}</code>`
     },
-    fetchInfoFromServer() {
-      fetch(`${this.serverAddress}/custom_run/`)
+    async fetchProgress(serverAddress, algo, bench, benchIn) {
+      let data = null
+      try {
+        data = await fetch(`${serverAddress}/custom_run/is_finished`, {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            algorithm:  algo,
+            benchmark:  bench,
+            entry:      benchIn
+          })
+        }).then(response => response.json())
+      } catch {
+        data = {
+          result: 'failure'
+        }
+      }
+      return data.result
+    },
+    async fetchBasicInfoFromServer(serverAddress) {
+      let data = await fetch(`${serverAddress}/custom_run/`)
         .then(response => response.json())
-        .then(function(data) {
-          this.benchmarks = data.benchmarks
-          this.algorithms = data.algorithms
-        }.bind(this))
+      return [data.benchmarks, data.algorithms]
+    },
+    async fetchCustomRunLogs(serverAddress) {
+      let data = await fetch(`${serverAddress}/custom_run/get_logs`)
+        .then(response => response.json())
+      return data.result
+    },
+    async fetchInfoFromServer() {
+      let [benchmarks, algorithms] = await this.fetchBasicInfoFromServer(this.serverAddress)
+      this.benchmarks = benchmarks
+      this.algorithms = algorithms
     }
   },
   computed: {
@@ -133,5 +204,10 @@ export default {
     //   inputs: []
     // })
     this.enquiryIfBenchmarkIsRunning()
+  },
+  beforeDestroy() {
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval)
+    }
   }
 }

@@ -1,7 +1,11 @@
 import os
 
+from flask import request
 from logzero import logger
 from server.config import Config
+from server.task_runner import get_custom_run_log_file, task_runner_is_custom_run_finished, task_runner_start_algorithm_on_custom_run
+from server.utils.log_utils import get_log_file_content
+from server.utils.redis_utils import get_saved_jobs
 from server.views.benchmark_dashboard.utils import benchmark_name_sorting_criterion
 
 def get_benchmarks():
@@ -10,15 +14,99 @@ def get_benchmarks():
   benchmarks = []
   for b in sorted(benchmark_names, key=benchmark_name_sorting_criterion):
     benchmark_dir = os.path.join(benchmark_root, b)
-    benchmark_inputs = list(os.listdir(benchmark_dir))
+    benchmark_entries = list(os.listdir(benchmark_dir))
     
-    benchmark_inputs_sorted = sorted(benchmark_inputs, key=benchmark_name_sorting_criterion)
+    benchmark_entries_sorted = sorted(benchmark_entries, key=benchmark_name_sorting_criterion)
     
-    benchmark_entry = {
+    entry = {
       "name": b,
-      "inputs": benchmark_inputs_sorted
+      "inputs": benchmark_entries_sorted
     }
 
-    benchmarks.append(benchmark_entry)
+    benchmarks.append(entry)
   return benchmarks
 
+def get_post_data():
+  post_data = request.get_json()
+  algorithm_name  = post_data.get('algorithm')
+  benchmark_name  = post_data.get('benchmark')
+  entry_name      = post_data.get('entry')
+  return algorithm_name, benchmark_name, entry_name
+
+def get_post_debug_level():
+  post_data = request.get_json()
+  return post_data.get('logLevel')
+
+def get_job_info(
+  algorithm_name,
+  benchmark_name,
+  entry_name,
+  saved_jobs):
+  index = construct_index(
+    algorithm_name,
+    benchmark_name,
+    entry_name
+  )
+  if index not in saved_jobs:
+    return RuntimeError(f"{index} not in saved_jobs")
+  return saved_jobs[index]
+
+def retrieve_log_file_content():
+  log_filename = get_custom_run_log_file()
+  if log_filename is None:
+    return "<code>No log file yet</code>"
+  
+  log_file_content = get_log_file_content(log_filename)
+  return log_file_content
+
+def is_custom_run_finished(
+  algorithm_name,
+  benchmark_name,
+  entry_name
+):
+  saved_jobs = get_saved_jobs()
+  job_info = get_job_info(
+    algorithm_name,
+    benchmark_name,
+    entry_name,
+    saved_jobs
+  )
+  return task_runner_is_custom_run_finished(job_info)
+  
+
+def start_algorithm_on_custom_run(
+  algorithm_name,
+  benchmark_name,
+  entry_name,
+  debug_level
+):
+  return task_runner_start_algorithm_on_custom_run(
+    algorithm_name,
+    benchmark_name,
+    entry_name,
+    debug_level
+  )
+
+def construct_index(
+  algorithm_name,
+  benchmark_name,
+  entry_name
+):
+  return f"{algorithm_name},{benchmark_name},{entry_name}"
+
+def save_job(
+  job,
+  algorithm_name,
+  benchmark_name,
+  entry_name,
+  saved_jobs
+):
+  index = construct_index(
+    algorithm_name,
+    benchmark_name,
+    entry_name
+  )
+  saved_jobs[index] = {
+    "job": job.get_id(),
+    "logs": None,
+  }
