@@ -13,6 +13,7 @@ from server.views.custom_run.utils import (
   get_benchmarks,
   get_post_data,
   get_post_debug_level,
+  get_running_job,
   is_custom_run_finished,
   retrieve_log_file_content,
   save_job,
@@ -26,6 +27,7 @@ def custom_run_index():
   try:
     with get_redis_connection() as connection:
       algorithms_infos = get_algorithms_infos(connection)
+      saved_jobs = get_saved_jobs(connection)
     # logger.info(algorithms_infos)
     # logger.info(saved_jobs)
     benchmarkable_algorithms = [a for a in algorithms_infos if a["benchmarkable"]]
@@ -33,6 +35,7 @@ def custom_run_index():
       "result": "success",
       "benchmarks": get_benchmarks(),
       "algorithms": benchmarkable_algorithms,
+      "running_job": get_running_job(saved_jobs)
     })
   except:
     logger.warning(traceback.format_exc())

@@ -7,6 +7,7 @@ from server.task_runner import get_custom_run_log_file, task_runner_is_custom_ru
 from server.utils.log_utils import get_log_file_content
 from server.utils.redis_utils import get_saved_jobs
 from server.views.benchmark_dashboard.utils import benchmark_name_sorting_criterion
+from server.task_runner import task_runner_get_job
 
 def get_benchmarks():
   benchmark_root = Config.SATSMT_BENCHMARK_ROOT
@@ -62,9 +63,11 @@ def retrieve_log_file_content():
 def is_custom_run_finished(
   algorithm_name,
   benchmark_name,
-  entry_name
+  entry_name,
+  saved_jobs=None
 ):
-  saved_jobs = get_saved_jobs()
+  if saved_jobs is None:
+    saved_jobs = get_saved_jobs()
   job_info = get_job_info(
     algorithm_name,
     benchmark_name,
@@ -110,3 +113,27 @@ def save_job(
     "job": job.get_id(),
     "logs": None,
   }
+
+def create_running_job_dict(
+  algorithm_name,
+  benchmark_name,
+  entry_name
+):
+  return {
+    "algorithm": algorithm_name,
+    "benchmark": benchmark_name,
+    "entry": entry_name
+  }
+
+def get_running_job(saved_jobs):
+  for key in saved_jobs:
+    key_parts = key.split(',')
+    if len(key_parts) != 3:
+      continue
+    algo, bench, entry = key_parts
+    job_info = saved_jobs[key]
+    is_finished = task_runner_is_custom_run_finished(job_info)
+
+    if not is_finished:
+      return create_running_job_dict(algo, bench, entry)
+  return create_running_job_dict("none", "none", "none")

@@ -356,7 +356,10 @@ def task_runner_get_benchmark_progress(job_info):
   return job.meta['progress']
 
 def task_runner_is_custom_run_finished(job_info):
-  job = task_runner_get_job(job_info)
+  try:
+    job = task_runner_get_job(job_info)
+  except:
+    return True
   job.refresh()
   if not 'finished' in job.meta:
     return True

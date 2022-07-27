@@ -1,4 +1,3 @@
-import redis
 import traceback
 
 from flask import Blueprint, jsonify
@@ -16,6 +15,7 @@ from server.views.benchmark_dashboard.utils import (
   get_benchmark_progress,
   get_post_data,
   get_post_debug_level,
+  get_running_benchmark,
   get_running_status,
   retrieve_log_file,
   save_job,
@@ -89,6 +89,15 @@ def get_result():
     algorithm_name, benchmark_name = get_post_data()
     log_file = retrieve_log_file(algorithm_name, benchmark_name)
     return jsonify({ "result" : log_file })
+  except:
+    logger.warning(traceback.format_exc())
+    return jsonify({ 'result': 'failure'})
+
+@benchmark_page.route('/get_running_benchmark', methods=['GET'])
+def running_benchmark():
+  try:
+    saved_jobs = get_saved_jobs()
+    return jsonify({ 'result': get_running_benchmark(saved_jobs)})
   except:
     logger.warning(traceback.format_exc())
     return jsonify({ 'result': 'failure'})

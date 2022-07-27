@@ -41,17 +41,23 @@ def retrieve_log_file(algorithm_name, benchmark_name):
     job_info["logs"] = "<strong>No log file yet!</strong>" if not log_file else get_log_file_content(log_file)
   return job_info["logs"]
 
+def job_is_running(job):
+  return ('interrupted' not in job.meta or not job.meta['interrupted'] ) and not has_job_finished(job)
+
 def find_running_benchmark(algo_name, saved_jobs):
   # finds all the jobs executing algorithm algo_name and
   # checks whether they're still running
   for key in saved_jobs.keys():
+    key_parts = key.split(',')
+    if len(key_parts) > 2:
+      continue
     if algo_name in key:
       try:
         job = task_runner_get_job(saved_jobs[key])
       except:
         continue
       
-      if ('interrupted' not in job.meta or not job.meta['interrupted'] ) and not has_job_finished(job):
+      if job_is_running(job):
         benchmark_name = key.split(',')[1]
         logger.warning(job.meta)
         return {
@@ -68,6 +74,29 @@ def get_running_status(benchmarkable_algorithms, saved_jobs):
   for ba in benchmarkable_algorithms:
     running_statuses.append(find_running_benchmark(ba["name"], saved_jobs))
   return running_statuses
+
+def create_running_job_dict(
+  algorithm_name,
+  benchmark_name
+):
+  return {
+    "algorithm": algorithm_name,
+    "benchmark": benchmark_name
+  }
+
+def get_running_benchmark(saved_jobs):
+  for key in saved_jobs.keys():
+    key_parts = key.split(',')
+    if len(key_parts) > 2:
+      continue
+    algo, bench = key_parts
+    try:
+      job = task_runner_get_job(saved_jobs[key])
+    except:
+      continue
+    if job_is_running(job):
+      return create_running_job_dict(algo, bench)
+  return create_running_job_dict("none", "none")
 
 def construct_index(algorithm_name, benchmark_name):
   return f"{algorithm_name},{benchmark_name}"

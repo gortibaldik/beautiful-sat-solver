@@ -12,6 +12,7 @@ import {
 } from 'mdbvue'
 
 import redis_logs from '@/assets/js/get_redis_logs'
+import benchmark_communication from '@/assets/js/benchmark_communication'
 
 export default {
   name: 'CustomRun',
@@ -42,8 +43,9 @@ export default {
       defaultBenchmarkName: defaultBenchmarkName,
       selectedBenchmarkName: defaultBenchmarkName,
       selectedLogLevel: "WARNING",
-      isCustomInputRunning: false,
       showRunResults: false,
+      isCustomRunRunning: false,
+      isBenchmarkRunning: false,
       showBenchmarkInputContent: false,
       benchmarkInputContent: "",
       redisStdLogs: "",
@@ -59,9 +61,6 @@ export default {
         }
       }
       return null
-    },
-    enquiryIfBenchmarkIsRunning() {
-      this.isBenchmarkRunning = false
     },
     async fetchStart(algo, bench, benchIn, logLevel) {
       return await fetch(`${this.serverAddress}/custom_run/start`, {
@@ -88,17 +87,31 @@ export default {
           is_finished     === "yes") {
         clearInterval(this.pollingInterval)
         this.pollingInterval = undefined;
+        this.isCustomRunRunning = false
       }
       this.redisErrorLogs = redisErrorLogs
       this.redisStdLogs = redisStdLogs
       this.stdLogs = stdLogs
     },
+    async pollRunningBenchmark(algo, bench) {
+      let data = await benchmark_communication.fetch_benchmark_progress(this.serverAddress, algo, bench)
+      if (data.result === 'failure' || data.result == 100) {
+        clearInterval(this.pollingInterval)
+        this.isBenchmarkRunning = false
+      }
+    },
     startMonitoringCustomRun(algo, bench, benchIn) {
+      this.isCustomRunRunning = true
       this.pollingInterval = setInterval(this.pollCustomRun.bind(this, algo, bench, benchIn), 1000)
     },
+    startMonitoringBenchmark(algo, bench) {
+      this.pollingInterval = setInterval(this.pollRunningBenchmark.bind(this, algo, bench), 1000)
+    },
     async runButtonClicked(algo, bench, benchIn, logLevel) {
-      this.showRunResults = true;
-      this.startedAlgo = `${algo},${bench},${benchIn}`
+      if (this.runButtonText === "Stop") {
+        return
+      }
+      this.showRunResults = true
       if ( !algo || !bench || !benchIn) {
         return
       }
@@ -138,7 +151,7 @@ export default {
     async fetchBasicInfoFromServer(serverAddress) {
       let data = await fetch(`${serverAddress}/custom_run/`)
         .then(response => response.json())
-      return [data.benchmarks, data.algorithms]
+      return [data.benchmarks, data.algorithms, data.running_job]
     },
     async fetchCustomRunLogs(serverAddress) {
       let data = await fetch(`${serverAddress}/custom_run/get_logs`)
@@ -146,9 +159,27 @@ export default {
       return data.result
     },
     async fetchInfoFromServer() {
-      let [benchmarks, algorithms] = await this.fetchBasicInfoFromServer(this.serverAddress)
+      let [benchmarks, algorithms, running_job] = await this.fetchBasicInfoFromServer(this.serverAddress)
+      let [running_algo, running_bench] = await benchmark_communication.fetch_running_benchmark(this.serverAddress)
+      if (running_algo != "none") {
+        this.isBenchmarkRunning = true
+        this.startMonitoringBenchmark(running_algo, running_bench)
+      } else {
+        this.isBenchmarkRunning = false
+      }
       this.benchmarks = benchmarks
       this.algorithms = algorithms
+      if (running_job.algorithm !== "none") {
+        this.selectedAlgorithmName      = running_job.algorithm
+        this.selectedBenchmarkName      = running_job.benchmark
+        this.selectedBenchmarkInputName = running_job.entry
+        this.showRunResults             = true
+        this.startMonitoringCustomRun(
+          this.selectedAlgorithmName,
+          this.selectedBenchmarkName,
+          this.selectedBenchmarkInputName
+        )
+      }
     }
   },
   computed: {
@@ -185,10 +216,14 @@ export default {
         this.selectedBenchmarkInputName != this.customInputName
     },
     runButtonText: function() {
-      return "Run"
+      if (this.isCustomRunRunning) {
+        return "Stop"
+      } else {
+        return "Run"
+      }
     },
     runButtonClass: function() {
-      if (this.isCustomInputRunning) {
+      if (this.isCustomRunRunning) { 
         return "run-button-stop"
       } else {
         return "run-button-start"
@@ -203,7 +238,6 @@ export default {
     //   name: this.customInputName,
     //   inputs: []
     // })
-    this.enquiryIfBenchmarkIsRunning()
   },
   beforeDestroy() {
     if (this.pollingInterval) {
