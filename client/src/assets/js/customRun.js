@@ -13,6 +13,7 @@ import {
 
 import redis_logs from '@/assets/js/get_redis_logs'
 import benchmark_communication from '@/assets/js/benchmark_communication'
+import custom_run_communication from '@/assets/js/customRun_communication'
 
 export default {
   name: 'CustomRun',
@@ -62,25 +63,10 @@ export default {
       }
       return null
     },
-    async fetchStart(algo, bench, benchIn, logLevel) {
-      return await fetch(`${this.serverAddress}/custom_run/start`, {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          algorithm:  algo,
-          benchmark:  bench,
-          entry:      benchIn,
-          logLevel:   logLevel
-        })
-      }).then(response => response.json())
-    },
     async pollCustomRun(algo, bench, benchIn) {
       let [redisErrorLogs, redisStdLogs] = await redis_logs.fetch(this.serverAddress)
-      let stdLogs = await this.fetchCustomRunLogs(this.serverAddress)
-      let is_finished = await this.fetchProgress(this.serverAddress, algo, bench, benchIn)
+      let stdLogs = await custom_run_communication.fetchCustomRunLogs(this.serverAddress)
+      let is_finished = await custom_run_communication.fetchProgress(this.serverAddress, algo, bench, benchIn)
       if (redisErrorLogs  === 'failure' ||
           stdLogs         === 'failure' ||
           is_finished     === 'failure' ||
@@ -115,7 +101,7 @@ export default {
       if ( !algo || !bench || !benchIn) {
         return
       }
-      let data = await this.fetchStart(algo, bench, benchIn, logLevel)
+      let data = await custom_run_communication.fetchStart(this.serverAddress, algo, bench, benchIn, logLevel)
 
       if (data.result !== "success") {
         return
@@ -126,40 +112,8 @@ export default {
       this.showBenchmarkInputContent = true;
       this.benchmarkInputContent = `<code>Benchmark input content: ${bench}, ${benchIn}</code>`
     },
-    async fetchProgress(serverAddress, algo, bench, benchIn) {
-      let data = null
-      try {
-        data = await fetch(`${serverAddress}/custom_run/is_finished`, {
-          method: 'POST',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            algorithm:  algo,
-            benchmark:  bench,
-            entry:      benchIn
-          })
-        }).then(response => response.json())
-      } catch {
-        data = {
-          result: 'failure'
-        }
-      }
-      return data.result
-    },
-    async fetchBasicInfoFromServer(serverAddress) {
-      let data = await fetch(`${serverAddress}/custom_run/`)
-        .then(response => response.json())
-      return [data.benchmarks, data.algorithms, data.running_job]
-    },
-    async fetchCustomRunLogs(serverAddress) {
-      let data = await fetch(`${serverAddress}/custom_run/get_logs`)
-        .then(response => response.json())
-      return data.result
-    },
     async fetchInfoFromServer() {
-      let [benchmarks, algorithms, running_job] = await this.fetchBasicInfoFromServer(this.serverAddress)
+      let [benchmarks, algorithms, running_job] = await custom_run_communication.fetchBasicInfoFromServer(this.serverAddress)
       let [running_algo, running_bench] = await benchmark_communication.fetch_running_benchmark(this.serverAddress)
       if (running_algo != "none") {
         this.isBenchmarkRunning = true
