@@ -413,5 +413,11 @@ def task_runner_stop_job(job:rq.job.Job, algorithm_name, benchmark_name):
     logzero.logger.warning("Caught exception when saving results to the database")
     logzero.logfile(None)
 
+def task_runner_stop_custom_run(job):
+  job.refresh()
+  send_stop_job_command(get_redis_connection(), job.get_id())
+  job.meta["finished"] = True
+  job.save_meta()
+
 def task_runner_get_job(job_info):
   return rq.job.Job.fetch(job_info["job"], connection=get_redis_connection())

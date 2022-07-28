@@ -3,7 +3,7 @@ import os
 from flask import request
 from logzero import logger
 from server.config import Config
-from server.task_runner import get_custom_run_log_file, task_runner_is_custom_run_finished, task_runner_start_algorithm_on_custom_run
+from server.task_runner import get_custom_run_log_file, has_job_finished, has_job_started, task_runner_is_custom_run_finished, task_runner_start_algorithm_on_custom_run, task_runner_stop_custom_run
 from server.utils.log_utils import get_log_file_content
 from server.utils.redis_utils import get_saved_jobs
 from server.views.benchmark_dashboard.utils import benchmark_name_sorting_criterion
@@ -89,6 +89,27 @@ def start_algorithm_on_custom_run(
     entry_name,
     debug_level
   )
+
+def stop_algorithm_on_custom_run(
+  algorithm_name,
+  benchmark_name,
+  entry_name,
+  saved_jobs
+):
+  job_info = get_job_info(
+    algorithm_name,
+    benchmark_name,
+    entry_name,
+    saved_jobs
+  )
+  job = task_runner_get_job(job_info)
+  try:
+    if has_job_started(job) and not has_job_finished(job):
+      task_runner_stop_custom_run(job)
+      return True
+  except: pass
+  logger.warning(f"Job ({construct_index(algorithm_name, benchmark_name, entry_name)}) cannot be stopped!")
+  return False
 
 def construct_index(
   algorithm_name,

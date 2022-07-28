@@ -1,34 +1,29 @@
+import fetch_json from "@/assets/js/fetch_utils"
+
 var custom_run = {
   async fetchStart(serverAddress, algo, bench, benchIn, logLevel) {
-    return await fetch(`${serverAddress}/custom_run/start`, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
+    return await fetch_json.post(`${serverAddress}/custom_run/start`, {
         algorithm:  algo,
         benchmark:  bench,
         entry:      benchIn,
         logLevel:   logLevel
-      })
-    }).then(response => response.json())
+    })
+  },
+  async fetchStop(serverAddress, algo, bench, benchIn) {
+    return await fetch_json.post(`${serverAddress}/custom_run/stop`, {
+      algorithm: algo,
+      benchmark: bench,
+      entry:     benchIn
+    })
   },
   async fetchProgress(serverAddress, algo, bench, benchIn) {
     let data = null
     try {
-      data = await fetch(`${serverAddress}/custom_run/is_finished`, {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
+      data = await fetch_json.post(`${serverAddress}/custom_run/is_finished`, {
           algorithm:  algo,
           benchmark:  bench,
           entry:      benchIn
-        })
-      }).then(response => response.json())
+      })
     } catch {
       data = {
         result: 'failure'

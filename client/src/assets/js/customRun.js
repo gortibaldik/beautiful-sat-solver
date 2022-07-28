@@ -44,6 +44,7 @@ export default {
       defaultBenchmarkName: defaultBenchmarkName,
       selectedBenchmarkName: defaultBenchmarkName,
       selectedLogLevel: "WARNING",
+      stopRunFunction: undefined,
       showRunResults: false,
       isCustomRunRunning: false,
       isBenchmarkRunning: false,
@@ -74,6 +75,7 @@ export default {
         clearInterval(this.pollingInterval)
         this.pollingInterval = undefined;
         this.isCustomRunRunning = false
+        this.stopRunFunction = undefined
       }
       this.redisErrorLogs = redisErrorLogs
       this.redisStdLogs = redisStdLogs
@@ -86,8 +88,12 @@ export default {
         this.isBenchmarkRunning = false
       }
     },
+    async stopRun(algo, bench, benchIn) {
+      custom_run_communication.fetchStop(this.serverAddress, algo, bench, benchIn)
+    },
     startMonitoringCustomRun(algo, bench, benchIn) {
       this.isCustomRunRunning = true
+      this.stopRunFunction = this.stopRun.bind(this, algo, bench, benchIn)
       this.pollingInterval = setInterval(this.pollCustomRun.bind(this, algo, bench, benchIn), 1000)
     },
     startMonitoringBenchmark(algo, bench) {
@@ -95,6 +101,7 @@ export default {
     },
     async runButtonClicked(algo, bench, benchIn, logLevel) {
       if (this.runButtonText === "Stop") {
+        this.stopRunFunction()
         return
       }
       this.showRunResults = true

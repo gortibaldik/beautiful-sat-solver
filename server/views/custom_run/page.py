@@ -18,6 +18,7 @@ from server.views.custom_run.utils import (
   retrieve_log_file_content,
   save_job,
   start_algorithm_on_custom_run,
+  stop_algorithm_on_custom_run,
 )
 
 custom_run_page = Blueprint('custom_run_page', __name__)
@@ -65,6 +66,22 @@ def start_custom_run():
     logger.warning(traceback.format_exc())
     return jsonify({'result': 'failure'})
   return jsonify({'result': 'success'})
+
+@custom_run_page.route('/stop', methods=['POST'])
+def stop_custom_run():
+  try:
+    saved_jobs = get_saved_jobs()
+    algorithm_name, benchmark_name, entry_name = get_post_data()
+    if stop_algorithm_on_custom_run(
+        algorithm_name,
+        benchmark_name,
+        entry_name,
+        saved_jobs
+    ):
+      return jsonify({'result': 'success'})
+  except:
+    logger.warning(traceback.format_exc())
+  return jsonify({'result': 'failure'})
 
 @custom_run_page.route('/get_logs', methods=['GET'])
 def get_custom_run_logs():
