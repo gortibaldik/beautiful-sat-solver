@@ -99,7 +99,11 @@
 }
 
 .scrollbar-class {
-  height: 25vh
+  height: 25vh;
+}
+
+.card-header-hoverable:hover {
+  background-color: #5595fb !important;
 }
 
 strong {

@@ -7,8 +7,13 @@ import {
   mdbView,
   mdbIcon,
   mdbContainer,
-  mdbBtn,
   mdbScrollbar,
+  mdbModal,
+  mdbModalHeader,
+  mdbModalFooter,
+  mdbModalBody,
+  mdbBtn,
+  mdbModalTitle,
 } from 'mdbvue'
 
 import redis_logs from '@/assets/js/get_redis_logs'
@@ -26,8 +31,13 @@ export default {
     mdbView,
     mdbIcon,
     mdbContainer,
-    mdbBtn,
     mdbScrollbar,
+    mdbModal,
+    mdbModalHeader,
+    mdbModalFooter,
+    mdbModalBody,
+    mdbBtn,
+    mdbModalTitle,
   },
   data () {
     let defaultBenchmarkName = "Pick a benchmark"
@@ -53,9 +63,30 @@ export default {
       redisStdLogs: "",
       redisErrorLogs: "",
       stdLogs: "",
+      displayModal: false,
+      modalMessage: "",
+      modalTitle: "",
     };
   },
   methods: {
+    switchOnModalRedisStd() {
+      console.log("REDIS STD !")
+      this.displayModal = true
+      this.modalMessage = this.redisStdLogs
+      this.modalTitle = "Standard Logs from Algorithm"
+    },
+    switchOnModalRedisError() {
+      console.log("REDIS ERROR !")
+      this.displayModal = true
+      this.modalMessage = this.redisErrorLogs
+      this.modalTitle = "Error Redis Worker Logs"
+    },
+    switchOnModalStd() {
+      console.log("STD !")
+      this.displayModal = true
+      this.modalMessage = this.stdLogs
+      this.modalTitle = "Standard Redis Worker Logs"
+    },
     findCorrespondingName(array, name) {
       for (let i = 0; i < array.length; i++) {
         if (array[i].name === name) {

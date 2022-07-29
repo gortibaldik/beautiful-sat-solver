@@ -98,8 +98,10 @@
       <mdb-row v-show="showRunResults" class="row-with-logs">
         <mdb-col xl="6" md="12" class="mb-r col-with-logs">
           <mdb-card class="card-with-logs rounded-border custom-margin-top ">
-            <mdb-card-title class="blue darken-2 rounded-border text-center">
-              <h4 class="h4-responsive text-white spaced-title">Standard Redis Worker Logs</h4>
+            <mdb-card-title
+              class="blue darken-2 rounded-border text-center card-header-hoverable">
+              <h4 class="h4-responsive text-white spaced-title"
+                  @click="switchOnModalRedisStd()">Standard Redis Worker Logs</h4>
             </mdb-card-title>
             <mdb-card-body>
               <div class="scrollbar-class">
@@ -111,8 +113,9 @@
         </mdb-col>
         <mdb-col xl="6" md="12" class="mb-r col-with-logs">
           <mdb-card class="card-with-logs rounded-border custom-margin-top ">
-            <mdb-card-title class="blue darken-2 rounded-border text-center">
-              <h4 class="h4-responsive text-white spaced-title">Standard Logs from Algorithm</h4>
+            <mdb-card-title class="blue darken-2 rounded-border text-center card-header-hoverable">
+              <h4 class="h4-responsive text-white spaced-title"
+                  @click="switchOnModalStd()">Standard Logs from Algorithm</h4>
             </mdb-card-title>
             <mdb-card-body>
               <div class="scrollbar-class">
@@ -124,8 +127,9 @@
         </mdb-col>
         <mdb-col xl="6" md="12" class="mb-r col-with-logs">
           <mdb-card class="card-with-logs rounded-border custom-margin-top ">
-            <mdb-card-title class="blue darken-2 rounded-border text-center">
-              <h4 class="h4-responsive text-white spaced-title">Error Redis Worker Logs</h4>
+            <mdb-card-title class="blue darken-2 rounded-border text-center card-header-hoverable">
+              <h4 class="h4-responsive text-white spaced-title"
+                  @click="switchOnModalRedisError()">Error Redis Worker Logs</h4>
             </mdb-card-title>
             <mdb-card-body>
               <div class="scrollbar-class">
@@ -147,6 +151,16 @@
           </mdb-card>
         </mdb-col>
       </mdb-row>
+      <mdb-modal size="fluid" :show="displayModal" @close="displayModal = false" scrollable>
+        <mdb-modal-header>
+          <mdb-modal-title>{{modalTitle}}</mdb-modal-title>
+        </mdb-modal-header>
+        <mdb-modal-body v-html="modalMessage" class="scrollbar-class">
+        </mdb-modal-body>
+        <mdb-modal-footer>
+          <mdb-btn color="secondary" @click.native="displayModal = false">Close</mdb-btn>
+        </mdb-modal-footer>
+      </mdb-modal>
     </section>
   </section>
 </template>
