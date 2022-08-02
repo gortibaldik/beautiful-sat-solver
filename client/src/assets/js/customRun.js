@@ -70,19 +70,16 @@ export default {
   },
   methods: {
     switchOnModalRedisStd() {
-      console.log("REDIS STD !")
       this.displayModal = true
       this.modalMessage = this.redisStdLogs
       this.modalTitle = "Standard Logs from Algorithm"
     },
     switchOnModalRedisError() {
-      console.log("REDIS ERROR !")
       this.displayModal = true
       this.modalMessage = this.redisErrorLogs
       this.modalTitle = "Error Redis Worker Logs"
     },
     switchOnModalStd() {
-      console.log("STD !")
       this.displayModal = true
       this.modalMessage = this.stdLogs
       this.modalTitle = "Standard Redis Worker Logs"
@@ -96,7 +93,8 @@ export default {
       return null
     },
     async pollCustomRun(algo, bench, benchIn) {
-      let [redisErrorLogs, redisStdLogs] = await redis_logs.fetch(this.serverAddress)
+      // eslint-disable-next-line no-unused-vars
+      let [redisErrorLogs, _] = await this.fetchRedisLogs()
       let stdLogs = await custom_run_communication.fetchCustomRunLogs(this.serverAddress)
       let is_finished = await custom_run_communication.fetchProgress(this.serverAddress, algo, bench, benchIn)
       if (redisErrorLogs  === 'failure' ||
@@ -108,8 +106,6 @@ export default {
         this.isCustomRunRunning = false
         this.stopRunFunction = undefined
       }
-      this.redisErrorLogs = redisErrorLogs
-      this.redisStdLogs = redisStdLogs
       this.stdLogs = stdLogs
     },
     async pollRunningBenchmark(algo, bench) {
@@ -172,7 +168,21 @@ export default {
           this.selectedBenchmarkInputName
         )
       }
-    }
+    },
+    async fetchRedisLogs() {
+      let [redisErrorLogs, redisStdLogs] = await redis_logs.fetch(this.serverAddress)
+      this.redisErrorLogs = redisErrorLogs
+      this.redisStdLogs = redisStdLogs
+      return [redisErrorLogs, redisStdLogs]
+    },
+    async removeStdRedisLogs() {
+      await redis_logs.fetch_remove_std(this.serverAddress)
+      setTimeout(this.fetchRedisLogs.bind(this), 1000)
+    },
+    async removeErrorRedisLogs() {
+      await redis_logs.fetch_remove_error(this.serverAddress)
+      setTimeout(this.fetchRedisLogs.bind(this), 1000)
+    },
   },
   computed: {
     selectedAlgorithm: function() {

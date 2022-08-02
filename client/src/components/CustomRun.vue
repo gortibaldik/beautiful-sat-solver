@@ -99,9 +99,15 @@
         <mdb-col xl="6" md="12" class="mb-r col-with-logs">
           <mdb-card class="card-with-logs rounded-border custom-margin-top ">
             <mdb-card-title
-              class="blue darken-2 rounded-border text-center card-header-hoverable">
-              <h4 class="h4-responsive text-white spaced-title"
-                  @click="switchOnModalRedisStd()">Standard Redis Worker Logs</h4>
+              class="blue darken-2 rounded-border text-center">
+              <li class="list-inline-item card-header-hoverable"
+                @click="switchOnModalRedisStd()">
+                <h4 class="h4-responsive text-white spaced-title">Standard Redis Worker Logs</h4>
+              </li>
+              <li class="header-button-style list-inline-item"
+                @click="removeStdRedisLogs()">
+                <h4 class="h4-responsive text-white">Clear</h4>
+              </li>
             </mdb-card-title>
             <mdb-card-body>
               <div class="scrollbar-class">
@@ -127,9 +133,15 @@
         </mdb-col>
         <mdb-col xl="6" md="12" class="mb-r col-with-logs">
           <mdb-card class="card-with-logs rounded-border custom-margin-top ">
-            <mdb-card-title class="blue darken-2 rounded-border text-center card-header-hoverable">
-              <h4 class="h4-responsive text-white spaced-title"
-                  @click="switchOnModalRedisError()">Error Redis Worker Logs</h4>
+            <mdb-card-title class="blue darken-2 rounded-border text-center">
+              <li class="list-inline-item card-header-hoverable"
+                @click="switchOnModalRedisError()">
+                <h4 class="h4-responsive text-white spaced-title">Error Redis Worker Logs</h4>
+              </li>
+              <li class="header-button-style list-inline-item"
+                @click="removeErrorRedisLogs()">
+                <h4 class="h4-responsive text-white">Clear</h4>
+              </li>
             </mdb-card-title>
             <mdb-card-body>
               <div class="scrollbar-class">
