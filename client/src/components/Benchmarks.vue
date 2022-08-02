@@ -8,7 +8,7 @@
       </mdb-card-body>
     </mdb-card>
     <section>
-      <mdb-row>
+      <mdb-row v-show="! isCustomRunRunning">
         <mdb-col xl="4" md="6" class="mb-r" v-for="(algorithm, index) in algorithms" :key="algorithm.name">
           <mdb-card class="cascading-admin-card">
             <div class="admin-up">
@@ -73,6 +73,12 @@
             </mdb-card-body>
           </mdb-card>
         </mdb-col>
+      </mdb-row>
+      <mdb-row v-show="isCustomRunRunning">
+        <mdb-card-body>
+          <mdb-row class="justify-content-center margin-top-little">Unfortunately <strong>no benchmark can be ran right now</strong> as there is another custom run running</mdb-row>
+          <mdb-row class="justify-content-center margin-top-little">We are checking the availability of Benchmark on the background</mdb-row>
+        </mdb-card-body>
       </mdb-row>
     </section>
   </section>

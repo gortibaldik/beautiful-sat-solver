@@ -41,6 +41,10 @@ var custom_run = {
       .then(response => response.json())
     return data.result
   },
+  async fetchRunningCustomRun(serverAddress) {
+    return await fetch(`${serverAddress}/custom_run/get_running_custom_run`)
+      .then(response => response.json())
+  }
 }
 
 export default custom_run

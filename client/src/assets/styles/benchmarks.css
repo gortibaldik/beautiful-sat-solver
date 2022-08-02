@@ -65,3 +65,10 @@
 .classic-admin-card .card-body h4 {
   margin-top: 10px;
 }
+.margin-top-little {
+  margin-top: 10px;
+}
+strong {
+  margin-right: 5px;
+  margin-left: 5px;
+}

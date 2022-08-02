@@ -16,6 +16,7 @@ import {
 } from 'mdbvue'
 
 import Vue from 'vue'
+import custom_run_comm from '@/assets/js/customRun_communication'
 
 export default {
   name: 'Dashboard',
@@ -76,6 +77,8 @@ export default {
       progressBarValue: 0,
       progressBarStyle: "width: 0%",
       displayModalFor: 0, // will be populated from backend
+      isCustomRunRunning: false,
+      customRunInterval: undefined,
     }
   },
   methods: {
@@ -138,6 +141,28 @@ export default {
         })
       }
       return algorithmNames
+    },
+    async pollInfoAboutCustomRun() {
+      let data = await custom_run_comm.fetchRunningCustomRun(this.serverAddress)
+      if (data.result === "failure") {
+        console.log("Server failure pollInfoAboutCustomRun")
+      }
+      console.log(data)
+      if (data.running_job.entry === "none") {
+        this.isCustomRunRunning = false
+        if (this.customRunInterval) {
+          clearInterval(this.customRunInterval)
+          this.customRunInterval = undefined
+        }
+      } else {
+        this.isCustomRunRunning = true
+      }
+    },
+    async getInfoAboutCustomRun() {
+      await this.pollInfoAboutCustomRun()
+      if (this.isCustomRunRunning) {
+        this.customRunInterval = setInterval(this.pollInfoAboutCustomRun.bind(this), 1000)
+      }
     },
     //#endregion INITIALIZATION
     //#region RUN BUTTON
@@ -308,6 +333,7 @@ export default {
     //debugger;  // eslint-disable-line no-debugger
     this.serverAddress = process.env.VUE_APP_SERVER_ADDRESS
     console.log(`server address: "${this.serverAddress}"`)
+    this.getInfoAboutCustomRun()
     this.getAlgorithms()
   }
 }
