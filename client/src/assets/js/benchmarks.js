@@ -335,5 +335,13 @@ export default {
     console.log(`server address: "${this.serverAddress}"`)
     this.getInfoAboutCustomRun()
     this.getAlgorithms()
+  },
+  beforeDestroy() {
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval)
+    }
+    if (this.customRunInterval) {
+      clearInterval(this.customRunInterval)
+    }
   }
 }
