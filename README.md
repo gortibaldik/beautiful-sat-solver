@@ -5,6 +5,8 @@
 1. Start containers: `docker compose up -d --force-recreate --build`
 2. Stop containers: `docker compose stop`
 
+3. (Only if you had had any of previous versions installed) Rebuild: `docker compose build --no-cache --pull`
+
 ### Run development server for both frontend and backend in docker container
 
 1. Start containers:`scripts/start_docker_dev.sh`
@@ -52,3 +54,9 @@
 #### Problems with installation of `psycopg2`
 
 - [stack overflow](https://stackoverflow.com/questions/19843945/psycopg-python-h-no-such-file-or-directory)
+
+#### How to prepare new release of frontend image
+
+- `scripts/build_frontend.sh` - build frontend as `satsolver_frontend_base`
+- `docker tag satsolver_frontend_base gortibaldik/satsolver_frontend_base:<version>`
+- `docker push gortibaldik/satsolver_frontend_base:<version>`
