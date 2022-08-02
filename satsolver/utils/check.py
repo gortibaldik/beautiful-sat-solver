@@ -82,7 +82,11 @@ def check_assignment(
     formula = read_from_input(input_file)
     mapping = None
     if input_file.endswith(".sat"):
-        formula, mapping = dimacs_tseitin_encoding(formula, nnf_reduce_implications=nnf_reduce_implications)
+        formula, mapping = dimacs_tseitin_encoding(
+            formula,
+            nnf_reduce_implications=nnf_reduce_implications,
+            log_info_about_node=False
+        )
     if read_from_file:
         assignment = read_assignment_from_file(assignment_source, mapping)
     else:

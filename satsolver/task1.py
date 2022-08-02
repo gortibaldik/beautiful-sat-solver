@@ -4,7 +4,7 @@ from argparse import ArgumentParser
 from logzero import logger
 from satsolver.tseitin_encoding.ast_tree import ASTAbstractNode
 from satsolver.tseitin_encoding.parsing_utils import create_abstract_syntax_tree
-from satsolver.tseitin_encoding.tseitin_transformation import turn_nnf_to_tseitin
+from satsolver.tseitin_encoding.tseitin_transformation import log_node_debug, log_node_info, turn_nnf_to_tseitin
 from satsolver.utils.file_utils import read_from_input
 from satsolver.utils.logging_utils import set_debug_level
 from satsolver.utils.parser_utils import add_parser_debug_levels
@@ -80,14 +80,32 @@ def print_to_dmacs(tseitin_ast_tree_root: ASTAbstractNode, file=None, should_be_
         content, mapping = _print_to_dmacs(tseitin_ast_tree_root, None, should_be_printed=should_be_printed)
     return content, mapping
 
-def tseitin_encoding(formula: str, nnf_reduce_implications: bool=False):
+def tseitin_encoding(
+    formula: str,
+    nnf_reduce_implications: bool=False,
+    log_info_about_node: bool=True
+):
     ast_tree_root = create_abstract_syntax_tree(formula)
-    tseitin_ast_tree_root = turn_nnf_to_tseitin(ast_tree_root, nnf_reduce_implications)
+    log_node_func = log_node_info
+    if not log_info_about_node:
+        log_node_func = log_node_debug
+    tseitin_ast_tree_root = turn_nnf_to_tseitin(
+        ast_tree_root,
+        nnf_reduce_implications,
+        log_node_func
+    )
 
     return tseitin_ast_tree_root
 
-def dimacs_tseitin_encoding(formula :str, nnf_reduce_implications=True):
-    tseitin_ast_tree_root = tseitin_encoding(formula, nnf_reduce_implications=nnf_reduce_implications)
+def dimacs_tseitin_encoding(
+    formula :str,
+    nnf_reduce_implications=True,
+    log_info_about_node: bool=True
+):
+    tseitin_ast_tree_root = tseitin_encoding(
+        formula,
+        nnf_reduce_implications=nnf_reduce_implications,
+        log_info_about_node=log_info_about_node)
     return print_to_dmacs(tseitin_ast_tree_root, should_be_printed=False)
 
 def create_parser():

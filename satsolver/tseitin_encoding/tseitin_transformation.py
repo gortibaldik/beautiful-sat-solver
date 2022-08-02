@@ -172,14 +172,23 @@ def implications_to_sat(and_formula: ASTAbstractNode, nnf_reduce_implications: b
     
     return merge_and(lc, rc)
 
+def log_node_debug(node):
+    log_node(node, logger.debug)
+
 def log_node_info(node: ASTAbstractNode):
-    logger.info(node)
+    log_node(node, logger.info)
+
+def log_node(node, log_func):
+    log_func(node)
     cnt = node.count()
     cnt["variables"] = len(cnt["variables"])
-    logger.info(cnt)
+    log_func(cnt)
 
-def turn_nnf_to_tseitin(root_of_nnf: ASTAbstractNode, nnf_reduce_implications: bool):
-    log_node_info(root_of_nnf)
+def turn_nnf_to_tseitin(
+    root_of_nnf: ASTAbstractNode,
+    nnf_reduce_implications: bool,
+    log_node_function=log_node_info):
+    log_node_function(root_of_nnf)
     sfs = root_of_nnf.get_subformulas()
     sfs.reverse()
 
@@ -205,5 +214,5 @@ def turn_nnf_to_tseitin(root_of_nnf: ASTAbstractNode, nnf_reduce_implications: b
     
     top_level_and.children = [equivalences[-1].children[0]] + top_level_and.children
 
-    log_node_info(top_level_and)
+    log_node_function(top_level_and)
     return top_level_and
