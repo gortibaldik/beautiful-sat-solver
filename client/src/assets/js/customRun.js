@@ -142,9 +142,10 @@ export default {
       }
       this.startMonitoringCustomRun(algo, bench, benchIn)
     },
-    showInputClicked(bench, benchIn) {
+    async showInputClicked(bench, benchIn) {
       this.showBenchmarkInputContent = true;
-      this.benchmarkInputContent = `<code>Benchmark input content: ${bench}, ${benchIn}</code>`
+      let data = await custom_run_communication.fetchBenchmarkInput(this.serverAddress, bench, benchIn)
+      this.benchmarkInputContent = `<code>${data.result}</code>`
     },
     async fetchInfoFromServer() {
       let [benchmarks, algorithms, running_job] = await custom_run_communication.fetchBasicInfoFromServer(this.serverAddress)
@@ -216,6 +217,11 @@ export default {
         this.selectedBenchmarkName != this.defaultBenchmarkName && 
         this.selectedBenchmarkInputName != this.defaultBenchmarkInputName &&
         this.selectedBenchmarkInputName != this.customInputName
+    },
+    showBenchmarkInputButton: function() {
+      return this.selectedBenchmarkName != this.defaultBenchmarkName && 
+      this.selectedBenchmarkInputName != this.defaultBenchmarkInputName &&
+      this.selectedBenchmarkInputName != this.customInputName
     },
     runButtonText: function() {
       if (this.isCustomRunRunning) {

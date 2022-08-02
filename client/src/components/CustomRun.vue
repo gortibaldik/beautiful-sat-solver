@@ -46,6 +46,7 @@
                     <select
                       class="browser-default custom-select benchmarkPossibilities"
                       v-model="selectedBenchmarkName"
+                      @change="selectedBenchmarkInputName=defaultBenchmarkInputName"
                     >
                       <option selected disabled>{{defaultBenchmarkName}}</option>
                       <option v-for="(bench, index) in benchmarks" :key="index">
@@ -80,8 +81,8 @@
                       <label class="custom-control-label" :for="`LogLevelWarning`">WARNING</label>
                     </div>
                   </mdb-row>
-                  <mdb-row v-show="showRunButton" class="justify-content-center">
-                    <mdb-btn :class="runButtonClass" @click="runButtonClicked(selectedAlgorithmName, selectedBenchmarkName, selectedBenchmarkInputName, selectedLogLevel)">{{runButtonText}}</mdb-btn>
+                  <mdb-row v-show="showBenchmarkInputButton" class="justify-content-center">
+                    <mdb-btn v-show="showRunButton" :class="runButtonClass" @click="runButtonClicked(selectedAlgorithmName, selectedBenchmarkName, selectedBenchmarkInputName, selectedLogLevel)">{{runButtonText}}</mdb-btn>
                     <mdb-btn class="run-button-start" @click="showInputClicked(selectedBenchmarkName, selectedBenchmarkInputName)">Show Benchmark Input</mdb-btn>
                   </mdb-row>
               </mdb-container>
@@ -158,7 +159,11 @@
             <mdb-card-title class="blue darken-2 rounded-border text-center">
                 <h4 class="h4-responsive text-white spaced-title">Benchmark Input Content</h4>
             </mdb-card-title>
-            <mdb-card-body v-html="benchmarkInputContent">
+            <mdb-card-body>
+              <div class="scrollbar-class">
+                <mdb-scrollbar v-html="benchmarkInputContent">
+                </mdb-scrollbar>
+              </div>
             </mdb-card-body>
           </mdb-card>
         </mdb-col>

@@ -27,11 +27,16 @@ def get_benchmarks():
     benchmarks.append(entry)
   return benchmarks
 
+def get_benchmark_post_data():
+  post_data = request.get_json()
+  benchmark_name = post_data.get('benchmark')
+  entry_name     = post_data.get('entry')
+  return benchmark_name, entry_name
+
 def get_post_data():
   post_data = request.get_json()
   algorithm_name  = post_data.get('algorithm')
-  benchmark_name  = post_data.get('benchmark')
-  entry_name      = post_data.get('entry')
+  benchmark_name, entry_name = get_benchmark_post_data()
   return algorithm_name, benchmark_name, entry_name
 
 def get_post_debug_level():
@@ -158,3 +163,19 @@ def get_running_job(saved_jobs):
     if not is_finished:
       return create_running_job_dict(algo, bench, entry)
   return create_running_job_dict("none", "none", "none")
+
+def get_benchmark_entry_content(benchmark_name, entry_name):
+  benchmark_dir = os.path.join(Config.SATSMT_BENCHMARK_ROOT, benchmark_name)
+  if ".." in benchmark_name or not os.path.isdir(benchmark_dir):
+    raise RuntimeError(f"{benchmark_name} is not a valid benchmark name !")
+  
+  entry_filename = os.path.join(benchmark_dir, entry_name)
+  if ".." in entry_filename or not os.path.isfile(entry_filename):
+    raise RuntimeError(f"{entry_name} is not a valid benchmark entry name ({benchmark_name})!")
+  
+  content = ""
+  with open(entry_filename, 'r') as f:
+    for line in f:
+      line = line.strip()
+      content += f"{line}</br>"
+  return content

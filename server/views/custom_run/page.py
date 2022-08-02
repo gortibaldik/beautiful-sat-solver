@@ -7,6 +7,8 @@ from server.utils.redis_utils import (
   set_saved_jobs,
 )
 from server.views.custom_run.utils import (
+  get_benchmark_entry_content,
+  get_benchmark_post_data,
   get_benchmarks,
   get_post_data,
   get_post_debug_level,
@@ -97,3 +99,10 @@ def is_finished():
     entry_name
   )
   return jsonify({'result': 'yes' if is_finished else 'no'})
+
+@custom_run_page.route('/show_benchmark', methods=['POST'])
+@on_exception_result_failure
+def show_benchmark():
+  benchmark_name, entry_name = get_benchmark_post_data()
+  content = get_benchmark_entry_content(benchmark_name, entry_name)
+  return jsonify({'result': content})

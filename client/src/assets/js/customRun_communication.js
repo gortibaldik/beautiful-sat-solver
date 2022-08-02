@@ -44,6 +44,12 @@ var custom_run = {
   async fetchRunningCustomRun(serverAddress) {
     return await fetch(`${serverAddress}/custom_run/get_running_custom_run`)
       .then(response => response.json())
+  },
+  async fetchBenchmarkInput(serverAddress, bench, benchIn) {
+    return await fetch_json.post(`${serverAddress}/custom_run/show_benchmark`, {
+      benchmark: bench,
+      entry:     benchIn
+    })
   }
 }
 
