@@ -1,89 +1,98 @@
 from logzero import logger
-from satsolver.tseitin_encoding.ast_tree import ASTAbstractNode
+from satsolver.dpll.assignment import assign_true, get_literal_int, unassign_multiple
+from satsolver.tseitin_encoding.ast_tree import ASTAbstractNode, SATClause, SATLiteral
+from satsolver.utils.enums import UnitPropagationResult
+from typing import List
 
-def _update_mapping(vcm, clause_index, value, negative: bool):
-    vcm[value] = vcm.get(value, []) + [(clause_index, negative)]
-
-
-def update_mapping(*, vcm, clause_index, child):
-    if len(child.children) == 0:
-        _update_mapping(vcm, clause_index, child._value, negative=False)
-    elif len(child.children) == 1:
-        _update_mapping(vcm, clause_index, child.children[0]._value, negative=True)
-
-def create_clause_mapping(ast_tree_root: ASTAbstractNode):
-    vcm = {} # variable clauses mapping
-    unit_clauses = set()
-    for i, c in enumerate(ast_tree_root.children):
-        if len(c.children) <= 1:
-            update_mapping(vcm=vcm, clause_index=i, child=c)
-            unit_clauses.add(c)
-        else:
-            for sub_c in c.children:
-                update_mapping(vcm=vcm, clause_index=i, child=sub_c)
-    return vcm, unit_clauses
-
-def find_clause_child(clause, value):
-    for i, c in enumerate(clause.children):
-        if len(c.children) == 0:
-            if c._value == value:
-                return i
-        elif len(c.children) == 1:
-            if c.children[0]._value == value:
-                return i
+def find_not_assigned(clause: SATClause):
+    unassigned_literal = None
+    at_least_one_true = False
+    for literal in clause.children:
+        if literal.satVariable.truth_value is None:
+            unassigned_literal = literal
+            break
+        if literal.satVariable.truth_value == literal.positive:
+            at_least_one_true = True
     
-    raise RuntimeError(f"INVALID REMOVAL of {value} from {clause}")
+    # conflict
+    if unassigned_literal is None and not at_least_one_true:
+        # logger.warning(f"{str(clause)} was expected to contain unassigned literal!")
+        return UnitPropagationResult.CONFLICT
+
+    return unassigned_literal
+
+def find_unit_clause(
+    c: List[SATClause] # clauses
+):
+    n_satisfied = 0
+    result, unit_clauses = None, []
+    for clause in c:
+        # clause is satisfied
+        if clause.n_satisfied > 0:
+            n_satisfied += 1
+            continue
+        if len(clause) == clause.n_unsatisfied:
+            return UnitPropagationResult.CONFLICT, None
+        # clause is unit
+        if len(clause) - clause.n_unsatisfied == 1:
+            result = UnitPropagationResult.UNIT_FOUND
+            unit_clauses.append(clause)
+    if result is not None:
+        return result, unit_clauses
+    if n_satisfied == len(c):
+        return UnitPropagationResult.ALL_SATISFIED, None
+    return UnitPropagationResult.NOTHING_FOUND, None
+
+def is_everything_satisfied(
+    ca # all clauses
+):
+    for c in ca:
+        if c.n_satisfied == 0:
+            return False
+    # for c in ca:
+    #     logger.warning(c)
+    return True
 
 
-def set_unit_clause_assignment(unit_clause: ASTAbstractNode, assignment):
-    # the clause is unit, therefore
-    # either it is just a variable node
-    # or it is a not node with only one child
-    not_node = len(unit_clause.children) == 1
-    var_name = unit_clause.children[0]._value if not_node else unit_clause._value
-    assignment[var_name] = not not_node
-    return not not_node, var_name
+def unit_propagation(
+    itc, # int to clauses
+    cs,  # clauses to search
+    ca   # all clauses
+):
+    assigned_literals = []
+    list_of_cs = [cs]
+    while len(list_of_cs) > 0:
+        cs = list_of_cs.pop()
+        result, clauses = find_unit_clause(cs)
 
+        if result == UnitPropagationResult.ALL_SATISFIED:
+            if is_everything_satisfied(ca):
+                return UnitPropagationResult.ALL_SATISFIED, []
 
-def unit_propagation(ast_tree_root: ASTAbstractNode):
-    # vcm - variable clause mapping
-    # each variable is mapped to a list of clauses it appears in
-    vcm, unit_clauses = create_clause_mapping(ast_tree_root)
-    assignment = {}
-    removed_clauses = set()
+        if result == UnitPropagationResult.CONFLICT:
+            unassign_multiple(assigned_literals, itc)
+            return UnitPropagationResult.CONFLICT, []
+        
+        if clauses is None:
+            continue
 
-    while len(unit_clauses) != 0:
-        first = unit_clauses.pop()
-        assigned_value, var_name = set_unit_clause_assignment(first, assignment)
-        logger.debug(f"-- UNIT PROPAGATION: {first}")
+        for clause in clauses:
+            literal = find_not_assigned(clause)
 
-        # clause index and info whether variable is present in the
-        # clause as negative literal
-        remove_from_vcmvar_name = set()
-        for i, (clause_index, clause_negative) in enumerate(vcm[var_name]):
-            if clause_index not in removed_clauses:
-                remove_from_vcmvar_name.add(i)
+            if literal is None:
+                continue
+            elif literal == UnitPropagationResult.CONFLICT:
+                unassign_multiple(assigned_literals, itc)
+                return UnitPropagationResult.CONFLICT, []
 
-                # if literal is in the clause, remove clause
-                if clause_negative == (not assigned_value):
-                    logger.debug(f"REMOVE {ast_tree_root.children[clause_index]}")
-                    removed_clauses.add(clause_index)
-                else:
-                    clause = ast_tree_root.children[clause_index]
-                    if len(clause.children) <= 1:
-                        # unit propagation found contradiction
-                        return None, None, None
+            assign_true(
+                literal,
+                itc,
+                assigned_literals
+            )
+            lit_int, other_int, _ = get_literal_int(literal)
+            list_of_cs.append(itc[other_int])
+    if result == UnitPropagationResult.ALL_SATISFIED and is_everything_satisfied(ca):
+        return result, []
 
-                    logger.debug(f"DECREASE: {clause} || {var_name}")
-                    idx_to_remove = find_clause_child(clause, var_name)
-                    clause.children.pop(idx_to_remove)
-                    if len(clause.children) == 1:
-                        # found another unit clause!
-                        remaining_child = clause.children[0]
-                        logger.debug(f"NEW UNIT: {remaining_child}")
-                        ast_tree_root.children[clause_index] = remaining_child
-                        unit_clauses.add(remaining_child)
-        for i in sorted(remove_from_vcmvar_name, reverse=True):
-            vcm[var_name].pop(i)
-
-    return assignment, vcm, removed_clauses
+    return UnitPropagationResult.NOTHING_FOUND, assigned_literals

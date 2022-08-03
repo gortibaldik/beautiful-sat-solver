@@ -1,3 +1,4 @@
+from typing import List
 from satsolver.tseitin_encoding.symbols import Symbols
 
 class ASTNodeFactory:
@@ -109,3 +110,45 @@ class ASTVariableNode(ASTAbstractNode):
     
     def copy(self):
         return ASTVariableNode(self._type, self._value)
+
+class SATVariable:
+    def __init__(self, positive_int: int, negative_int: int, name: str):
+        self.positive_int = positive_int
+        self.negative_int = negative_int
+        self.name         = name
+        self.truth_value  = None
+    def __repr__(self):
+        return self.name
+
+class SATLiteral:
+    def __init__(
+        self,
+        satVariable: SATVariable,
+        positivity_of_literal
+    ):
+        self.satVariable: SATVariable = satVariable
+        self.positive                 = positivity_of_literal
+    def __repr__(self):
+        s = "" if self.positive else "NOT "
+        s += str(self.satVariable)
+        return s
+
+class SATClause:
+    def __init__(
+        self,
+        children: List[SATLiteral]
+    ):
+        self.children: List[SATLiteral] = children
+        self.n_satisfied                = 0
+        self.n_unsatisfied              = 0
+
+    def __repr__(self):
+        for i, c in enumerate(self.children):
+            if i == 0:
+                s = f"({str(c)}"
+            else:
+                s += f", {c}"
+        return s + ")" + f"[+{self.n_satisfied};-{self.n_unsatisfied}]"
+    
+    def __len__(self):
+        return len(self.children)

@@ -10,13 +10,18 @@ from satsolver.tseitin_encoding.tseitin_transformation import log_node_info
 from satsolver.utils.file_utils import read_from_input
 from satsolver.utils.logging_utils import set_debug_level
 from satsolver.utils.parser_utils import add_parser_debug_levels
-from timeit import default_timer as timer
+from satsolver.utils.time import time_execution
 
 class Extensions(Enum):
     DIMACS=".cnf"
     SMTLIB=".sat"
 
 def recognize_file_extension(file_name: str):
+    """
+    Return Extensions Enum based on file_name (stdin (`file_name == None`) is treated as being in `.sat` format)
+    """
+    if file_name is None:
+        return Extensions.DIMACS.value
     filename, file_extension = os.path.splitext(file_name)
     for extension in Extensions:
         if file_extension == extension.value:
@@ -78,7 +83,19 @@ def create_parser():
     parser.add_argument("--output_to_stdout", action="store_true")
     return parser
 
-def read_tree(input_file, nnf_reduce_implications=True):
+def read_tree(input_file: str, nnf_reduce_implications=True):
+    """
+    Read input in SMTLIB or DIMACS format (recognized by file extension) and create an abstract syntax tree.
+
+    Args:
+
+        @input_file: str
+            - either None or .sat or .cnf format. None means the formula will be read from stdin and it is assumed the formula is in .cnf format.
+            .sat format is transformed to tseitin encoding.
+        
+        @nnf_reduce_implications: bool
+            - whether or not is the formula in the negation normal form. (Formulas in negation normal form are transformed to shorter tseitin encodings)
+    """
     extension = recognize_file_extension(input_file)
     formula = read_from_input(input_file)
     if extension == Extensions.SMTLIB:
@@ -146,13 +163,9 @@ def find_model(
     output_to_stdout=False,
     nnf_reduce_implications=True
 ):
-    if input_file is None:
-        return None
     set_debug_level(warning=warning, debug=debug)
     ast_tree_root = read_tree(input_file, nnf_reduce_implications=nnf_reduce_implications)
-    start = timer()
-    result, model, ndecs, nunit = dpll(ast_tree_root)
-    end = timer()
+    start, end, result, model, ndecs, nunit = time_execution(dpll, ast_tree_root)
     print_result(result, model, ndecs, nunit, end - start, input_file, output_to_stdout)
     return pack_result_to_dict(
         result=result,
