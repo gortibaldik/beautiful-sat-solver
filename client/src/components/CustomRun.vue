@@ -172,7 +172,7 @@
         <mdb-modal-header>
           <mdb-modal-title>{{modalTitle}}</mdb-modal-title>
         </mdb-modal-header>
-        <mdb-modal-body v-html="modalMessage" class="scrollbar-class">
+        <mdb-modal-body v-html="modalMessage">
         </mdb-modal-body>
         <mdb-modal-footer>
           <mdb-btn color="secondary" @click.native="displayModal = false">Close</mdb-btn>

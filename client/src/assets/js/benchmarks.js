@@ -147,7 +147,6 @@ export default {
       if (data.result === "failure") {
         console.log("Server failure pollInfoAboutCustomRun")
       }
-      console.log(data)
       if (data.running_job.entry === "none") {
         this.isCustomRunRunning = false
         if (this.customRunInterval) {
