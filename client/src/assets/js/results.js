@@ -21,6 +21,7 @@ import Vue from 'vue'
 
 export default {
   name: 'Results',
+  title: 'SAT: Results',
   components: {
     mdbRow,
     mdbCol,

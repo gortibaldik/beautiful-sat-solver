@@ -22,6 +22,7 @@ import custom_run_communication from '@/assets/js/customRun_communication'
 
 export default {
   name: 'CustomRun',
+  title: 'SAT: Custom Run',
   components: {
     mdbCard,
     mdbCardBody,

@@ -20,6 +20,7 @@ import custom_run_comm from '@/assets/js/customRun_communication'
 
 export default {
   name: 'Dashboard',
+  title: 'SAT: Benchmarks',
   components: {
     mdbBtn,
     mdbRow,
