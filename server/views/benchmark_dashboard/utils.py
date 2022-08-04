@@ -120,11 +120,13 @@ def stop_job(algorithm_name, benchmark_name, saved_jobs):
 
 def benchmark_name_sorting_criterion(x):
   if "uuf" in x:
-    value = int(x[3:].split('-')[0]) + 10_000
+    value = int(x[3:].split('-')[0]) + 30_000
   elif "uf" in x:
-    value = int(x[2:].split('-')[0])
+    value = int(x[2:].split('-')[0]) + 10_000
   elif "task" in x:
     value = 1
+  elif "flat" in x:
+    value = int((x[4:].split('-')[0]))
   else:
     value = x
   return value
