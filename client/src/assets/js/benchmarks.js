@@ -331,7 +331,6 @@ export default {
   created() {
     //debugger;  // eslint-disable-line no-debugger
     this.serverAddress = process.env.VUE_APP_SERVER_ADDRESS
-    console.log(`server address: "${this.serverAddress}"`)
     this.getInfoAboutCustomRun()
     this.getAlgorithms()
   },
