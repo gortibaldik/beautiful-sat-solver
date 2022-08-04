@@ -1,0 +1,126 @@
+.cascading-admin-card {
+  margin: 20px 0;
+}
+.cascading-admin-card .admin-up {
+  margin-left: -20px;
+  margin-right: 4%;
+  margin-top: -20px;
+}
+.cascading-admin-card .admin-up .fas,
+.cascading-admin-card .admin-up .far {
+  box-shadow: 0 2px 9px 0 rgba(0, 0, 0, 0.2), 0 2px 13px 0 rgba(0, 0, 0, 0.19);
+  padding: 1.2rem;
+  font-size: 2.8rem;
+  color: #fff;
+  text-align: left;
+  margin-right: 0.5rem;
+  border-radius: 5px;
+}
+
+.taskNumber {
+  color: #999999;
+  font-size: 12px;
+  margin-right: 0px;
+}
+
+.cascading-admin-card .benchmarkSelector {
+  color: #999999;
+  margin-bottom: -0.05rem;
+  font-size: 13px;
+}
+
+.benchmarkPossibilities {
+  color: #1f71ff;
+  font-size: 12px;
+  padding: 0.1rem;
+}
+
+.classic-admin-card .card-body {
+  color: #fff;
+  margin-bottom: 0;
+  padding: 0.9rem;
+}
+.classic-admin-card .card-body p {
+  font-size: 13px;
+  opacity: 0.7;
+  margin-bottom: 0;
+}
+.classic-admin-card .card-body h4 {
+  margin-top: 10px;
+}
+
+.title-class {
+  background-color: white;
+  padding-left: 20px;
+  border-radius: 5px;
+}
+
+.algo-select { 
+  padding-bottom: 10px;
+}
+
+.top-card-section {
+  margin-top: -50px;
+}
+
+.margin-top-little {
+  margin-top: 10px;
+}
+
+.no-up-padding-card-body {
+  padding-top: 0px;
+}
+
+.run-button-start {
+  background-color: var(--primary) !important;
+}
+
+.run-button-stop {
+  background-color: #aa66cc !important;
+}
+
+.row-with-logs {
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+.col-with-logs {
+  padding-left: 0px;
+  padding-right: 20px;
+  padding-bottom: 20px;
+}
+
+.spaced-title {
+  margin: 5px;
+}
+
+.rounded-border {
+  border-radius: 5px;
+}
+
+.scrollbar-class {
+  height: 25vh;
+}
+
+.card-header-hoverable:hover {
+  background-color: #5595fb !important;
+}
+
+.header-button-style {
+  float: right;
+  padding: 5px;
+  height: 50px;
+  border-style: solid;
+  border-color: black;
+  border-width: thin;
+  background-color: #1452b6; 
+}
+
+.header-button-style:hover {
+  background-color: #5595fb
+}
+
+strong {
+  margin-right: 5px;
+  margin-left: 5px;
+}

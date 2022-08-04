@@ -1,0 +1,7 @@
+FROM gortibaldik/satsolver_base:0.11 as production
+WORKDIR /app
+COPY ./server ./server
+COPY ./satsolver ./satsolver
+ 
+CMD if [ ! -d "$SATSOLVER_REDIS_LOGS" ]; then mkdir -p $SATSOLVER_REDIS_LOGS; fi && \
+    rq worker $REDIS_QUEUE_NAME --url redis://redis:6379 >> "${SATSOLVER_REDIS_LOGS}${SATSOLVER_REDIS_STD_FILENAME}" 2>> "${SATSOLVER_REDIS_LOGS}${SATSOLVER_REDIS_ERROR_FILENAME}"

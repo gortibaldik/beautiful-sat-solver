@@ -1,0 +1,48 @@
+.card-with-logs {
+  margin-top: 20px;
+}
+
+.rounded-border {
+  border-radius: 5px;
+}
+
+.spaced-title {
+  margin: 5px;
+}
+
+.card-header-hoverable:hover {
+  background-color: #5595fb !important;
+}
+
+.scrollbar-class {
+  height: 40vh
+}
+
+.graph-li-class {
+  padding-top:13px;
+  height: 50px;
+}
+
+.header-button-style {
+  float: right;
+  padding: 5px;
+  height: 50px;
+  border-style: solid;
+  border-color: black;
+  border-width: thin;
+  background-color: #1452b6; 
+}
+
+.header-button-style:hover {
+  background-color: #5595fb
+}
+
+.title-class {
+  background-color: white;
+  padding-left: 20px;
+  border-radius: 5px;
+}
+
+.custom-margin-top {
+  margin-top: 0px
+}

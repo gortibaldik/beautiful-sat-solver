@@ -1,0 +1,1 @@
+docker exec -it satsolver_backend_dev /bin/sh

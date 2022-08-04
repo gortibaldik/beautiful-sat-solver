@@ -1,0 +1,143 @@
+.card.card-cascade .view.gradient-card-header {
+  padding: 1rem 1rem;
+  text-align: center;
+  margin-top: 0px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
+.card.card-cascade h3,
+.card.card-cascade h4 {
+  margin-bottom: 0;
+}
+.card {
+  background-color: transparent;
+}
+
+.card-body {
+  padding-left: 0px;
+  padding-right: 0px;
+}
+
+.title-class {
+  background-color: white;
+  padding-left: 20px;
+  border-radius: 5px;
+}
+
+.custom-margin-top {
+  margin-top: 0px
+}
+
+.results-table {
+  padding-top: 0px;
+}
+
+table {
+  table-layout: fixed;
+}
+
+td {
+  overflow: hidden;
+}
+
+.header-button-style {
+  float: right;
+  padding-top:13px;
+  padding-left: 5px;
+  padding-right: 5px;
+  height: 50px;
+  border-style: solid;
+  border-color: black;
+  border-width: thin;
+}
+
+.dark-blue-background {
+  background-color: #1452b6;
+}
+
+.light-blue-background {
+  background-color: #5595fb
+}
+
+.results-row {
+  margin-right: 5px;
+  margin-left: 5px;
+}
+
+.graph-li-class {
+  padding-top:13px;
+  height: 50px;
+}
+
+/* CSS styles for checkboxes: https://www.sliderrevolution.com/resources/css-checkbox/
+- author: thelaazyguy
+-  
+ */
+.input_wrapper{
+  width: 80px;
+  height: 40px;
+  position: relative;
+  cursor: pointer;
+}
+
+.input_wrapper input[type="checkbox"]{
+  width: 80px;
+  height: 40px;
+  cursor: pointer;
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  background: #4285F4;
+  border-radius: 2px;
+  position: relative;
+  outline: 0;
+  -webkit-transition: all .2s;
+  transition: all .2s;
+}
+
+.input_wrapper input[type="checkbox"]:after{
+  position: absolute;
+  content: "";
+  top: 3px;
+  left: 3px;
+  width: 34px;
+  height: 34px;
+  background: #dfeaec;
+  z-index: 2;
+  border-radius: 2px;
+  -webkit-transition: all .35s;
+  transition: all .35s;
+}
+
+.input_wrapper .is_checked{
+  width: 18px;
+  left: 18%;
+  -webkit-transform: translateX(190%) translateY(-30%) scale(0);
+          transform: translateX(190%) translateY(-30%) scale(0);
+}
+
+.input_wrapper .is_unchecked{
+  width: 15px;
+  right: 10%;
+  -webkit-transform: translateX(0) translateY(-30%) scale(1);
+          transform: translateX(0) translateY(-30%) scale(1);
+}
+
+/* Checked State */
+.input_wrapper input[type="checkbox"]:checked{
+  background: #23da87;
+}
+
+.input_wrapper input[type="checkbox"]:checked:after{
+  left: calc(100% - 37px);
+}
+
+.input_wrapper input[type="checkbox"]:checked + .is_checked{
+  -webkit-transform: translateX(0) translateY(-30%) scale(1);
+          transform: translateX(0) translateY(-30%) scale(1);
+}
+
+.input_wrapper input[type="checkbox"]:checked ~ .is_unchecked{
+  -webkit-transform: translateX(-190%) translateY(-30%) scale(0);
+          transform: translateX(-190%) translateY(-30%) scale(0);
+}

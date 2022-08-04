@@ -1,0 +1,20 @@
+FROM nginx:stable-alpine as production
+WORKDIR /app
+COPY ./requirements.txt .
+
+# separation of RUN commands: https://stackoverflow.com/questions/39223249/multiple-run-vs-single-chained-run-in-dockerfile-which-is-better
+# https://dzone.com/articles/docker-layers-explained
+
+RUN addgroup -S satsmt && adduser -S satsmt -G satsmt
+RUN   apk update && \
+      apk add --no-cache python3 && \
+      if [ ! -e /usr/bin/python ]; then ln -sf /usr/bin/python3 /usr/bin/python; fi && \
+      python -m ensurepip && \
+      rm -r /usr/lib/python*/ensurepip && \
+      if [ ! -e /usr/bin/pip ]; then ln -s pip3 /usr/bin/pip; fi && \
+      pip install --upgrade pip setuptools && \
+      rm -r /root/.cache
+RUN apk update && apk add postgresql-dev gcc python3-dev musl-dev
+ENV PATH="/home/satsmt/.local/bin:${PATH}"
+
+RUN pip install -r requirements.txt && pip install gunicorn
