@@ -11,9 +11,9 @@ from satsolver.utils.stats import SATSolverStats
 
 def __dpll(
     dec_var_int,
-    itc,
-    itl: List[SATLiteral],
-    c,
+    itc, # int to clause
+    itl: List[SATLiteral], # int to literal
+    c, # clauses
     stats: SATSolverStats
 ):
     cs = c # cs == clauses to search
@@ -44,11 +44,16 @@ def __dpll(
 
 def _dpll(
     dec_var_int,
-    itc,
-    itl: List[SATLiteral],
-    c,
+    itc, # int to clause
+    itl: List[SATLiteral], # int to literal
+    c, # clauses
     stats: SATSolverStats
 ):
+    """
+    Assigns true to literal which has index `dec_var_int` in table `itl` (int to literal). Calls `__dpll`.
+    Also unassigns in case of `UNSAT` (e.g. removes the need for unassignments in all cases where `__dpll`
+    can return `UNSAT`)
+    """
     other_int, literal = None, None
     if dec_var_int is not None:
         literal = itl[dec_var_int]
