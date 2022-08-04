@@ -3,11 +3,11 @@ from satsolver.dpll.assignment import assign_true, get_literal_int, unassign, un
 from satsolver.dpll.decision_variable_selection import dec_var_selection
 from satsolver.dpll.structures_preparation import prepare_structures
 from satsolver.dpll.unit_propagation import unit_propagation
-from satsolver.tseitin_encoding.ast_tree import ASTAbstractNode, SATLiteral
 from satsolver.utils.enums import DecisionVariableResult, UnitPropagationResult, SATSolverResult
+from satsolver.utils.representation import SATLiteral
+from satsolver.utils.stats import SATSolverStats
 from typing import List
 
-from satsolver.utils.stats import SATSolverStats
 
 def __dpll(
     dec_var_int,
@@ -26,7 +26,7 @@ def __dpll(
     elif unitPropResult == UnitPropagationResult.ALL_SATISFIED:
         return SATSolverResult.SAT, None
 
-    decVarResult, pos_int, neg_int = dec_var_selection(itl, itc)
+    decVarResult, pos_int, neg_int = dec_var_selection(itl)
 
     if decVarResult == DecisionVariableResult.FAILURE:
         logger.warning("DecVarResult is FAILURE")
@@ -71,7 +71,7 @@ def _dpll(
 
     return result
 
-def dpll(ast_tree_root: ASTAbstractNode):
+def dpll(ast_tree_root):
     itl, vti, itc, c, stats = prepare_structures(ast_tree_root)
     result = _dpll(None, itc, itl, c, stats)
 
@@ -87,7 +87,5 @@ def dpll(ast_tree_root: ASTAbstractNode):
         model = {}
         for var_name, (ipos, ineg) in vti.items():
             model[var_name] = itl[ipos].satVariable.truth_value
-
-
 
     return result.value, model, stats

@@ -1,13 +1,10 @@
-from typing import List
-from satsolver.dpll.unit_propagation import is_everything_satisfied
-
-from satsolver.tseitin_encoding.ast_tree import SATClause, SATLiteral
+from satsolver.utils.representation import SATLiteral
 from satsolver.utils.enums import DecisionVariableResult
+from typing import List
 
 
 def dec_var_selection(
   itl: List[SATLiteral], # int to literal
-  itc: List[SATClause]   # int to clause
 ):
   """
   Select first unassigned variable

@@ -1,11 +1,7 @@
-from satsolver.tseitin_encoding.ast_tree import (
-    SATClause,
-    SATLiteral,
-    SATVariable,
-)
-from typing import List
-
+from satsolver.dpll.representation import SATClause
+from satsolver.utils.representation import SATLiteral, SATVariable
 from satsolver.utils.stats import SATSolverStats
+from typing import List
 
 
 def assign_variable_to_structures(

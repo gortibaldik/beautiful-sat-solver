@@ -1,10 +1,8 @@
-from logzero import logger
 from satsolver.dpll.assignment import assign_true, get_literal_int, unassign_multiple
-from satsolver.tseitin_encoding.ast_tree import ASTAbstractNode, SATClause, SATLiteral
+from satsolver.dpll.representation import SATClause
 from satsolver.utils.enums import UnitPropagationResult
-from typing import List
-
 from satsolver.utils.stats import SATSolverStats
+from typing import List
 
 def find_not_assigned(clause: SATClause):
     unassigned_literal = None

@@ -1,5 +1,5 @@
-from logzero import logger
-from satsolver.tseitin_encoding.ast_tree import SATClause, SATLiteral
+from satsolver.dpll.representation import SATClause
+from satsolver.utils.representation import SATLiteral
 from satsolver.utils.enums import UnitPropagationResult
 from typing import List
 
