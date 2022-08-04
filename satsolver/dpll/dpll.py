@@ -7,16 +7,19 @@ from satsolver.tseitin_encoding.ast_tree import ASTAbstractNode, SATLiteral
 from satsolver.utils.enums import DecisionVariableResult, UnitPropagationResult, SATSolverResult
 from typing import List
 
+from satsolver.utils.stats import SATSolverStats
+
 def __dpll(
     dec_var_int,
     itc,
     itl: List[SATLiteral],
-    c
+    c,
+    stats: SATSolverStats
 ):
     cs = c # cs == clauses to search
     if dec_var_int is not None:
         cs = itc[dec_var_int]
-    unitPropResult, assigned_literals = unit_propagation(itc, cs, c)
+    unitPropResult, assigned_literals = unit_propagation(itc, cs, c, stats)
 
     if unitPropResult == UnitPropagationResult.CONFLICT:
         return SATSolverResult.UNSAT, assigned_literals
@@ -29,11 +32,11 @@ def __dpll(
         logger.warning("DecVarResult is FAILURE")
         return SATSolverResult.UNSAT
 
-    satResultPos = _dpll(pos_int, itc, itl, c)
+    satResultPos = _dpll(pos_int, itc, itl, c, stats)
     if satResultPos == SATSolverResult.SAT:
         return satResultPos, None
 
-    satResultNeg = _dpll(neg_int, itc, itl, c)
+    satResultNeg = _dpll(neg_int, itc, itl, c, stats)
     if satResultNeg == SATSolverResult.SAT:
         return satResultNeg, None
 
@@ -43,17 +46,19 @@ def _dpll(
     dec_var_int,
     itc,
     itl: List[SATLiteral],
-    c
+    c,
+    stats: SATSolverStats
 ):
     other_int, literal = None, None
     if dec_var_int is not None:
         literal = itl[dec_var_int]
         lit_int, other_int, is_positive = get_literal_int(literal)
         result = assign_true(literal, itc)
+        stats.decVars += 1
         if result == UnitPropagationResult.CONFLICT:
             unassign(literal, itc)
             return SATSolverResult.UNSAT
-    result, assigned_variables = __dpll(other_int, itc, itl, c)
+    result, assigned_variables = __dpll(other_int, itc, itl, c, stats)
     if result == SATSolverResult.UNSAT:
         unassign_multiple(assigned_variables, itc)
         if literal is not None:
@@ -62,8 +67,8 @@ def _dpll(
     return result
 
 def dpll(ast_tree_root: ASTAbstractNode):
-    itl, vti, itc, c = prepare_structures(ast_tree_root)
-    result = _dpll(None, itc, itl, c)
+    itl, vti, itc, c, stats = prepare_structures(ast_tree_root)
+    result = _dpll(None, itc, itl, c, stats)
 
     # health check
     if result == SATSolverResult.UNSAT:
@@ -80,4 +85,4 @@ def dpll(ast_tree_root: ASTAbstractNode):
 
 
 
-    return result.value, model, 0, 0
+    return result.value, model, stats

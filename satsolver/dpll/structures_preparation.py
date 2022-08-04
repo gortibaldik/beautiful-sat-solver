@@ -5,6 +5,8 @@ from satsolver.tseitin_encoding.ast_tree import (
 )
 from typing import List
 
+from satsolver.utils.stats import SATSolverStats
+
 
 def assign_variable_to_structures(
     variable,
@@ -62,4 +64,5 @@ def prepare_structures(ast_tree_root):
                 itc[literalInt].append(satClause)
 
         c.append(satClause)
-    return itl, vti, itc, c
+    stats = SATSolverStats()
+    return itl, vti, itc, c, stats

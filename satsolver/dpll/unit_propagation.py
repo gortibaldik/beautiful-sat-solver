@@ -4,6 +4,8 @@ from satsolver.tseitin_encoding.ast_tree import ASTAbstractNode, SATClause, SATL
 from satsolver.utils.enums import UnitPropagationResult
 from typing import List
 
+from satsolver.utils.stats import SATSolverStats
+
 def find_not_assigned(clause: SATClause):
     unassigned_literal = None
     at_least_one_true = False
@@ -57,7 +59,8 @@ def is_everything_satisfied(
 def unit_propagation(
     itc, # int to clauses
     cs,  # clauses to search
-    ca   # all clauses
+    ca,  # all clauses
+    stats: SATSolverStats
 ):
     assigned_literals = []
     list_of_cs = [cs]
@@ -85,11 +88,13 @@ def unit_propagation(
                 unassign_multiple(assigned_literals, itc)
                 return UnitPropagationResult.CONFLICT, []
 
+
             assign_true(
                 literal,
                 itc,
                 assigned_literals
             )
+            stats.unitProps += 1
             lit_int, other_int, _ = get_literal_int(literal)
             list_of_cs.append(itc[other_int])
     if result == UnitPropagationResult.ALL_SATISFIED and is_everything_satisfied(ca):
