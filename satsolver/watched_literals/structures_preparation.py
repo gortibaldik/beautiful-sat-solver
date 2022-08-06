@@ -2,13 +2,13 @@ from satsolver.watched_literals.representation import SATLiteral
 from satsolver.utils.stats import SATSolverStats
 from satsolver.utils.structures_preparation import assign_literal_to_structures
 from satsolver.watched_literals.representation import SATClause
-from typing import List
+from typing import List, Tuple
 
 def prepare_structures(ast_tree_root):
     itl: List[SATLiteral] = [] # int to literal
     vti = {} # variable to int
     itc = [] # int to clauses
-    c: List[SATClause]   = [] # clauses
+    c: List[Tuple[SATClause, int]]   = [] # clauses
     for clause in ast_tree_root.children:
         # it is a literal
         if len(clause.children) <= 1:
@@ -22,8 +22,7 @@ def prepare_structures(ast_tree_root):
             literal = itl[literalInt]
             satClause = SATClause([literal])
             satClause.watched[0] = 0 # index which is watched in the clause
-            literal.watched_index = 0 # index in satClause.watched which belongs to literal
-            itc[literalInt].append(satClause)
+            itc[literalInt].append((satClause, 0))
         # it is a disjunction
         else:
             satClause= SATClause([])
@@ -40,10 +39,9 @@ def prepare_structures(ast_tree_root):
                 satClause.children.append(literal)
                 if watched_index < 2:
                     satClause.watched[watched_index] = watched_index # index which is watched in the clause
-                    literal.watched_index = watched_index # index in satClause.watched which belongs to literal
-                    itc[literalInt].append(satClause)
+                    itc[literalInt].append((satClause, watched_index))
                     watched_index += 1
 
-        c.append(satClause)
+        c.append((satClause, -1))
     stats = SATSolverStats()
     return itl, vti, itc, c, stats
