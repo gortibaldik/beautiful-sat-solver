@@ -8,7 +8,7 @@ def get_literal_int(literal: SATLiteral):
   else:
     lit_int = literal.satVariable.negative_int
     other_int = literal.satVariable.positive_int
-  return lit_int, other_int, is_positive
+  return lit_int, other_int
 
 def assign_variable_to_structures(
     variable,

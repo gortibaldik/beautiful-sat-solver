@@ -30,6 +30,12 @@ class SATLiteral:
     s += "" if self.positive else "NOT "
     s += str(self.satVariable)
     return s
+  
+  def satisfy(self):
+    self.satVariable.truth_value = self.positive
+  
+  def unassign(self):
+    self.satVariable.truth_value = None
 
   def is_assigned(self):
     return self.satVariable.truth_value is not None

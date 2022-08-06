@@ -9,10 +9,10 @@ def find_not_assigned(clause: SATClause):
   unassigned_literal = None
   at_least_one_true = False
   for literal in clause.children:
-    if literal.satVariable.truth_value is None:
+    if not literal.is_assigned():
       unassigned_literal = literal
       break
-    if literal.satVariable.truth_value == literal.positive:
+    if literal.is_satisfied():
        at_least_one_true = True
     
   # conflict
@@ -78,7 +78,7 @@ def unit_propagation(
         assigned_literals
       )
       stats.unitProps += 1
-      lit_int, other_int, _ = get_literal_int(literal)
+      lit_int, other_int = get_literal_int(literal)
       list_of_cs.append(itc[other_int])
 
   return UnitPropagationResult.NOTHING_FOUND, assigned_literals

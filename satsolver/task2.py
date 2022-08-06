@@ -8,7 +8,7 @@ from satsolver.dpll.dpll import DPLL
 
 def get_info():
   return general_setup.get_info(
-    name="DPLL.v3",
+    name="DPLL.v4",
     taskName="TASK 2",
     benchmarkable=True
   )
@@ -22,12 +22,12 @@ def find_model(
   nnf_reduce_implications=True
 ):
   dpll = DPLL(
-    prepare_structures,
-    unit_propagation,
-    dec_var_selection,
-    assign_true,
-    unassign,
-    unassign_multiple
+    prepare_structures=prepare_structures,
+    unit_propagation=unit_propagation,
+    dec_var_selection=dec_var_selection,
+    assign_true=assign_true,
+    unassign=unassign,
+    unassign_multiple=unassign_multiple
   )
   return general_setup.find_model(
     dpll.dpll,

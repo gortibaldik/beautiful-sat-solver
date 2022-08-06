@@ -10,8 +10,7 @@ def dec_var_selection(
   Select first unassigned variable
   """
   for l in itl:
-    if l.satVariable.truth_value is None:
-      return DecisionVariableResult.SUCCESS, \
-             l.satVariable.positive_int, \
+    if not l.is_assigned():
+      return l.satVariable.positive_int, \
              l.satVariable.negative_int
-  return DecisionVariableResult.FAILURE, None, None
+  raise RuntimeError("Each variable is assigned!")

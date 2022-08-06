@@ -49,11 +49,7 @@ class DPLL:
 
     logger.debug(f"UP: {assigned_literals}")
 
-    decVarResult, pos_int, neg_int = self.dec_var_selection(itl)
-
-    if decVarResult == DecisionVariableResult.FAILURE:
-      logger.warning("DecVarResult is FAILURE")
-      return SATSolverResult.UNSAT
+    pos_int, neg_int = self.dec_var_selection(itl)
 
     satResultPos = self._dpll(pos_int, itc, itl, c, stats, n_variables, n_assigned_variables)
     if satResultPos == SATSolverResult.SAT:
@@ -83,13 +79,10 @@ class DPLL:
     other_int, literal = None, None
     if dec_var_int is not None:
       literal = itl[dec_var_int]
-      lit_int, other_int, is_positive = get_literal_int(literal)
-      result = self.assign_true(literal, itc)
+      lit_int, other_int = get_literal_int(literal)
+      self.assign_true(literal, itc)
       stats.decVars += 1
       n_assigned_variables += 1
-      if result == UnitPropagationResult.CONFLICT:
-        self.unassign(literal, itc)
-        return SATSolverResult.UNSAT
 
     result, assigned_literals = self.__dpll(other_int, itc, itl, c, stats, n_variables, n_assigned_variables)
     if result == SATSolverResult.UNSAT:

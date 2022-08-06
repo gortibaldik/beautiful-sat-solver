@@ -1,7 +1,6 @@
 from satsolver.dpll.representation import SATClause
 from satsolver.utils.representation import SATLiteral
 from satsolver.utils.structures_preparation import get_literal_int
-from satsolver.utils.enums import UnitPropagationResult
 from typing import List
 
 def assign_true(
@@ -9,11 +8,11 @@ def assign_true(
   itc: List[List[SATClause]], # int to clauses
   assigned_literals=[]
 ):
-  if literal.satVariable.truth_value is not None:
+  if literal.is_assigned():
     raise RuntimeError(f"`{str(literal)}` was supposed to be unassigned!")
   assigned_literals.append(literal)
-  lit_int, other_int, is_positive = get_literal_int(literal)
-  literal.satVariable.truth_value = is_positive
+  lit_int, other_int = get_literal_int(literal)
+  literal.satisfy()
 
   positive_clauses = itc[lit_int]
   for clause in positive_clauses:
@@ -22,25 +21,20 @@ def assign_true(
       raise RuntimeError(f"ASSIGN on `{str(clause)}`: n_satisfied > len(clause)")
   
   negative_clauses = itc[other_int]
-  result = UnitPropagationResult.SUCCESS
   for clause in negative_clauses:
     clause.n_unsatisfied += 1
     if clause.n_unsatisfied > len(clause):
       raise RuntimeError(f"ASSIGN on `{str(clause)}`: n_unsatisfied > len(clause)")
-    if clause.n_unsatisfied == len(clause):
-      result = UnitPropagationResult.CONFLICT
-  
-  return result
 
 def unassign(
   literal: SATLiteral,
   itc: List[List[SATClause]], # int to clauses
 ):
-  if literal.satVariable.truth_value is None:
+  if not literal.is_assigned():
     raise RuntimeError(f"`{str(literal)}` was supposed to be assigned!")
-  lit_int, other_int, is_positive = get_literal_int(literal)
+  lit_int, other_int = get_literal_int(literal)
 
-  literal.satVariable.truth_value = None
+  literal.unassign()
   
   positive_clauses = itc[lit_int]
   for clause in positive_clauses:
