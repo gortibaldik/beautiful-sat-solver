@@ -35,12 +35,14 @@ class DPLL:
     if dec_var_int is not None:
       cs = itc[dec_var_int]
     unitPropResult, assigned_literals = self.unit_propagation(itc, cs, c, stats)
-    logger.debug(f"UP: {assigned_literals}")
 
     if unitPropResult == UnitPropagationResult.CONFLICT:
       return SATSolverResult.UNSAT, assigned_literals
     elif unitPropResult == UnitPropagationResult.ALL_SATISFIED:
+      logger.debug(f"UP: {assigned_literals}")
       return SATSolverResult.SAT, None
+
+    logger.debug(f"UP: {assigned_literals}")
 
     decVarResult, pos_int, neg_int = self.dec_var_selection(itl)
 
@@ -80,9 +82,11 @@ class DPLL:
       if result == UnitPropagationResult.CONFLICT:
         self.unassign(literal, itc)
         return SATSolverResult.UNSAT
-    result, assigned_variables = self.__dpll(other_int, itc, itl, c, stats)
+    result, assigned_literals = self.__dpll(other_int, itc, itl, c, stats)
     if result == SATSolverResult.UNSAT:
-      self.unassign_multiple(assigned_variables, itc)
+      if len(assigned_literals) != 0:
+        logger.debug(f"DPLL: Conflict: {assigned_literals}")
+      self.unassign_multiple(assigned_literals, itc)
       if literal is not None:
         self.unassign(literal, itc)
 

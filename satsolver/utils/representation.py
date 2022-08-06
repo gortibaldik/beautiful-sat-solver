@@ -8,24 +8,34 @@ class SATVariable:
         return self.name
 
 class SATLiteral:
-    def __init__(
-        self,
-        satVariable: SATVariable,
-        positivity_of_literal
-    ):
-        self.satVariable: SATVariable = satVariable
-        self.positive: bool           = positivity_of_literal
-    
-    def __repr__(self):
-        s = "" if self.positive else "NOT "
-        s += str(self.satVariable)
-        return s
+  def __init__(
+      self,
+      satVariable: SATVariable,
+      positivity_of_literal
+  ):
+      self.satVariable: SATVariable = satVariable
+      self.positive: bool           = positivity_of_literal
 
-    def is_assigned(self):
-        return self.satVariable.truth_value is not None
-
-    def is_satisfied(self):
-        return self.positive == self.satVariable.truth_value
+  def _lts(self):
+    """Literal to Sign"""
+    if not self.is_assigned():
+      return "?"
+    elif self.is_satisfied():
+      return "+"
+    else:
+      return "-"
     
-    def is_unsatisfied(self):
-        return self.is_assigned() and not self.is_satisfied()
+  def __repr__(self):
+    s = f"[{self._lts()}]"
+    s += "" if self.positive else "NOT "
+    s += str(self.satVariable)
+    return s
+
+  def is_assigned(self):
+    return self.satVariable.truth_value is not None
+
+  def is_satisfied(self):
+    return self.positive == self.satVariable.truth_value
+
+  def is_unsatisfied(self):
+    return self.is_assigned() and not self.is_satisfied()
