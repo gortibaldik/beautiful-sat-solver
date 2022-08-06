@@ -26,3 +26,6 @@ class SATLiteral:
 
     def is_satisfied(self):
         return self.positive == self.satVariable.truth_value
+    
+    def is_unsatisfied(self):
+        return self.is_assigned() and not self.is_satisfied()

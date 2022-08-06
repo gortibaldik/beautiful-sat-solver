@@ -1,17 +1,8 @@
 from satsolver.dpll.representation import SATClause
 from satsolver.utils.representation import SATLiteral
+from satsolver.utils.structures_preparation import get_literal_int
 from satsolver.utils.enums import UnitPropagationResult
 from typing import List
-
-def get_literal_int(literal: SATLiteral):
-  is_positive = literal.positive
-  if is_positive:
-    lit_int = literal.satVariable.positive_int
-    other_int = literal.satVariable.negative_int
-  else:
-    lit_int = literal.satVariable.negative_int
-    other_int = literal.satVariable.positive_int
-  return lit_int, other_int, is_positive
 
 def assign_true(
   literal: SATLiteral,

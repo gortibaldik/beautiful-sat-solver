@@ -166,6 +166,7 @@ def benchmark(file, algorithm_name, benchmark_name, debug_level):
     total_number_of_benchmarks = len(benchmark_filenames)
     cumulative_stats = init_cumulative_stats()
     debug, info, warning = log_level_per_debug_level(debug_level)
+    check_debug, check_info, check_warning = log_level_per_debug_level(Config.CHECK_LOG_LEVEL)
 
     for i, filename in enumerate(benchmark_filenames):
       job.meta['progress'] = i * 100 / total_number_of_benchmarks
@@ -179,8 +180,8 @@ def benchmark(file, algorithm_name, benchmark_name, debug_level):
       check_assignment(
         input_file=filename,
         assignment_source=result["model"],
-        debug=debug,
-        warning=warning,
+        debug=check_debug,
+        warning=check_warning,
         read_from_file=False,
         is_satisfiable="uuf" not in filename,
         nnf_reduce_implications=Config.NNF_REDUCE_IMPLICATIONS
@@ -227,6 +228,7 @@ def custom_run(
       return
 
     debug, info, warning = log_level_per_debug_level(debug_level)
+    check_debug, check_info, check_warning = log_level_per_debug_level(Config.CHECK_LOG_LEVEL)
     result = algo_module.find_model(
       input_file=benchmark_filename,
       debug=debug,
@@ -237,8 +239,8 @@ def custom_run(
     check_assignment(
       input_file=benchmark_filename,
       assignment_source=result["model"],
-      debug=debug,
-      warning=warning,
+      debug=check_debug,
+      warning=check_warning,
       read_from_file=False,
       is_satisfiable="uuf" not in benchmark_filename,
       nnf_reduce_implications=Config.NNF_REDUCE_IMPLICATIONS

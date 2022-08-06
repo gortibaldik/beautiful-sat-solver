@@ -147,7 +147,13 @@ def get_info(
   taskName: str,
   benchmarkable: bool
 ):
-  """"""
+  """Provides information needed by server/frontend for correctly displaying the benchmark in client browser
+  
+  Args:
+    @name: str              name of the benchmark
+    @taskName: str          name of the task
+    @benchmarkable: bool    whether to display task in the benchmark/custom run menu (whether it can be ran on benchmarks)
+  """
   return {
     "name": name,
     "taskName": taskName,

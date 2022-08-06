@@ -1,5 +1,15 @@
 from satsolver.utils.representation import SATLiteral, SATVariable
 
+def get_literal_int(literal: SATLiteral):
+  is_positive = literal.positive
+  if is_positive:
+    lit_int = literal.satVariable.positive_int
+    other_int = literal.satVariable.negative_int
+  else:
+    lit_int = literal.satVariable.negative_int
+    other_int = literal.satVariable.positive_int
+  return lit_int, other_int, is_positive
+
 def assign_variable_to_structures(
     variable,
     vti, # variable to int
