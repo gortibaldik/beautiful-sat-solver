@@ -29,7 +29,9 @@ class DPLL:
     itc, # int to clause
     itl: List[SATLiteral], # int to literal
     c, # clauses
-    stats: SATSolverStats
+    stats: SATSolverStats,
+    n_variables,
+    n_assigned_variables
   ):
     cs = c # cs == clauses to search
     if dec_var_int is not None:
@@ -38,7 +40,10 @@ class DPLL:
 
     if unitPropResult == UnitPropagationResult.CONFLICT:
       return SATSolverResult.UNSAT, assigned_literals
-    elif unitPropResult == UnitPropagationResult.ALL_SATISFIED:
+
+    # end condition -> each variable is assigned and there is no conflict
+    n_assigned_variables += len(assigned_literals)
+    if n_assigned_variables == n_variables:
       logger.debug(f"UP: {assigned_literals}")
       return SATSolverResult.SAT, None
 
@@ -50,11 +55,11 @@ class DPLL:
       logger.warning("DecVarResult is FAILURE")
       return SATSolverResult.UNSAT
 
-    satResultPos = self._dpll(pos_int, itc, itl, c, stats)
+    satResultPos = self._dpll(pos_int, itc, itl, c, stats, n_variables, n_assigned_variables)
     if satResultPos == SATSolverResult.SAT:
       return satResultPos, None
 
-    satResultNeg = self._dpll(neg_int, itc, itl, c, stats)
+    satResultNeg = self._dpll(neg_int, itc, itl, c, stats, n_variables, n_assigned_variables)
     if satResultNeg == SATSolverResult.SAT:
       return satResultNeg, None
 
@@ -66,7 +71,9 @@ class DPLL:
     itc, # int to clause
     itl: List[SATLiteral], # int to literal
     c, # clauses
-    stats: SATSolverStats
+    stats: SATSolverStats,
+    n_variables,
+    n_assigned_variables
   ):
     """
     Assigns true to literal which has index `dec_var_int` in table `itl` (int to literal). Calls `__dpll`.
@@ -79,10 +86,12 @@ class DPLL:
       lit_int, other_int, is_positive = get_literal_int(literal)
       result = self.assign_true(literal, itc)
       stats.decVars += 1
+      n_assigned_variables += 1
       if result == UnitPropagationResult.CONFLICT:
         self.unassign(literal, itc)
         return SATSolverResult.UNSAT
-    result, assigned_literals = self.__dpll(other_int, itc, itl, c, stats)
+
+    result, assigned_literals = self.__dpll(other_int, itc, itl, c, stats, n_variables, n_assigned_variables)
     if result == SATSolverResult.UNSAT:
       if len(assigned_literals) != 0:
         logger.debug(f"DPLL: Conflict: {assigned_literals}")
@@ -94,7 +103,8 @@ class DPLL:
 
   def dpll(self,ast_tree_root):
     itl, vti, itc, c, stats = self.prepare_structures(ast_tree_root)
-    result = self._dpll(None, itc, itl, c, stats)
+    n_variables = len(vti) # vti == variable to integer
+    result = self._dpll(None, itc, itl, c, stats, n_variables, n_assigned_variables=0)
 
     # health check
     if result == SATSolverResult.UNSAT:

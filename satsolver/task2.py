@@ -8,7 +8,7 @@ from satsolver.dpll.dpll import DPLL
 
 def get_info():
   return general_setup.get_info(
-    name="DPLL.v2",
+    name="DPLL.v3",
     taskName="TASK 2",
     benchmarkable=True
   )
