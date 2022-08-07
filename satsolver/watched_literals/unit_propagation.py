@@ -11,8 +11,6 @@ def find_unit_clauses(
   result: UnitPropagationResult = None
   unit_clauses: List[Tuple[SATClause, int]] = []
   for clause, watched_index in c:
-    logger.debug(clause)
-    logger.debug(clause.watched)
     # satisfied clause
     if clause.get_w(0).is_satisfied():
       continue
@@ -69,7 +67,6 @@ def unit_propagation(
 
     # implicitly result == (UnitPropagationResult.NOTHING_FOUND or UnitPropagationResult.UNIT_FOUND)
     for clause, n_of_wl in clauses:
-      logger.warning(f"{clause} -> {n_of_wl}")
       literal = clause.get_w(n_of_wl)
 
       if literal.is_satisfied():

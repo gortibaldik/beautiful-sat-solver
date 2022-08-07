@@ -17,10 +17,8 @@ class SATClause:
   def get_w(self, i):
     """Return i-th watched literal"""
     if self.watched[i] is None:
-      logger.debug(f"self.watched[{i}] is None")
       return None
     if len(self.children) <= self.watched[i]:
-      logger.debug(f"len(self.children) == {len(self.children)}, self.watched[{i}] == {self.watched[i]}")
       return None
     return self.children[self.watched[i]]
 
@@ -32,8 +30,7 @@ class SATClause:
         s += f", {c}"
     wl_0 = self.get_w(0)
     wl_1 = self.get_w(1)
-    return s + ")" + "\t[" +\
-      f"({wl_0}); " + f"({wl_1})]"
+    return s + ")"
   
   def __len__(self):
     return len(self.children)
