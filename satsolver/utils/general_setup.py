@@ -101,7 +101,7 @@ def print_model(model, input_file, output_to_stdout):
 
 def print_result(result, model, stats: SATSolverStats, time, input_file, output_to_stdout):
   if result == "SAT":
-    logger.warning(f"SAT; decs: {stats.decVars}; unit: {stats.unitProps}; time: {time}")
+    logger.warning(f"SAT; decs: {stats.decVars}; unit: {stats.unitProps}; unit_checked: {stats.unitPropCheckedClauses} time: {time}")
     print_model(model, input_file, output_to_stdout)
   else:
     logger.warning(f"UNSAT; decs: {stats.decVars}; unit: {stats.unitProps}; time: {time}")
@@ -116,8 +116,7 @@ def pack_result_to_dict(
   return {
     "result": result,
     "model": model,
-    "number_of_decisions": stats.decVars,
-    "number_of_unit_props": stats.unitProps,
+    "stats": stats,
     "time": time
   }
 

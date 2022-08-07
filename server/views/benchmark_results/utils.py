@@ -4,7 +4,7 @@ import traceback
 from logzero import logger
 from server import db
 from server.config import Config
-from server.models.job import SATJob, SATJobConfig, enumerateSATJobConfig
+from server.models.job import Descr, SATJob, SATJobConfig, enumerateSATJobConfig
 
 def create_col(
   label,
@@ -24,17 +24,6 @@ def create_col(
     "can_be_pressed": can_be_pressed,
   }
 
-def create_row(row):
-  return {
-    SATJobConfig.algorithm.long:       getattr(row, "algorithm"),
-    SATJobConfig.benchmark.long:       getattr(row, "benchmark"),
-    SATJobConfig.time.long:            getattr(row, "time"),
-    SATJobConfig.decision_vars.long:   getattr(row, "decision_vars"),
-    SATJobConfig.unit_prop_vals.long:  getattr(row, "unit_prop_vals"),
-    SATJobConfig.log_file.long:        getattr(row, "log_file"),
-    SATJobConfig.date.long:            getattr(row, "date").strftime("%d/%m/%Y, %H:%M:%S"),
-  }
-
 should_be_categorized = {
   SATJobConfig.algorithm.long,
   SATJobConfig.benchmark.long
@@ -47,19 +36,32 @@ shouldnt_be_displayed = {
 should_be_plotted = {
   SATJobConfig.decision_vars.long,
   SATJobConfig.time.long,
-  SATJobConfig.unit_prop_vals.long
+  SATJobConfig.unit_prop_vals.long,
+  SATJobConfig.unit_checked.long,
 }
 
 can_be_pressed = {
   SATJobConfig.log_file.long
 }
 
+def sortColDefs(colDef: Descr):
+  if colDef.long in can_be_pressed:
+    return 10_000
+  if colDef.long in should_be_plotted:
+    return ord(colDef.long[0])
+  if colDef.long in should_be_categorized:
+    return ord(colDef.long[0]) + 500
+  return ord(colDef.long[0]) + 1_000
+
 def get_data():
-  colDefs = enumerateSATJobConfig()
   columns = []
-  for col in colDefs:
+  colDefs = []
+  for _, col in enumerateSATJobConfig():
     if col.long in shouldnt_be_displayed:
       continue
+    colDefs.append(col)
+  
+  for col in sorted(colDefs, key=sortColDefs):
     columns.append(create_col(
       col.long,
       col.short,
@@ -70,7 +72,7 @@ def get_data():
   logger.debug(f"returned column definitions: {columns}")
   rows = []
   for row in SATJob.query.all():
-    rows.append(create_row(row))
+    rows.append(SATJobConfig.create_row(row))
   return {
     "columns": columns,
     "rows": rows

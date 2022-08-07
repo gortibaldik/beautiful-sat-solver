@@ -8,6 +8,7 @@ from contextlib import redirect_stdout, redirect_stderr
 from pathlib import Path
 from rq.command import send_stop_job_command
 from satsolver.utils.check import check_assignment
+from satsolver.utils.stats import SATSolverStats
 from server.database import SessionLocal
 from server.config import Config
 from server.models.job import SATJob
@@ -35,16 +36,16 @@ def create_sat_job(
   algorithm_name,
   benchmark_name,
   log_file,
-  avg_time=-1,
-  avg_derivs=-1,
-  avg_unit_props=-1):
+  avg_time,
+  stats: SATSolverStats):
   sat_job = SATJob(
-    unit_prop_vals  = avg_unit_props,
-    decision_vars   = avg_derivs,
+    unit_prop_vals  = stats.unitProps,
+    decision_vars   = stats.decVars,
     time            = avg_time,
     algorithm       = algorithm_name,
     benchmark       = benchmark_name,
-    log_file        = log_file
+    log_file        = log_file,
+    unit_checked    = stats.unitPropCheckedClauses
   )
   return sat_job
 
@@ -54,17 +55,17 @@ def create_n_commit_satjob(
   benchmark_name,
   storage_file,
   avg_time=0,
-  avg_derivs=0,
-  avg_unit_props=0
+  stats=None,
 ):
+  if stats is None:
+    stats = SATSolverStats()
   with SessionLocal() as db:
     sat_job = create_sat_job(
       algorithm_name=algorithm_name,
       benchmark_name=benchmark_name,
       log_file=storage_file,
       avg_time=avg_time,
-      avg_derivs=avg_derivs,
-      avg_unit_props=avg_unit_props
+      stats=stats
     )
     db.add(sat_job)
     db.commit()
@@ -111,8 +112,7 @@ def retrieve_benchmark_filenames(benchmark_name):
 
 def init_cumulative_stats():
   return {
-    "ndecs": 0,
-    "nunit": 0,
+    "stats": SATSolverStats(),
     "time": 0,
     "total": 0,
   }
@@ -122,15 +122,14 @@ def update_cumulative_stats(
   cumulative_stats,
   result
 ):
+  cumulative_stats["stats"].update(result["stats"])
   cumulative_stats["total"] += 1
-  cumulative_stats["ndecs"] += result["number_of_decisions"]
-  cumulative_stats["nunit"] += result["number_of_unit_props"]
   cumulative_stats["time"] += result["time"]
 
 def avg_cumulative_stats(cumulative_stats):
-  cumulative_stats["ndecs"] /= cumulative_stats["total"]
-  cumulative_stats["nunit"] /= cumulative_stats["total"]
-  cumulative_stats["time"] /= cumulative_stats["total"]
+  total = cumulative_stats["total"]
+  cumulative_stats["stats"].divide(total)
+  cumulative_stats["time"] /= total
 
 def log_level_per_debug_level(debug_level):
   debug, info, warning = False, False, False
@@ -278,8 +277,7 @@ def run_benchmark(algorithm_name, benchmark_name, debug_level):
       algorithm_name=algorithm_name,
       benchmark_name=benchmark_name,
       storage_file=storage_file,
-      avg_derivs=result["ndecs"],
-      avg_unit_props=result["nunit"],
+      stats=result["stats"],
       avg_time=result["time"]
     )
   except:

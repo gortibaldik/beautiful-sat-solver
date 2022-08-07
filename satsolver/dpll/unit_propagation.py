@@ -23,11 +23,13 @@ def find_not_assigned(clause: SATClause):
   return unassigned_literal
 
 def find_unit_clause(
-  c: List[SATClause] # clauses
+  c: List[SATClause], # clauses
+  stats: SATSolverStats
 ):
   n_satisfied = 0
   result, unit_clauses = None, []
   for clause in c:
+    stats.unitPropCheckedClauses += 1
     # clause is satisfied
     if clause.n_satisfied > 0:
       n_satisfied += 1
@@ -54,7 +56,7 @@ def unit_propagation(
   list_of_cs = [cs]
   while len(list_of_cs) > 0:
     cs = list_of_cs.pop()
-    result, clauses = find_unit_clause(cs)
+    result, clauses = find_unit_clause(cs, stats)
 
     if result == UnitPropagationResult.CONFLICT:
       unassign_multiple(assigned_literals, itc)

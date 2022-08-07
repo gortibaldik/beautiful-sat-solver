@@ -6,11 +6,13 @@ from satsolver.watched_literals.representation import SATClause
 from typing import List, Tuple
 
 def find_unit_clauses(
-  c: List[Tuple[SATClause, int]] # clauses
+  c: List[Tuple[SATClause, int]], # clauses
+  stats: SATSolverStats
 ):
   result: UnitPropagationResult = None
   unit_clauses: List[Tuple[SATClause, int]] = []
   for clause, watched_index in c:
+    stats.unitPropCheckedClauses += 1
     # satisfied clause
     if clause.get_w(0).is_satisfied():
       continue
@@ -59,7 +61,7 @@ def unit_propagation(
   list_of_cs = [cs]
   while len(list_of_cs) > 0:
     cs = list_of_cs.pop()
-    result, clauses = find_unit_clauses(cs)
+    result, clauses = find_unit_clauses(cs, stats)
 
     if result == UnitPropagationResult.CONFLICT:
       unassign_multiple(assigned_literals, itc)
