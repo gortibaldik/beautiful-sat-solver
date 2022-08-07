@@ -1,3 +1,4 @@
+from logzero import logger
 from satsolver.watched_literals.representation import SATClause, SATLiteral
 from satsolver.utils.structures_preparation import get_literal_int
 from typing import List, Tuple
@@ -40,16 +41,21 @@ def assign_true(
       continue
 
     # find new watched literal for the clause
+    found_new_watched = False
     for i in range(1, len_clause):
       j = (i + watched_literal_index) % len_clause
       if j == second_watched_literal_index:
         continue
-      if not clause[j].is_assigned():
+      if not clause[j].is_assigned() or clause[j].is_satisfied():
+        found_new_watched = True
         candidate_literal = clause[j]
         pos_int, _ = get_literal_int(candidate_literal)
         itc[pos_int].append((clause, watched_index))
         clause.watched[watched_index] = j
         break
+    
+    if not found_new_watched:
+      clauses_to_keep.append((clause, watched_index))
 
   # until this assignment the data structures are in inconsistent
   # state
