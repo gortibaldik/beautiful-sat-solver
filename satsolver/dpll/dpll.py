@@ -5,6 +5,7 @@ from satsolver.utils.stats import SATSolverStats
 from typing import List
 
 from satsolver.utils.structures_preparation import get_literal_int
+from satsolver.watched_literals.representation import SATClause
 
 class DPLL:
   def __init__(
@@ -22,6 +23,23 @@ class DPLL:
     self.assign_true        = assign_true
     self.unassign           = unassign
     self.unassign_multiple  = unassign_multiple
+    self.health_check       = None
+
+  def __debug_print_unsatisfied(self, c: List[SATClause]):
+    s = ""
+    for clause, _ in c:
+      is_satisfied = False
+      for child in clause.children:
+        if child.is_satisfied():
+          is_satisfied = True
+          break
+      if not is_satisfied:
+        if len(s) == 0:
+          s = str(clause)
+        else:
+          s += f"; {clause}"
+
+    logger.debug(s)
 
   def __dpll(
     self,
@@ -33,6 +51,7 @@ class DPLL:
     n_variables,
     n_assigned_variables
   ):
+    #self.__debug_print_unsatisfied(c)
     cs = c # cs == clauses to search
     if dec_var_int is not None:
       cs = itc[dec_var_int]
@@ -43,11 +62,9 @@ class DPLL:
 
     # end condition -> each variable is assigned and there is no conflict
     n_assigned_variables += len(assigned_literals)
-    if n_assigned_variables == n_variables:
-      logger.debug(f"UP: {assigned_literals}")
-      return SATSolverResult.SAT, None
-
     logger.debug(f"UP: {assigned_literals}")
+    if n_assigned_variables == n_variables:
+      return SATSolverResult.SAT, None
 
     pos_int, neg_int = self.dec_var_selection(itl)
 
@@ -81,6 +98,7 @@ class DPLL:
       literal = itl[dec_var_int]
       lit_int, other_int = get_literal_int(literal)
       self.assign_true(literal, itc)
+      logger.debug(f"DEC: {literal}")
       stats.decVars += 1
       n_assigned_variables += 1
 
@@ -90,6 +108,7 @@ class DPLL:
         logger.debug(f"DPLL: Conflict: {assigned_literals}")
       self.unassign_multiple(assigned_literals, itc)
       if literal is not None:
+        logger.debug(f"UNDEC: {literal}")
         self.unassign(literal, itc)
 
     return result
@@ -100,10 +119,8 @@ class DPLL:
     result = self._dpll(None, itc, itl, c, stats, n_variables, n_assigned_variables=0)
 
     # health check
-    if result == SATSolverResult.UNSAT:
-      for clause in c:
-        if clause.n_satisfied != 0 or clause.n_unsatisfied != 0:
-          raise RuntimeError(f"SATSolverResult == UNSAT while there are still assignments pending!")
+    if result == SATSolverResult.UNSAT and self.health_check is not None:
+      self.health_check(c)
 
     # construct model
     model = None

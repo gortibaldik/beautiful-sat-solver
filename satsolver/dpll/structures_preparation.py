@@ -26,3 +26,8 @@ def prepare_structures(ast_tree_root):
         c.append(satClause)
     stats = SATSolverStats()
     return itl, vti, itc, c, stats
+
+def health_check(c):
+    for clause in c:
+        if clause.n_satisfied != 0 or clause.n_unsatisfied != 0:
+          raise RuntimeError(f"SATSolverResult == UNSAT while there are still assignments pending!")

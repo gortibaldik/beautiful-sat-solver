@@ -1,6 +1,6 @@
 from satsolver.dpll.assignment import assign_true, unassign, unassign_multiple
 from satsolver.dpll.decision_variable_selection import dec_var_selection
-from satsolver.dpll.structures_preparation import prepare_structures
+from satsolver.dpll.structures_preparation import health_check, prepare_structures
 from satsolver.dpll.unit_propagation import unit_propagation
 import satsolver.utils.general_setup as general_setup
 
@@ -29,6 +29,7 @@ def find_model(
     unassign=unassign,
     unassign_multiple=unassign_multiple
   )
+  dpll.health_check = health_check
   return general_setup.find_model(
     dpll.dpll,
     input_file=input_file,
