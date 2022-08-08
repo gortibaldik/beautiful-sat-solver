@@ -17,6 +17,7 @@ import {
 
 import Vue from 'vue'
 import custom_run_comm from '@/assets/js/customRun_communication'
+import benchmark_comm from '@/assets/js/benchmark_communication'
 
 export default {
   name: 'Dashboard',
@@ -39,21 +40,6 @@ export default {
   },
   data () {
     return {
-      showFrameModalTop: false,
-      showFrameModalBottom: false,
-      showSideModalTopRight: false,
-      showSideModalTopLeft: false,
-      showSideModalBottomRight: false,
-      showSideModalBottomLeft: false,
-      showCentralModalSmall: false,
-      showCentralModalMedium: false,
-      showCentralModalLarge: false,
-      showCentralModalFluid: false,
-      showFluidModalRight: false,
-      showFluidModalLeft: false,
-      showFluidModalTop: false,
-      showFluidModalBottom: false,
-
       benchmarks: [],
       algorithms: [],
       symbolsForAlgorithms: [
@@ -109,20 +95,17 @@ export default {
       this.displayedModalButtonTimeouts = dmto
       this.selectedLogLevels = sll
     },
-    getAlgorithms() {
-      fetch(`${this.serverAddress}/benchmarks/`)
-        .then(response => response.json())
-        .then(function(data) {
-          if (data["result"] === "failure") {
-            return
-          }
-          this.algorithms = this.extractAlgorithmNamesFromResponse(data)
-          this.displayModalFor = data["benchmarked_result_availability"]
-          this.populatePlaceholders()
-          this.benchmarks = data["benchmarks"]
-          this.restartMonitorings(data["benchmarkable_algorithms_running_status"])
-        }.bind(this))
-        .then(() => this.populatePlaceholders())
+    async getAlgorithms() {
+      let data = await benchmark_comm.fetchBenchmarks(this.serverAddress)
+      if (data["result"] === "failure") {
+        return
+      }
+      this.algorithms = this.extractAlgorithmNamesFromResponse(data)
+      this.displayModalFor = data["benchmarked_result_availability"]
+      this.populatePlaceholders()
+      this.benchmarks = data["benchmarks"]
+      this.restartMonitorings(data["benchmarkable_algorithms_running_status"])
+      this.populatePlaceholders()
     },
     restartMonitorings(running_statuses) {
       for (let i = 0; i < running_statuses.length; i++) {
@@ -186,7 +169,7 @@ export default {
         return "primary"
       }
     },
-    runBenchmarkClicked(algorithmName, selectedBenchmark, selectedIndex) {
+    async runBenchmarkClicked(algorithmName, selectedBenchmark, selectedIndex) {
       if (!algorithmName || !selectedBenchmark) {
         return
       }
@@ -194,25 +177,16 @@ export default {
         this.clickStopComputation(algorithmName, selectedBenchmark, selectedIndex)
         return
       }
-      fetch(`${this.serverAddress}/benchmarks/start`, {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          algorithm: algorithmName,
-          benchmark: selectedBenchmark,
-          logLevel: this.selectedLogLevels[selectedIndex]
-        })
-      })
-        .then(response => response.json())
-        .then(function(data) {
-          if (data['result'] != "success") {
-            return
-          }
-          this.startMonitoringProgress(algorithmName, selectedBenchmark, selectedIndex)
-        }.bind(this))
+      let data = await benchmark_comm.fetchStartBenchmark(
+        this.serverAddress,
+        algorithmName,
+        selectedBenchmark,
+        this.selectedLogLevels[selectedIndex]
+      )
+      if (data['result'] != "success") {
+        return
+      }
+      this.startMonitoringProgress(algorithmName, selectedBenchmark, selectedIndex)
     },
     startMonitoringProgress(algorithmName, selectedBenchmark, selectedIndex) {
       this.runningComputation = true
@@ -225,27 +199,22 @@ export default {
       }
       this.pollingInterval = setInterval(this.pollComputation.bind(this, algorithmName, selectedBenchmark), 1000)
     },
-    clickStopComputation(algorithmName, benchmarkName) {
-      fetch(`${this.serverAddress}/benchmarks/stop`, {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({algorithm: algorithmName, benchmark: benchmarkName})
-      }).then(response => response.json())
-        .then(function(data) {
-          if (data['result'] === 'failure') {
-            return
-          }
-          else {
-            clearInterval(this.pollingInterval)
-            Vue.set(this.displayedModalButtonsBenchmarks, this.runningIndex, benchmarkName)
-            Vue.set(this.displayedModalButtonTimeouts, this.runningIndex, setTimeout(this.cooldownDisplayModalButton.bind(this, this.runningIndex), this.displayModalFor))
-            Vue.set(this.displayedModalButtons, this.runningIndex, true)
-            this.resetPollingParameters()
-          }
-        }.bind(this))
+    async clickStopComputation(algorithmName, benchmarkName) {
+      let data = await benchmark_comm.fetchStopCommunication(
+        this.serverAddress,
+        algorithmName,
+        benchmarkName
+      )
+      if (data['result'] === 'failure') {
+        return
+      }
+      else {
+        clearInterval(this.pollingInterval)
+        Vue.set(this.displayedModalButtonsBenchmarks, this.runningIndex, benchmarkName)
+        Vue.set(this.displayedModalButtonTimeouts, this.runningIndex, setTimeout(this.cooldownDisplayModalButton.bind(this, this.runningIndex), this.displayModalFor))
+        Vue.set(this.displayedModalButtons, this.runningIndex, true)
+        this.resetPollingParameters()
+      }
     },
     //#endregion RUN BUTTON
     //#region POLLING COMPUTATION
@@ -254,30 +223,24 @@ export default {
       this.runningComputation = false
       this.progressOfAlgorithm = 0
     },
-    pollComputation(algorithmName, benchmarkName) {
-      // here call to the backend 
-      fetch(`${this.serverAddress}/benchmarks/progress`, {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({algorithm: algorithmName, benchmark: benchmarkName})
-      }).then(response => response.json())
-        .then(function(data) {
-          this.progressOfAlgorithm = data['result']
-          if (this.progressOfAlgorithm === 'failure') {
-            clearInterval(this.pollingInterval)
-            this.resetPollingParameters()
-          }
-          else if (this.progressOfAlgorithm == 100) {
-            clearInterval(this.pollingInterval)
-            Vue.set(this.displayedModalButtonsBenchmarks, this.runningIndex, benchmarkName)
-            Vue.set(this.displayedModalButtonTimeouts, this.runningIndex, setTimeout(this.cooldownDisplayModalButton.bind(this, this.runningIndex), this.displayModalFor))
-            Vue.set(this.displayedModalButtons, this.runningIndex, true)
-            this.resetPollingParameters()
-          }
-        }.bind(this))
+    async pollComputation(algorithmName, benchmarkName) {
+      let data = await benchmark_comm.fetchBenchmarkProgress(
+        this.serverAddress,
+        algorithmName,
+        benchmarkName
+      )
+      this.progressOfAlgorithm = data['result']
+      if (this.progressOfAlgorithm === 'failure') {
+        clearInterval(this.pollingInterval)
+        this.resetPollingParameters()
+      }
+      else if (this.progressOfAlgorithm == 100) {
+        clearInterval(this.pollingInterval)
+        Vue.set(this.displayedModalButtonsBenchmarks, this.runningIndex, benchmarkName)
+        Vue.set(this.displayedModalButtonTimeouts, this.runningIndex, setTimeout(this.cooldownDisplayModalButton.bind(this, this.runningIndex), this.displayModalFor))
+        Vue.set(this.displayedModalButtons, this.runningIndex, true)
+        this.resetPollingParameters()
+      }
     },
     displayProgressBar(index) {
       if (index === this.runningIndex) {
@@ -298,22 +261,17 @@ export default {
         return "display: none;"
       }
     },
-    clickDisplayModalButton(index) {
-      fetch(`${this.serverAddress}/benchmarks/result`, {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({algorithm: this.algorithms[index].name, benchmark: this.displayedModalButtonsBenchmarks[index]})
-      }).then(response => response.json())
-        .then(function(data) {
-          if (data['result'] === "failure") {
-            return
-          }
-          Vue.set(this.modalMessages, index, data["result"])
-          Vue.set(this.displayedModals, index, true)
-        }.bind(this))
+    async clickDisplayModalButton(index) {
+      let data = await benchmark_comm.fetchBenchmarkResult(
+        this.serverAddress, 
+        this.algorithms[index].name,
+        this.displayedModalButtonsBenchmarks[index]
+      )
+      if (data['result'] === "failure") {
+        return
+      }
+      Vue.set(this.modalMessages, index, data["result"])
+      Vue.set(this.displayedModals, index, true)
     },
     closeModal(index) {
       Vue.set(this.displayedModals, index, false);

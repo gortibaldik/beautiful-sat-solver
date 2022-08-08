@@ -164,6 +164,7 @@ def benchmark(file, algorithm_name, benchmark_name, debug_level):
 
     total_number_of_benchmarks = len(benchmark_filenames)
     cumulative_stats = init_cumulative_stats()
+    logzero.logger.warning(f"Algorithm: {algorithm_name}, Benchmark: {benchmark_name}, Log Level: {debug_level}")
     debug, info, warning = log_level_per_debug_level(debug_level)
     check_debug, check_info, check_warning = log_level_per_debug_level(Config.CHECK_LOG_LEVEL)
 
@@ -228,6 +229,7 @@ def custom_run(
 
     debug, info, warning = log_level_per_debug_level(debug_level)
     check_debug, check_info, check_warning = log_level_per_debug_level(Config.CHECK_LOG_LEVEL)
+    logzero.logger.warning(f"Algorithm: {algorithm_name}, Benchmark: {benchmark_name}, Entry: {entry_name} Log Level: {debug_level}")
     result = algo_module.find_model(
       input_file=benchmark_filename,
       debug=debug,

@@ -110,7 +110,7 @@ export default {
       this.stdLogs = stdLogs
     },
     async pollRunningBenchmark(algo, bench) {
-      let data = await benchmark_communication.fetch_benchmark_progress(this.serverAddress, algo, bench)
+      let data = await benchmark_communication.fetchBenchmarkProgress(this.serverAddress, algo, bench)
       if (data.result === 'failure' || data.result == 100) {
         clearInterval(this.pollingInterval)
         this.isBenchmarkRunning = false
@@ -150,7 +150,7 @@ export default {
     },
     async fetchInfoFromServer() {
       let [benchmarks, algorithms, running_job] = await custom_run_communication.fetchBasicInfoFromServer(this.serverAddress)
-      let [running_algo, running_bench] = await benchmark_communication.fetch_running_benchmark(this.serverAddress)
+      let [running_algo, running_bench] = await benchmark_communication.fetchRunningBenchmark(this.serverAddress)
       if (running_algo != "none") {
         this.isBenchmarkRunning = true
         this.startMonitoringBenchmark(running_algo, running_bench)
