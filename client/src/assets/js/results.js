@@ -48,9 +48,6 @@ export default {
         rows: [],
       },
       filtered_rows: [],
-      hovered_sorts: [],
-      hovered_headers: [],
-      hovered_filters: [],
       headers_sorted: [],
       uniques: [],
       selected_values: [],
@@ -60,18 +57,6 @@ export default {
       displayed_modals: [],
       modal_messages: [],
       all_checked: false,
-      unhovered_style: "background-color: #f9a825",
-      button_unhovered_style: "background-color: #f9b74c",
-      hovered_style: 'background-color: #f57f17',
-      select_all_style: "background-color: #f9b74c",
-      unhovered_compute_graph_class: "dark-blue-background",
-      hovered_compute_graph_class: "light-blue-background",
-      unhovered_download_csv_class: "dark-blue-background",
-      hovered_download_csv_class: "light-blue-background",
-      hovered_show_log_file_style: "background-color: #ceefff",
-      unhovered_show_log_file_style: "background-color: #e8f7ff",
-      compute_graph_class: "dark-blue-background",
-      download_csv_class: "dark-blue-background",
       serverAddress: "",
       textWrapClass: "text-nowrap",
       showBarChart: false,
@@ -127,10 +112,7 @@ export default {
       fetch(`${this.serverAddress}/results/`)
         .then(response => response.json())
         .then(function(data) {
-          let hovered_sorts = {}
-          let hovered_headers = {}
           let headers_sorted = {}
-          let hovered_filters = {}
           let uniques = []
           let selected_values = {}
           let filtered_rows = []
@@ -139,9 +121,6 @@ export default {
           let displayed_modals = []
           let modal_messages = []
           for (let i = 0; i < data.columns.length; i++) {
-            hovered_sorts[data.columns[i].label] = "color: #e65100;"
-            hovered_headers[data.columns[i].label] = this.unhovered_style
-            hovered_filters[data.columns[i].label] = this.unhovered_style
             headers_sorted[data.columns[i].label] = "none"
             selected_values[data.columns[i].label] = "Show all"
 
@@ -166,15 +145,10 @@ export default {
             data.rows[i].originalIndex = i
             filtered_rows.push(data.rows[i])
 
-            show_log_file_styles.push(this.unhovered_show_log_file_style)
-            delete_button_styles.push(this.unhovered_show_log_file_style)
             displayed_modals.push(false)
             modal_messages.push(false)
           }
           this.data = data
-          this.hovered_sorts = hovered_sorts
-          this.hovered_headers = hovered_headers
-          this.hovered_filters = hovered_filters
           this.uniques = uniques
           this.selected_values = selected_values
           this.filtered_rows = filtered_rows
@@ -185,11 +159,30 @@ export default {
           this.calculateTableHeight()
         }.bind(this))
     },
-    setHovered(array, index) {
-      Vue.set(array, index, this.hovered_style)
+    canBePressedClass(colHeader) {
+      if (colHeader.can_be_pressed) {
+        return "can-be-pressed"
+      } else {
+        return ""
+      }
     },
-    unsetHovered(array, index) {
-      Vue.set(array, index, this.unhovered_style)
+    tableDataContent(colHeader, row) {
+      if (colHeader.can_be_pressed) {
+        return "Show"
+      }
+
+      // each float displayed with only 2 decimals
+      if (this.isFloat(row[colHeader.label])) {
+        return row[colHeader.label].toLocaleString(
+          "en-US",
+          { 
+            maximumFractionDigits: 2,
+            minimumFractionDigits: 2 
+          }
+        )
+      }
+
+      return row[colHeader.label]
     },
     sortRowsByIndex(index) {
       if (this.headers_sorted[index] != "asc") {
@@ -385,12 +378,6 @@ export default {
         Vue.set(this.modal_messages, index, data["result"])
       }.bind(this))
     },
-    setShowLogFileHovered(index) {
-      Vue.set(this.show_log_file_styles, index, this.hovered_show_log_file_style)
-    }, 
-    unsetShowLogFileHovered(index) {
-      Vue.set(this.show_log_file_styles, index, this.unhovered_show_log_file_style)
-    },
     removeLogFileFromDataRows(index) {
       let log_file = this.filtered_rows[index]["Log File"]
       let theIndex = -1
@@ -420,11 +407,5 @@ export default {
         this.filtered_rows.splice(index, 1)
       }.bind(this))
     },
-    setDeleteHovered(index) {
-      Vue.set(this.delete_button_styles, index, this.hovered_show_log_file_style)
-    },
-    unsetDeleteHovered(index) {
-      Vue.set(this.delete_button_styles, index, this.unhovered_show_log_file_style)
-    }
   }
 }
