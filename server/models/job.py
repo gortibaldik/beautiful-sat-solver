@@ -23,7 +23,11 @@ class SATJobConfig:
   def create_row(row):
     row_dict = {}
     for name, descr in enumerateSATJobConfig():
-      row_dict[descr.long] = getattr(row, name)
+      if name != "date":
+        row_dict[descr.long] = getattr(row, name)
+        continue
+      date = getattr(row, name)
+      row_dict[descr.long] = date.strftime("%m/%d/%Y, %H:%M:%S")
     return row_dict
 
 
