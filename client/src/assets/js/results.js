@@ -18,6 +18,7 @@ import {
   mdbModalTitle,
 } from 'mdbvue'
 import Vue from 'vue'
+import results_comm from '@/assets/js/results_communication'
 
 export default {
   name: 'Results',
@@ -52,8 +53,6 @@ export default {
       uniques: [],
       selected_values: [],
       checked_rows: [],
-      show_log_file_styles: [],
-      delete_button_styles: [],
       displayed_modals: [],
       modal_messages: [],
       all_checked: false,
@@ -105,59 +104,52 @@ export default {
     window.addEventListener('resize', this.onResize)
     this.onResize()
     this.serverAddress = process.env.VUE_APP_SERVER_ADDRESS
-    this.fetchBenchmarkResults()
+    this.initBenchmarkResults()
   },
   methods: {
-    fetchBenchmarkResults() {
-      fetch(`${this.serverAddress}/results/`)
-        .then(response => response.json())
-        .then(function(data) {
-          let headers_sorted = {}
-          let uniques = []
-          let selected_values = {}
-          let filtered_rows = []
-          let show_log_file_styles = []
-          let delete_button_styles = []
-          let displayed_modals = []
-          let modal_messages = []
-          for (let i = 0; i < data.columns.length; i++) {
-            headers_sorted[data.columns[i].label] = "none"
-            selected_values[data.columns[i].label] = "Show all"
+    async initBenchmarkResults() {
+      let data = await results_comm.fetchBenchmarkResults(this.serverAddress)
+      let headers_sorted = {}
+      let uniques = []
+      let selected_values = {}
+      let filtered_rows = []
+      let displayed_modals = []
+      let modal_messages = []
+      for (let i = 0; i < data.columns.length; i++) {
+        headers_sorted[data.columns[i].label] = "none"
+        selected_values[data.columns[i].label] = "Show all"
 
-            // each column has a special "categorized"
-            // attribute which shows whether there should
-            // be a filter for selecting one of the unique
-            // values of rows in the column
-            if (data.columns[i].categorized) {
-              uniques.push(new Set())
-              uniques[i].add("Show all")
-            } else {
-              uniques.push(null)
-            }
+        // each column has a special "categorized"
+        // attribute which shows whether there should
+        // be a filter for selecting one of the unique
+        // values of rows in the column
+        if (data.columns[i].categorized) {
+          uniques.push(new Set())
+          uniques[i].add("Show all")
+        } else {
+          uniques.push(null)
+        }
+      }
+      for (let i = 0; i < data.rows.length; i++) {
+        for (let j = 0; j < data.columns.length; j++) {
+          if (data.columns[j].categorized) {
+            uniques[j].add(data.rows[i][data.columns[j].label])
           }
-          for (let i = 0; i < data.rows.length; i++) {
-            for (let j = 0; j < data.columns.length; j++) {
-              if (data.columns[j].categorized) {
-                uniques[j].add(data.rows[i][data.columns[j].label])
-              }
-            }
-            data.rows[i].checked = "is_unchecked"
-            data.rows[i].originalIndex = i
-            filtered_rows.push(data.rows[i])
+        }
+        data.rows[i].checked = "is_unchecked"
+        data.rows[i].originalIndex = i
+        filtered_rows.push(data.rows[i])
 
-            displayed_modals.push(false)
-            modal_messages.push(false)
-          }
-          this.data = data
-          this.uniques = uniques
-          this.selected_values = selected_values
-          this.filtered_rows = filtered_rows
-          this.show_log_file_styles = show_log_file_styles
-          this.delete_button_styles = delete_button_styles
-          this.displayed_modals = displayed_modals
-          this.modal_messages = modal_messages
-          this.calculateTableHeight()
-        }.bind(this))
+        displayed_modals.push(false)
+        modal_messages.push(false)
+      }
+      this.data = data
+      this.uniques = uniques
+      this.selected_values = selected_values
+      this.filtered_rows = filtered_rows
+      this.displayed_modals = displayed_modals
+      this.modal_messages = modal_messages
+      this.calculateTableHeight()
     },
     canBePressedClass(colHeader) {
       if (colHeader.can_be_pressed) {
@@ -361,22 +353,16 @@ export default {
     closeModal(index) {
       Vue.set(this.displayed_modals, index, false)
     },
-    showLogFile(index) {
-      fetch(`${this.serverAddress}/results/get_log_file`, {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({log_file: this.filtered_rows[index]["Log File"]})
-      }).then(response => response.json())
-      .then(function(data) {
-        if (data["result"] === "failure") {
-          return
-        }
-        Vue.set(this.displayed_modals, index, true)
-        Vue.set(this.modal_messages, index, data["result"])
-      }.bind(this))
+    async showLogFile(index) {
+      let data = await results_comm.fetchLogFile(
+        this.serverAddress,
+        this.filtered_rows[index]["Log File"]
+      )
+      if (data["result"] === "failure") {
+        return
+      }
+      Vue.set(this.displayed_modals, index, true)
+      Vue.set(this.modal_messages, index, data["result"])
     },
     removeLogFileFromDataRows(index) {
       let log_file = this.filtered_rows[index]["Log File"]
@@ -390,22 +376,16 @@ export default {
       }
       this.data.rows.splice(theIndex, 1)
     },
-    deleteLogFile(index) {
-      fetch(`${this.serverAddress}/results/remove_log_file`, {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({log_file: this.filtered_rows[index]["Log File"]})
-      }).then(response => response.json())
-      .then(function(data) {
-        if (data["result"] === "failure") {
-          return
-        }
-        this.removeLogFileFromDataRows(index)
-        this.filtered_rows.splice(index, 1)
-      }.bind(this))
+    async deleteLogFile(index) {
+      let data = await results_comm.fetchDeleteLogFile(
+        this.serverAddress,
+        this.filtered_rows[index]["Log File"]
+      )
+      if (data["result"] === "failure") {
+        return
+      }
+      this.removeLogFileFromDataRows(index)
+      this.filtered_rows.splice(index, 1)
     },
   }
 }
