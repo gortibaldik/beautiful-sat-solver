@@ -57,7 +57,7 @@
                     @click="checkAll()">
                     <ul class="list-inline" style="margin-bottom: 0;">
                       <li class="list-inline-item">
-                        {{all_checked ? 'Unselect All' : 'Select All'}}
+                        {{(no_checked !== 0) ? 'Unselect All' : 'Select All'}}
                       </li>
                     </ul>
                   </th>
@@ -105,7 +105,7 @@
           <mdb-view class="gradient-card-header blue darken-2" style="padding: 0;">
             <ul class="list-inline" style="margin-bottom: 0px;">
               <li class="graph-li-class list-inline-item">
-                <h4 class="h4-responsive text-white">Graph</h4>
+                <h4 class="h4-responsive text-white">Data Visualization</h4>
               </li>
               <li class="header-button-style list-inline-item dark-blue-background-hoverable"
                 @click="toggleGraphCreation()">
@@ -118,16 +118,46 @@
               </li>
             </ul>
           </mdb-view>
-          <mdb-card-body>
-            <mdb-horizontal-bar-chart
-              :data="barChartData"
-              :options="barChartOptions"
-              :style="`display: ${showBarChart ? '' : 'none'}; height: ${barChartHeight}px`">
-            </mdb-horizontal-bar-chart>
-          </mdb-card-body>
         </mdb-card>
       </mdb-col>
     </mdb-row>
+    <section v-if="showBarChart">
+      <mdb-row>
+        <mdb-col md="12">
+          <mdb-card cascade narrow class="mt-5 border border-0 border-dark">
+            <mdb-card-title class="gradient-card-header blue darken-2 rounded-border">
+              <h4 class="h4-responsive text-white spaced-title text-center">
+                Cumulative data
+              </h4>
+            </mdb-card-title>
+            <mdb-card-body>
+              <mdb-horizontal-bar-chart
+                :data="barChartData"
+                :options="barChartOptions"
+                :style="`height: ${barChartHeight}px`">
+              </mdb-horizontal-bar-chart>
+            </mdb-card-body>
+          </mdb-card>
+        </mdb-col>
+      </mdb-row>
+      <mdb-row v-for="(visualization, ix) in visualizations" :key="ix">
+        <mdb-col md="12">
+          <mdb-card cascade narrow class="mt-5 border border-0 border-dark">
+            <mdb-card-title class="gradient-card-header blue darken-2 rounded-border">
+              <h4 class="h4-responsive text-white spaced-title text-center">
+                {{visualization.title}}
+              </h4>
+            </mdb-card-title>
+            <mdb-card-body>
+              <mdb-line-chart
+                :data="visualization.data"
+                :options="lineChartOptions">
+              </mdb-line-chart>
+            </mdb-card-body>
+          </mdb-card>
+        </mdb-col>
+      </mdb-row>
+    </section>
   </section>
 </template>
 

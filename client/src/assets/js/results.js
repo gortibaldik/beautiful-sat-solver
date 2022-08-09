@@ -4,12 +4,14 @@ import {
   mdbCard,
   mdbView,
   mdbCardBody,
+  mdbCardTitle,
   mdbTbl,
   mdbTblHead,
   mdbTblBody,
   mdbScrollbar,
   mdbIcon,
   mdbHorizontalBarChart,
+  mdbLineChart,
   mdbBtn,
   mdbModal,
   mdbModalBody,
@@ -29,12 +31,14 @@ export default {
     mdbCard,
     mdbView,
     mdbCardBody,
+    mdbCardTitle,
     mdbTbl,
     mdbTblHead,
     mdbTblBody,
     mdbScrollbar,
     mdbIcon,
     mdbHorizontalBarChart,
+    mdbLineChart,
     mdbBtn,
     mdbModal,
     mdbModalBody,
@@ -56,6 +60,7 @@ export default {
       displayed_modals: [],
       modal_messages: [],
       all_checked: false,
+      no_checked: 0,
       serverAddress: "",
       textWrapClass: "text-nowrap",
       showBarChart: false,
@@ -91,12 +96,46 @@ export default {
       barChartHeight: 0,
       chartColors: [
         'rgba(255, 99, 132, 0.2)',
-        'rgba(75, 192, 192, 0.2)'
+        'rgba(75, 192, 192, 0.2)',
+        'rgba(26, 171, 38, 0.2)',
+        'rgba(127, 16, 237, 0.2)',
       ],
       chartBorderColors: [
         'rgba(255,99,132,1)',
-        'rgba(75, 192, 192, 1)'
+        'rgba(75, 192, 192, 1)',
+        'rgba(9, 129, 19, 0.2)',
+        'rgba(70, 30, 110, 0.2)',
       ],
+      lineChartTimeData: {
+        labels: [],
+        datasets: [
+          {
+            label: "",
+            backgroundColor: "",
+            borderColor: "",
+            borderWidth: 0,
+            data: []
+          }
+        ]
+      },
+      lineChartOptions: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          xAxes: [{
+            gridLines: {
+              display: true,
+              color: "rgba(0, 0, 0, 0.1)"
+            }
+          }],
+          yAxes: [{
+            gridLines: {
+              display: true,
+              color: "rgba(0, 0, 0, 0.1)"
+            }
+          }]
+        }
+      },
       calculatedTableHeight: 0,
     }
   },
@@ -187,21 +226,24 @@ export default {
     },
     filterRows() {
       let filtered_rows = []
+      this.no_checked = 0
       for (let i = 0; i < this.filtered_rows.length; i++) {
         this.data.rows[this.filtered_rows[i].originalIndex].checked = this.filtered_rows[i].checked
       }
       for (let i = 0; i < this.data.rows.length; i++) {
         let equal_on_everything = true
         for (let j = 0; j < this.data.columns.length; j++) {
-          if (this.selected_values[this.data.columns[j].label] != "Show all" && this.data.rows[i][this.data.columns[j].label] != this.selected_values[this.data.columns[j].label]) {
+          if (this.selected_values[this.data.columns[j].label] != "Show all" &&
+              this.data.rows[i][this.data.columns[j].label] != this.selected_values[this.data.columns[j].label]) {
             equal_on_everything = false
             break
           }
         }
         if (equal_on_everything) {
           filtered_rows.push(this.data.rows[i])
-        } else {
-          this.data.rows[i].checked = "is_unchecked"
+          if (this.data.rows[i].checked == "is_checked") {
+            this.no_checked++
+          }
         }
       }
       this.filtered_rows = filtered_rows
@@ -214,8 +256,10 @@ export default {
         newValue.checked = value
       } else {
         if (oldValue.checked === "is_checked") {
+          this.no_checked--
           newValue.checked = "is_unchecked"
         } else {
+          this.no_checked++
           newValue.checked = "is_checked"
         }
       }
@@ -227,15 +271,15 @@ export default {
       } 
     },
     checkAll() {
-      if (this.all_checked) {
+      if (this.no_checked !== 0) {
         this.checkAllImpl("is_unchecked")
-        this.all_checked = false
+        this.no_checked = 0
       } else {
         this.checkAllImpl("is_checked")
-        this.all_checked = true
+        this.no_checked = this.filtered_rows.length
       }
     },
-    toggleGraphCreation() {
+    cumulativeVisualizationCreation(checked) {
       let barChartData = {
         labels: [],
         datasets: []
@@ -243,6 +287,7 @@ export default {
       for (let j = 0; j < this.data.columns.length; j++) {
         if (this.data.columns[j].plotted) {
           barChartData.datasets.push({
+             // time/unit props etc. are examples of datasets
             label: this.data.columns[j].label,
             data: [],
             backgroundColor: [],
@@ -250,15 +295,6 @@ export default {
             borderWidth: 1
           })
         }
-      }
-      let checked = []
-      for (let i = 0; i < this.filtered_rows.length; i++) {
-        if (this.filtered_rows[i].checked == "is_checked") {
-          checked.push(this.filtered_rows[i])
-        }
-      }
-      if (checked.length === 0) {
-        return
       }
       for (let i = 0; i < checked.length; i++) {
         barChartData.labels.push(`${checked[i]["Algorithm"]} ${checked[i]["Benchmark"]}`)
@@ -274,8 +310,74 @@ export default {
         }
       }
       this.barChartData = barChartData
-      this.showBarChart = true
       this.barChartHeight = 80 + checked.length * 50
+    },
+    visualizationCreation(checked, nameOfField) {
+      let chartData = {
+        labels: [],
+        datasets: []
+      }
+      // datasets are sets of time results of algorithms
+      // labels are names of benchmarks
+      let datasetNamesSet = new Set();
+      let labelsSet = new Set();
+      for (let i = 0; i < checked.length; i++) {
+        datasetNamesSet.add(checked[i]["Algorithm"])
+        labelsSet.add(checked[i]["Benchmark"])
+      }
+      let datasetNames = Array.from(datasetNamesSet)
+      let labelNames = Array.from(labelsSet)
+      chartData.labels = labelNames
+      for (let i = 0; i < datasetNames.length; i++) {
+        chartData.datasets.push({
+          label: datasetNames[i],
+          data: [],
+          backgroundColor: this.chartColors[i],
+          borderColor: this.chartBorderColors[i],
+          borderWidth: 1
+        })
+      }
+
+      for (let dix = 0; dix < datasetNames.length; dix++) {
+        for (let lnix = 0; lnix < labelNames.length; lnix++) {
+          let data = undefined;
+          for (let cix = 0; cix < checked.length; cix++) {
+            if (checked[cix]["Algorithm"] == datasetNames[dix] &&
+                checked[cix]["Benchmark"] == labelNames[lnix]) {
+              data = checked[cix][nameOfField]
+            }
+          }
+          chartData.datasets[dix].data.push(data)
+        }
+      }
+      return chartData
+    },
+    getCheckedRows() {
+      let checked = []
+      for (let i = 0; i < this.filtered_rows.length; i++) {
+        if (this.filtered_rows[i].checked == "is_checked") {
+          checked.push(this.filtered_rows[i])
+        }
+      }
+      return checked
+    },
+    toggleGraphCreation() {
+      let checked = this.getCheckedRows()
+      if (checked.length === 0) {
+        return
+      }
+      this.cumulativeVisualizationCreation(checked)
+      this.visualizations = []
+      for (let i = 0; i < this.data.columns.length; i++) {
+        if (this.data.columns[i].plotted) {
+          let d = this.visualizationCreation(checked, this.data.columns[i].label)
+          this.visualizations.push({
+            title: this.data.columns[i].label,
+            data: d
+          })
+        }
+      }
+      this.showBarChart = true
     },
     downloadCsv() {
       // write headers
@@ -290,11 +392,9 @@ export default {
       }
 
       // select checked rows
-      let checked = []
-      for (let i = 0; i < this.filtered_rows.length; i++) {
-        if (this.filtered_rows[i].checked == "is_checked") {
-          checked.push(this.filtered_rows[i])
-        }
+      let checked = this.getCheckedRows()
+      if (checked.length == 0) {
+        return
       }
 
       // write data
