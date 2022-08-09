@@ -51,7 +51,7 @@
                 </mdb-row>
                 <mdb-row class="justify-content-center">
                   <mdb-btn :color="runButtonColor(index)" class="runButton" @click="runBenchmarkClicked(algorithm.name,selected[index][0], index)" :disabled="runButtonIsDisabled(index)">{{runButtonText(index)}}</mdb-btn>
-                  <mdb-btn :color="runButtonColor(index)" class="runButton" @click="runAllClicked(algorithm.name, index)" v-if="! runButtonDisplaysStopMessage(index)">RUN ALL</mdb-btn>
+                  <mdb-btn :color="runButtonColor(index)" class="runButton" @click="runAllClicked(algorithm.name, index)" v-if="! runButtonDisplaysStopMessage(index)" :disabled="runButtonIsDisabled(index)">RUN ALL</mdb-btn>
                 </mdb-row>
                 <mdb-row v-if="displayedModalButtons[index]" class="justify-content-center">
                   <mdb-btn color="primary" class="runButton" @click="clickDisplayModalButton(index)" >Display results</mdb-btn>

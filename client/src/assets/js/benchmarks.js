@@ -67,6 +67,7 @@ export default {
       displayModalFor: 0, // will be populated from backend
       isCustomRunRunning: false,
       customRunInterval: undefined,
+      pollTimeoutValue: 1000,
     }
   },
   methods: {
@@ -149,7 +150,7 @@ export default {
     async getInfoAboutCustomRun() {
       await this.pollInfoAboutCustomRun()
       if (this.isCustomRunRunning) {
-        this.customRunInterval = setInterval(this.pollInfoAboutCustomRun.bind(this), 1000)
+        this.customRunInterval = setInterval(this.pollInfoAboutCustomRun.bind(this), this.pollTimeoutValue)
       }
     },
     //#endregion INITIALIZATION
@@ -220,7 +221,7 @@ export default {
         Vue.set(this.displayedModalButtons, this.runningIndex, false)
         clearTimeout(this.displayedModalButtonTimeouts[this.runningIndex])
       }
-      this.pollingInterval = setInterval(this.pollAllRun.bind(this, algorithmName), 1000)
+      this.pollingInterval = setInterval(this.pollAllRun.bind(this, algorithmName), this.pollTimeoutValue)
     },
     startMonitoringProgress(algorithmName, selectedBenchmark, selectedIndex) {
       this.runningComputation = true
@@ -231,7 +232,7 @@ export default {
         Vue.set(this.displayedModalButtons, this.runningIndex, false)
         clearTimeout(this.displayedModalButtonTimeouts[this.runningIndex])
       }
-      this.pollingInterval = setInterval(this.pollComputation.bind(this, algorithmName, selectedBenchmark), 1000)
+      this.pollingInterval = setInterval(this.pollComputation.bind(this, algorithmName, selectedBenchmark), this.pollTimeoutValue)
     },
     async clickStopComputation(algorithmName, benchmarkName) {
       let data = await benchmark_comm.fetchStopCommunication(
