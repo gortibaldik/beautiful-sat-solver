@@ -38,6 +38,13 @@
   font-size: 13px;
 }
 
+.logSelector {
+  color: #999999;
+  margin-bottom: -0.05rem;
+  font-size: 13px;
+  margin-left: 0px;
+}
+
 .cascading-admin-card .benchmarkPossibilities {
   color: #1f71ff;
   font-size: 12px;

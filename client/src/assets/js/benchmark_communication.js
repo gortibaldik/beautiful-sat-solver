@@ -39,6 +39,22 @@ var benchmark_communication = {
       algorithm: algorithm_name,
       benchmark: benchmark_name
     })
+  },
+  async fetchStartAll(serverAddress, algorithm_name, log_level_name) {
+    return await fetch_json.post(`${serverAddress}/benchmarks/start_all`, {
+      algorithm: algorithm_name,
+      logLevel:  log_level_name
+    })
+  },
+  async fetchAllProgress(serverAddress, algorithm_name) {
+    return await fetch_json.post(`${serverAddress}/benchmarks/progress_all`, {
+      algorithm: algorithm_name
+    })
+  },
+  async fetchStopAll(serverAddress, algorithm_name) {
+    return await fetch_json.post(`${serverAddress}/benchmarks/stop_all`, {
+      algorithm: algorithm_name
+    })
   }
 }
 

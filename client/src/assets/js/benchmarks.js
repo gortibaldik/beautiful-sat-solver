@@ -57,6 +57,7 @@ export default {
       modalMessages: [],
       selectedLogLevels: [],
       serverAddress: "",
+      allBenchmarksAreRunning: false,
       runningComputation: false,
       runningIndex: null,
       runningBenchmark: null,
@@ -110,8 +111,12 @@ export default {
     restartMonitorings(running_statuses) {
       for (let i = 0; i < running_statuses.length; i++) {
         if (running_statuses[i].running) {
-          this.startMonitoringProgress(this.algorithms[i].name, running_statuses[i].benchmarkName, i)
-          Vue.set(this.selected, i, [running_statuses[i].benchmarkName])
+          if (running_statuses[i].all) {
+            this.startMonitoringProgressAll(this.algorithms[i].name, i)
+          } else {
+            this.startMonitoringProgress(this.algorithms[i].name, running_statuses[i].benchmarkName, i)
+            Vue.set(this.selected, i, [running_statuses[i].benchmarkName])
+          }
         }
       }
     },
@@ -170,10 +175,12 @@ export default {
       }
     },
     async runBenchmarkClicked(algorithmName, selectedBenchmark, selectedIndex) {
-      if (!algorithmName || !selectedBenchmark) {
+      if (this.allBenchmarksAreRunning) {
+        this.clickStopAll(algorithmName)
         return
-      }
-      if (this.runButtonDisplaysStopMessage(selectedIndex)) {
+      } else if (!algorithmName || !selectedBenchmark) {
+        return
+      } else if (this.runButtonDisplaysStopMessage(selectedIndex)) {
         this.clickStopComputation(algorithmName, selectedBenchmark, selectedIndex)
         return
       }
@@ -187,6 +194,33 @@ export default {
         return
       }
       this.startMonitoringProgress(algorithmName, selectedBenchmark, selectedIndex)
+    },
+    async runAllClicked(algorithmName, selectedIndex) {
+      if (!algorithmName) {
+        return
+      }
+      let data = await benchmark_comm.fetchStartAll(
+        this.serverAddress,
+        algorithmName,
+        this.selectedLogLevels[selectedIndex]
+      )
+      if (data['result'] === "failure") {
+        return
+      }
+      this.startMonitoringProgressAll(algorithmName, selectedIndex)
+    },
+    startMonitoringProgressAll(algorithmName, selectedIndex) {
+      this.allBenchmarksAreRunning = true
+      this.runningComputation = true
+      this.runningIndex = selectedIndex
+      this.runningBenchmark = ""
+
+      // switch off the modal button
+      if (this.displayedModalButtons[this.runningIndex]) {
+        Vue.set(this.displayedModalButtons, this.runningIndex, false)
+        clearTimeout(this.displayedModalButtonTimeouts[this.runningIndex])
+      }
+      this.pollingInterval = setInterval(this.pollAllRun.bind(this, algorithmName), 1000)
     },
     startMonitoringProgress(algorithmName, selectedBenchmark, selectedIndex) {
       this.runningComputation = true
@@ -216,6 +250,21 @@ export default {
         this.resetPollingParameters()
       }
     },
+    async clickStopAll(algorithmName) {
+      let data = await benchmark_comm.fetchStopAll(
+        this.serverAddress,
+        algorithmName
+      )
+      if (data['result'] === "failure") {
+        return
+      } else {
+        clearInterval(this.pollingInterval)
+        this.resetPollingParameters()
+      }
+    },
+    shouldProgressBeDisplayed(index) {
+      return index === this.runningIndex
+    },
     //#endregion RUN BUTTON
     //#region POLLING COMPUTATION
     resetPollingParameters() {
@@ -242,24 +291,22 @@ export default {
         this.resetPollingParameters()
       }
     },
-    displayProgressBar(index) {
-      if (index === this.runningIndex) {
-        return ""
-      } else {
-        return "display: none;"
+    async pollAllRun(algorithmName) {
+      let data = await benchmark_comm.fetchAllProgress(
+        this.serverAddress,
+        algorithmName
+      )
+      if (data['result'] === 'failure' || data['finished']) {
+        clearInterval(this.pollingInterval)
+        this.resetPollingParameters()
       }
+      this.runningBenchmark = data['benchmark_name']
+      this.progressOfAlgorithm = data['result']
     },
     //#endregion POLLING COMPUTATION
     //#region BUTTON WITH LOGS
     cooldownDisplayModalButton(indexToSwitchOff) {
       Vue.set(this.displayedModalButtons, indexToSwitchOff, false)
-    },
-    displayModalButton(index) {
-      if (this.displayedModalButtons[index]) {
-        return ""
-      } else {
-        return "display: none;"
-      }
     },
     async clickDisplayModalButton(index) {
       let data = await benchmark_comm.fetchBenchmarkResult(

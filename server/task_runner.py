@@ -253,11 +253,16 @@ def custom_run(
       logzero.logger.warning(f"Filename with error: {benchmark_filename}")
     logzero.logger.warning(traceback.format_exc())
 
-def run_benchmark(algorithm_name, benchmark_name, debug_level):
+def run_benchmark(
+  algorithm_name,
+  benchmark_name,
+  debug_level,
+  finished_meta_key="finished"
+):
   job = rq.get_current_job()
   storage_file = ensure_storage_file(algorithm_name, benchmark_name)
   logzero.logger.info(f"Selected storage file: {storage_file}")
-  job.meta['finished'] = False
+  job.meta[finished_meta_key] = False
   job.meta['storage_file'] = storage_file
   job.save_meta()
   with open(storage_file, 'w') as f:
@@ -271,7 +276,7 @@ def run_benchmark(algorithm_name, benchmark_name, debug_level):
     job.meta['interrupted'] = True
   else:
     job.meta['progress'] = 100.0
-    job.meta['finished'] = True
+    job.meta[finished_meta_key] = True
   job.save_meta()
 
   try:
@@ -288,6 +293,25 @@ def run_benchmark(algorithm_name, benchmark_name, debug_level):
     logzero.logfile(None)
 
   return job
+
+def run_all_benchmarks(algorithm_name, debug_level):
+  job = rq.get_current_job()
+  ix = 1
+  total = len(list(os.listdir(Config.SATSMT_BENCHMARK_ROOT)))
+  job.meta['finished'] = False
+  for benchmark_name in os.listdir(Config.SATSMT_BENCHMARK_ROOT):
+    job.meta['running_benchmark'] = f"{benchmark_name} ({ix}/{total})"
+    job.meta['progress'] = 0
+    job.save_meta()
+    run_benchmark(
+      algorithm_name,
+      benchmark_name,
+      debug_level,
+      finished_meta_key="_fin_"
+    )
+    ix += 1
+  job.meta['finished'] = True
+  job.save_meta()
 
 def run_custom_input(
   algorithm_name,
@@ -326,6 +350,15 @@ def task_runner_start_algorithm_on_benchmark(algorithm_name, benchmark_name, deb
   job = queue.enqueue('server.task_runner.run_benchmark', algorithm_name, benchmark_name, debug_level)
   return job
 
+def task_runner_start_algorithm_on_all_benchmarks(algorithm_name, debug_level):
+  queue = rq.Queue(
+    Config.REDIS_WORKER_QUEUE_NAME,
+    connection=get_redis_connection(),
+    default_timeout=36_000
+  )
+  job = queue.enqueue('server.task_runner.run_all_benchmarks', algorithm_name, debug_level)
+  return job
+
 def task_runner_start_algorithm_on_custom_run(
   algorithm_name,
   benchmark_name,
@@ -354,8 +387,20 @@ def task_runner_get_benchmark_progress(job_info):
   if 'finished' in job.meta and job.meta['finished']:
     return 100
   if not 'progress' in job.meta:
-    raise RuntimeError("Caught no progress exception!")
+    return 0
   return job.meta['progress']
+
+def task_runner_get_all_benchmarks_progress(job_info):
+  job = task_runner_get_job(job_info)
+  job.refresh()
+  if 'interrupted' in job.meta and job.meta['interrupted']:
+    return 100, None, True
+  if 'finished' in job.meta and job.meta['finished']:
+    return 100, None, True
+  if not 'progress' in job.meta or not 'running_benchmark' in job.meta or not 'finished' in job.meta:
+    return 0, None, False
+  return job.meta['progress'], job.meta['running_benchmark'], job.meta['finished']
+  
 
 def task_runner_is_custom_run_finished(job_info):
   try:
@@ -397,6 +442,12 @@ def get_custom_run_log_file():
     return log_filename
   else:
     return None
+
+def task_runner_stop_all_run_job(job: rq.job.Job, algorithm_name):
+  job.refresh()
+  running_benchmark = job.meta['running_benchmark']
+  task_runner_stop_job(job, algorithm_name, running_benchmark)
+
 
 def task_runner_stop_job(job:rq.job.Job, algorithm_name, benchmark_name):
   job.refresh()

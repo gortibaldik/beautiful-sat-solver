@@ -116,6 +116,13 @@ export default {
         this.isBenchmarkRunning = false
       }
     },
+    async pollRunningBenchmarkAll(algo) {
+      let data = await benchmark_communication.fetchAllProgress(algo)
+      if (data.result === 'failure' || data.finished) {
+        clearInterval(this.pollingInterval)
+        this.isBenchmarkRunning = false
+      }
+    },
     async stopRun(algo, bench, benchIn) {
       custom_run_communication.fetchStop(this.serverAddress, algo, bench, benchIn)
     },
@@ -126,6 +133,9 @@ export default {
     },
     startMonitoringBenchmark(algo, bench) {
       this.pollingInterval = setInterval(this.pollRunningBenchmark.bind(this, algo, bench), 1000)
+    },
+    startMonitoringBenchmarkAll(algo) {
+      this.pollingInterval = setInterval(this.pollRunningBenchmarkAll.bind(this, algo), 1000)
     },
     async runButtonClicked(algo, bench, benchIn, logLevel) {
       if (this.runButtonText === "Stop") {
@@ -153,7 +163,11 @@ export default {
       let [running_algo, running_bench] = await benchmark_communication.fetchRunningBenchmark(this.serverAddress)
       if (running_algo != "none") {
         this.isBenchmarkRunning = true
-        this.startMonitoringBenchmark(running_algo, running_bench)
+        if (running_bench === "__all__") {
+          this.startMonitoringBenchmarkAll(running_algo)
+        } else {
+          this.startMonitoringBenchmark(running_algo, running_bench)
+        }
       } else {
         this.isBenchmarkRunning = false
       }
