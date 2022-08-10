@@ -58,7 +58,7 @@ def find_running_benchmark(algo_name, saved_jobs):
   for key in saved_jobs.keys():
     key_parts = key.split(',')
     if len(key_parts) == 1:
-      if algo_name in key:
+      if algo_name == key:
         try:
           job = task_runner_get_job(saved_jobs[key])
         except:
@@ -69,6 +69,7 @@ def find_running_benchmark(algo_name, saved_jobs):
             "running": True,
             "all":     True
           }
+      continue
     if len(key_parts) > 2:
       continue
     if algo_name in key:
@@ -189,7 +190,7 @@ def get_job_info(algorithm_name, benchmark_name, saved_jobs):
 
 def get_all_run_job_info(algorithm_name, saved_jobs):
   if algorithm_name not in saved_jobs:
-    raise RuntimeError(f"{algorithm_name} not in saved_jobs")
+    raise RuntimeError(f"{algorithm_name} not in saved_jobs: {saved_jobs}")
   return saved_jobs[algorithm_name]
 
 def get_benchmark_progress(algorithm_name, benchmark_name):
