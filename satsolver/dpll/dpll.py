@@ -113,7 +113,7 @@ class DPLL:
 
     return result
 
-  def dpll(self,ast_tree_root):
+  def dpll(self,ast_tree_root, debug):
     itl, vti, itc, c, stats = self.prepare_structures(ast_tree_root)
     n_variables = len(vti) # vti == variable to integer
     result = self._dpll(None, itc, itl, c, stats, n_variables, n_assigned_variables=0)
