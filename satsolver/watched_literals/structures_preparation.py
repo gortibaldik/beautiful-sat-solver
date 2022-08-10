@@ -15,6 +15,7 @@ def get_literal_int(literal: SATLiteral):
 
 def assign_variable_to_structures(
     variable,
+    itv, # int to variable name
     vti, # variable to int
     assignment,
     itc, # int to clauses
@@ -25,6 +26,7 @@ def assign_variable_to_structures(
     if var_name not in vti:
         var_int = len(assignment)
         vti[var_name] = var_int
+        itv.append(var_name)
         assignment.append(None)
         itc.append([])
         itc.append([])
@@ -33,6 +35,7 @@ def assign_variable_to_structures(
 
 def assign_literal_to_structures(
     literal,
+    itv, # int to variable name
     vti, # variable to int
     assignment,
     itc, # int to clauses
@@ -42,6 +45,7 @@ def assign_literal_to_structures(
         # vix == variable index
         vix = assign_variable_to_structures(
             literal,
+            itv,
             vti,
             assignment,
             itc
@@ -50,6 +54,7 @@ def assign_literal_to_structures(
     elif len(literal.children) == 1:
         vix = assign_variable_to_structures(
             literal.children[0],
+            itv,
             vti,
             assignment,
             itc,
@@ -60,6 +65,7 @@ def assign_literal_to_structures(
 
 def prepare_structures(ast_tree_root):
     assignment: List[bool] = []
+    itv = [] # int to variable name
     vti = {} # variable to int
     itc = [] # int to clauses
     c: List[Tuple[SATClause, int]]   = [] # clauses
@@ -68,6 +74,7 @@ def prepare_structures(ast_tree_root):
         if len(clause.children) <= 1:
             literalInt = assign_literal_to_structures(
                 clause,
+                itv,
                 vti,
                 assignment,
                 itc,
@@ -83,6 +90,7 @@ def prepare_structures(ast_tree_root):
             for literal in clause.children:
                 literalInt = assign_literal_to_structures(
                     literal,
+                    itv,
                     vti,
                     assignment,
                     itc
@@ -96,4 +104,4 @@ def prepare_structures(ast_tree_root):
 
         c.append((satClause, -1))
     stats = SATSolverStats()
-    return assignment, vti, itc, c, stats
+    return assignment, itv, vti, itc, c, stats

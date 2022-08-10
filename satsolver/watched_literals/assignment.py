@@ -6,12 +6,13 @@ from typing import List, Tuple
 # TODO
 def assign_true(
   lit_int: int,
+  itv,
   assignment,
   itc: List[List[Tuple[SATClause, int]]], # int to clauses
   assigned_literals=None
 ):
   if lit_is_assigned(lit_int, assignment):
-    raise RuntimeError(f"`{debug_str(lit_int)}` was supposed to be unassigned!")
+    raise RuntimeError(f"`{debug_str(lit_int, itv)}` was supposed to be unassigned!")
   if assigned_literals is not None:
     assigned_literals.append(lit_int)
   satisfy_lit(lit_int, assignment)
@@ -55,7 +56,7 @@ def assign_true(
       candidate_lit_int = clause[wli]
       if lit_is_none(candidate_lit_int, assignment) or lit_is_satisfied(candidate_lit_int, assignment):
         found_new_watched = True
-        itc[lit_int].append(entry)
+        itc[candidate_lit_int].append(entry)
         clause.watched[watched_index] = wli
         break
     

@@ -44,6 +44,7 @@ class DPLL:
   def __dpll(
     self,
     dec_var_int,
+    itv, # int to variable
     itc, # int to clause
     assignment,
     c, # clauses
@@ -55,26 +56,26 @@ class DPLL:
     cs = c # cs == clauses to search
     if dec_var_int is not None:
       cs = itc[dec_var_int]
-    unitPropResult, assigned_literals = self.unit_propagation(itc, assignment, cs, stats)
+    unitPropResult, assigned_literals = self.unit_propagation(itv, itc, assignment, cs, stats)
 
     if unitPropResult == UnitPropagationResult.CONFLICT:
       return SATSolverResult.UNSAT, assigned_literals
 
     # end condition -> each variable is assigned and there is no conflict
     n_assigned_variables += len(assigned_literals)
-    logger.debug(f"UP: {debug_str_multi(assigned_literals)}")
+    logger.debug(f"UP: {debug_str_multi(assigned_literals, itv)}")
     if n_assigned_variables == n_variables:
       return SATSolverResult.SAT, None
 
     var_int = self.dec_var_selection(assignment)
 
     # positive literal: var_int << 1
-    satResultPos = self._dpll(var_int << 1, itc, assignment, c, stats, n_variables, n_assigned_variables)
+    satResultPos = self._dpll(var_int << 1, itv, itc, assignment, c, stats, n_variables, n_assigned_variables)
     if satResultPos == SATSolverResult.SAT:
       return satResultPos, None
 
     # negative literal: var_int << 1 | 1
-    satResultNeg = self._dpll(var_int << 1 | 1, itc, assignment, c, stats, n_variables, n_assigned_variables)
+    satResultNeg = self._dpll(var_int << 1 | 1, itv, itc, assignment, c, stats, n_variables, n_assigned_variables)
     if satResultNeg == SATSolverResult.SAT:
       return satResultNeg, None
 
@@ -83,6 +84,7 @@ class DPLL:
   def _dpll(
     self,
     dec_lit_int,
+    itv, # int to variable
     itc, # int to clause
     assignment,
     c, # clauses
@@ -98,26 +100,26 @@ class DPLL:
     other_int = None
     if dec_lit_int is not None:
       other_int = dec_lit_int ^ 1
-      self.assign_true(dec_lit_int, assignment, itc)
-      logger.debug(f"DEC: {debug_str(dec_lit_int)}")
+      self.assign_true(dec_lit_int, itv, assignment, itc)
+      logger.debug(f"DEC: {debug_str(dec_lit_int, itv)}")
       stats.decVars += 1
       n_assigned_variables += 1
 
-    result, assigned_literals = self.__dpll(other_int, itc, assignment, c, stats, n_variables, n_assigned_variables)
+    result, assigned_literals = self.__dpll(other_int, itv, itc, assignment, c, stats, n_variables, n_assigned_variables)
     if result == SATSolverResult.UNSAT:
       if len(assigned_literals) != 0:
-        logger.debug(f"DPLL: Conflict: {debug_str_multi(assigned_literals)}")
+        logger.debug(f"DPLL: Conflict: {debug_str_multi(assigned_literals, itv)}")
       self.unassign_multiple(assigned_literals, assignment, itc)
       if dec_lit_int is not None:
-        logger.debug(f"UNDEC: {debug_str(dec_lit_int)}")
+        logger.debug(f"UNDEC: {debug_str(dec_lit_int, itv)}")
         self.unassign(dec_lit_int, assignment, itc)
 
     return result
 
   def dpll(self,ast_tree_root):
-    assignment, vti, itc, c, stats = self.prepare_structures(ast_tree_root)
+    assignment, itv, vti, itc, c, stats = self.prepare_structures(ast_tree_root)
     n_variables = len(vti) # vti == variable to integer
-    result = self._dpll(None, itc, assignment, c, stats, n_variables, n_assigned_variables=0)
+    result = self._dpll(None, itv, itc, assignment, c, stats, n_variables, n_assigned_variables=0)
 
     # health check
     if result == SATSolverResult.UNSAT and self.health_check is not None:

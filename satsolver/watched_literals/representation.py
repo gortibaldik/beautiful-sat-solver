@@ -34,13 +34,13 @@ class SATClause:
   def __len__(self):
     return  self._len
 
-def debug_str(lit_int):
-  return f"{'+' if lit_int & 1 == 0 else '-'} {lit_int >> 1}"
+def debug_str(lit_int, itv):
+  return f"{'' if lit_int & 1 == 0 else 'NOT '}{itv[lit_int >> 1]}"
 
-def debug_str_multi(multi):
+def debug_str_multi(multi, itv):
   s = []
   for l in multi:
-    s.append(debug_str(l))
+    s.append(debug_str(l, itv))
   return s
 
 def lit_is_satisfied(lit_int, assignment):
