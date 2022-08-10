@@ -61,6 +61,7 @@
 - [postgres pooling](https://stackoverflow.blog/2020/10/14/improve-database-performance-with-connection-pooling/)
 - [publishing docker images to docker repositories](https://docs.docker.com/docker-hub/repos/#pushing-a-docker-container-image-to-docker-hub)
 - [publishing docker images with github actions](https://docs.github.com/en/actions/publishing-packages/publishing-docker-images)
+- [simple satsolver implementation](https://sahandsaba.com/understanding-sat-by-implementing-a-simple-sat-solver-in-python.html)
 
 #### Problems with installation of `psycopg2`
 
