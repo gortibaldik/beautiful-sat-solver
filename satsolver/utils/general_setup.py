@@ -170,7 +170,7 @@ def find_model(
 ):
   set_debug_level(warning=warning, debug=debug)
   ast_tree_root = read_tree(input_file, nnf_reduce_implications=nnf_reduce_implications)
-  start, end, result, model, stats = time_execution(satsolver_function, ast_tree_root)
+  start, end, result, model, stats = time_execution(satsolver_function, ast_tree_root, debug)
   print_result(result, model, stats, end - start, input_file, output_to_stdout)
   return pack_result_to_dict(
     result=result,

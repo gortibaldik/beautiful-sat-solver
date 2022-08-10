@@ -1,7 +1,7 @@
-from satsolver.dpll.decision_variable_selection import dec_var_selection
-from satsolver.dpll.dpll import DPLL
+from satsolver.dpll.dpll_better_encoding import DPLL
 import satsolver.utils.general_setup as general_setup
 from satsolver.watched_literals.assignment import assign_true, unassign, unassign_multiple
+from satsolver.watched_literals.decision_variable_selection import dec_var_selection
 from satsolver.watched_literals.structures_preparation import prepare_structures
 from satsolver.watched_literals.unit_propagation import unit_propagation
 

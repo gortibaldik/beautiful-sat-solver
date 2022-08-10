@@ -1,13 +1,15 @@
+from satsolver.utils.representation import SATLiteral
 from typing import List
 
-# TODO
+
 def dec_var_selection(
-  assignment: List[bool], # int to literal
+  itl: List[SATLiteral], # int to literal
 ):
   """
   Select first unassigned variable
   """
-  for i, v in enumerate(assignment):
-    if v is None:
-      return i
+  for l in itl:
+    if not l.is_assigned():
+      return l.satVariable.positive_int, \
+             l.satVariable.negative_int
   raise RuntimeError("Each variable is assigned!")
