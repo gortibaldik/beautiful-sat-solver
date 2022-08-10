@@ -6,22 +6,25 @@ import zipfile
 
 from logzero import logger
 from pathlib import Path
-from server.config import Config
 from satsolver.benchmark_preparation.filter_benchmark_files import filter_files
+from server.config import Config
+from shutil import rmtree
 
 satlib_benchmark_urls = [
   ("http://ktiml.mff.cuni.cz/~kucerap/satsmt/practical/task1.zip", 5),
-  ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/GCP/flat30-60.tar.gz", 10),
-  ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/GCP/flat50-115.tar.gz", 10),
-  ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/GCP/flat75-180.tar.gz", 10),
-  ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/GCP/flat100-239.tar.gz", 10),
-  ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/RND3SAT/uf20-91.tar.gz", 100),
-  ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/RND3SAT/uf50-218.tar.gz", 50),
-  ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/RND3SAT/uuf50-218.tar.gz", 50),
+  # ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/GCP/flat30-60.tar.gz", 10),
+  # ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/GCP/flat50-115.tar.gz", 10),
+  # ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/GCP/flat75-180.tar.gz", 10),
+  # ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/GCP/flat100-239.tar.gz", 10),
+  # ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/RND3SAT/uf20-91.tar.gz", 100),
+  # ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/RND3SAT/uf50-218.tar.gz", 50),
+  # ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/RND3SAT/uuf50-218.tar.gz", 50),
   ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/RND3SAT/uf75-325.tar.gz", 10),
   ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/RND3SAT/uuf75-325.tar.gz", 10),
   ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/RND3SAT/uf100-430.tar.gz", 10),
-  ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/RND3SAT/uuf100-430.tar.gz", 10)
+  ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/RND3SAT/uuf100-430.tar.gz", 10),
+  ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/RND3SAT/uf125-538.tar.gz", 10),
+  ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/RND3SAT/uuf125-538.tar.gz", 10),
 ]
 
 def _construct_filename(base_filename, suffix_int, suffix_targz):
@@ -110,6 +113,18 @@ def filter_downloaded_benchmarks(benchmark_root):
     dirname = extract_directoryname_from_url(b)
     if dirname not in dirs_in_benchmark_root:
       filtered_benchmarks.append((i, b, n))
+  
+  for dirname in dirs_in_benchmark_root:
+    is_present = False
+    for i, (b, n) in enumerate(satlib_benchmark_urls):
+      benchmark_name = extract_directoryname_from_url(b)
+      if dirname == benchmark_name:
+        is_present = True
+        break
+    if not is_present:
+      logger.warning(f"REMOVED: {dirname}")
+      rmtree(os.path.join(Config.SATSMT_BENCHMARK_ROOT, dirname))
+
   return filtered_benchmarks
 
 async def download_all_not_downloaded_benchmarks():
