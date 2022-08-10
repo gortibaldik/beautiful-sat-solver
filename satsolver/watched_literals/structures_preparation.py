@@ -22,6 +22,7 @@ def prepare_structures(ast_tree_root):
             literal = itl[literalInt]
             satClause = SATClause([literal])
             satClause.watched[0] = 0 # index which is watched in the clause
+            satClause._len = len(satClause.children)
             itc[literalInt].append((satClause, 0))
         # it is a disjunction
         else:
@@ -41,6 +42,7 @@ def prepare_structures(ast_tree_root):
                     satClause.watched[watched_index] = watched_index # index which is watched in the clause
                     itc[literalInt].append((satClause, watched_index))
                     watched_index += 1
+            satClause._len = len(satClause.children)
 
         c.append((satClause, -1))
     stats = SATSolverStats()

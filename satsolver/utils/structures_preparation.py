@@ -1,8 +1,7 @@
 from satsolver.utils.representation import SATLiteral, SATVariable
 
 def get_literal_int(literal: SATLiteral):
-  is_positive = literal.positive
-  if is_positive:
+  if literal.positive:
     lit_int = literal.satVariable.positive_int
     other_int = literal.satVariable.negative_int
   else:

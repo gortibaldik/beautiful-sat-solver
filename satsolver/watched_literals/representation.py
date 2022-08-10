@@ -10,16 +10,17 @@ class SATClause:
   ):
     self.children: List[SATLiteral] = children
     self.watched:  int              = [None, None]
+    self._len:     int              = None
 
   def __getitem__(self, i: int):
     return self.children[i]
   
   def get_w(self, i):
     """Return i-th watched literal"""
-    if self.watched[i] is None:
-      return None
-    if len(self.children) <= self.watched[i]:
-      return None
+    # if self.watched[i] is None:
+    #   return None
+    # if len(self.children) <= self.watched[i]:
+    #   return None
     return self.children[self.watched[i]]
 
   def __repr__(self):
@@ -33,4 +34,4 @@ class SATClause:
     return s + ")"
   
   def __len__(self):
-    return len(self.children)
+    return  self._len

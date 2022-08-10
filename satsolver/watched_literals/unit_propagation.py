@@ -10,7 +10,8 @@ def find_unit_clauses(
   stats: SATSolverStats
 ):
   unit_clauses: List[Tuple[SATClause, int]] = []
-  for clause, watched_index in c:
+  for entry in c:
+    clause, watched_index = entry
     stats.unitPropCheckedClauses += 1
 
     if watched_index == -1:
