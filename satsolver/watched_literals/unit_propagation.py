@@ -14,6 +14,8 @@ def find_unit_clauses(
   unit_clauses: List[Tuple[SATClause, int]] = []
   for entry in c:
     clause, watched_index = entry
+    children = clause.children
+    watched = clause.watched
     stats.unitPropCheckedClauses += 1
 
     if watched_index == -1:
@@ -21,18 +23,18 @@ def find_unit_clauses(
       # a list where watched_index == -1, therefore there
       # we only need to check for real unit clauses (only
       # one literal clauses)
-      if clause.watched[1] is None:
+      if watched[1] is None:
         unit_clauses.append((clause, 0))
         continue
       continue
       
     # satisfied clause
-    lit_w = clause.get_w(watched_index)
+    lit_w = children[watched[watched_index]]
     a_w = assignment[lit_w >> 1]
     if a_w == ((lit_w & 1) ^ 1):
       continue
 
-    lit_o = clause.get_w(watched_index ^ 1)
+    lit_o = children[watched[watched_index ^ 1]]
     a_o = assignment[lit_o >> 1]
     if a_o == ((lit_o & 1) ^ 1):
       continue

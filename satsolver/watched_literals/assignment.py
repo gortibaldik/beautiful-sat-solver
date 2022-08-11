@@ -1,5 +1,5 @@
 from logzero import logger
-from satsolver.utils.representation import debug_str, lit_is_assigned
+from satsolver.utils.representation import debug_str
 from satsolver.watched_literals.representation import SATClause
 from typing import List, Tuple
 
@@ -32,23 +32,24 @@ def assign_true(
     clause, watched_index = entry
 
     # index of the second watched literal
-    swli = clause.watched[watched_index ^ 1]
+    watched = clause.watched
+    swli = watched[watched_index ^ 1]
 
     # watched literal index
-    wli = clause.watched[watched_index]
-    len_clause = len(clause)
+    wli = watched[watched_index]
+    children = clause.children
 
     # if second watched literal is already satisfied there is no
     # work to do
     #
     # if second watched literal is false, there isn't any
     # other unassigned literal in the clause
-    if lit_is_assigned(clause[swli], assignment):
+    if assignment[children[swli] >> 1] is not None:
       clauses_to_keep.append(entry)
       continue
 
     # find new watched literal for the clause
-    for i, c_lit in enumerate(clause.children):
+    for i, c_lit in enumerate(children):
       if i == wli or i == swli:
         continue
       
@@ -56,7 +57,7 @@ def assign_true(
       a_c = assignment[c_lit >> 1]
       if a_c is None or a_c != (c_lit & 1):
         itc[c_lit].append(entry)
-        clause.watched[watched_index] = i
+        watched[watched_index] = i
         break
     else:
       clauses_to_keep.append(entry)
@@ -83,5 +84,9 @@ def unassign_multiple(
   itc: List[List[SATClause]],
   itv: List[str]
 ):
-  for l in ls:
-    unassign(l, assignment, itc, itv)
+  for lit_int in ls:
+    vix = lit_int >> 1
+    if assignment[vix] is None:
+      raise RuntimeError(f"`{debug_str(lit_int)}` was supposed to be assigned!")
+
+    assignment[vix] = None
