@@ -110,8 +110,15 @@ export default {
       this.stdLogs = stdLogs
     },
     async pollRunningBenchmark(algo, bench) {
-      let data = await benchmark_communication.fetch_benchmark_progress(this.serverAddress, algo, bench)
+      let data = await benchmark_communication.fetchBenchmarkProgress(this.serverAddress, algo, bench)
       if (data.result === 'failure' || data.result == 100) {
+        clearInterval(this.pollingInterval)
+        this.isBenchmarkRunning = false
+      }
+    },
+    async pollRunningBenchmarkAll(algo) {
+      let data = await benchmark_communication.fetchAllProgress(algo)
+      if (data.result === 'failure' || data.finished) {
         clearInterval(this.pollingInterval)
         this.isBenchmarkRunning = false
       }
@@ -126,6 +133,9 @@ export default {
     },
     startMonitoringBenchmark(algo, bench) {
       this.pollingInterval = setInterval(this.pollRunningBenchmark.bind(this, algo, bench), 1000)
+    },
+    startMonitoringBenchmarkAll(algo) {
+      this.pollingInterval = setInterval(this.pollRunningBenchmarkAll.bind(this, algo), 1000)
     },
     async runButtonClicked(algo, bench, benchIn, logLevel) {
       if (this.runButtonText === "Stop") {
@@ -150,10 +160,14 @@ export default {
     },
     async fetchInfoFromServer() {
       let [benchmarks, algorithms, running_job] = await custom_run_communication.fetchBasicInfoFromServer(this.serverAddress)
-      let [running_algo, running_bench] = await benchmark_communication.fetch_running_benchmark(this.serverAddress)
+      let [running_algo, running_bench] = await benchmark_communication.fetchRunningBenchmark(this.serverAddress)
       if (running_algo != "none") {
         this.isBenchmarkRunning = true
-        this.startMonitoringBenchmark(running_algo, running_bench)
+        if (running_bench === "__all__") {
+          this.startMonitoringBenchmarkAll(running_algo)
+        } else {
+          this.startMonitoringBenchmark(running_algo, running_bench)
+        }
       } else {
         this.isBenchmarkRunning = false
       }

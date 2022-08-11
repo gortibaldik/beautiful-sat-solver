@@ -4,12 +4,14 @@ import {
   mdbCard,
   mdbView,
   mdbCardBody,
+  mdbCardTitle,
   mdbTbl,
   mdbTblHead,
   mdbTblBody,
   mdbScrollbar,
   mdbIcon,
   mdbHorizontalBarChart,
+  mdbLineChart,
   mdbBtn,
   mdbModal,
   mdbModalBody,
@@ -18,6 +20,7 @@ import {
   mdbModalTitle,
 } from 'mdbvue'
 import Vue from 'vue'
+import results_comm from '@/assets/js/results_communication'
 
 export default {
   name: 'Results',
@@ -28,12 +31,14 @@ export default {
     mdbCard,
     mdbView,
     mdbCardBody,
+    mdbCardTitle,
     mdbTbl,
     mdbTblHead,
     mdbTblBody,
     mdbScrollbar,
     mdbIcon,
     mdbHorizontalBarChart,
+    mdbLineChart,
     mdbBtn,
     mdbModal,
     mdbModalBody,
@@ -48,30 +53,14 @@ export default {
         rows: [],
       },
       filtered_rows: [],
-      hovered_sorts: [],
-      hovered_headers: [],
-      hovered_filters: [],
       headers_sorted: [],
       uniques: [],
       selected_values: [],
       checked_rows: [],
-      show_log_file_styles: [],
-      delete_button_styles: [],
       displayed_modals: [],
       modal_messages: [],
       all_checked: false,
-      unhovered_style: "background-color: #f9a825",
-      button_unhovered_style: "background-color: #f9b74c",
-      hovered_style: 'background-color: #f57f17',
-      select_all_style: "background-color: #f9b74c",
-      unhovered_compute_graph_class: "dark-blue-background",
-      hovered_compute_graph_class: "light-blue-background",
-      unhovered_download_csv_class: "dark-blue-background",
-      hovered_download_csv_class: "light-blue-background",
-      hovered_show_log_file_style: "background-color: #ceefff",
-      unhovered_show_log_file_style: "background-color: #e8f7ff",
-      compute_graph_class: "dark-blue-background",
-      download_csv_class: "dark-blue-background",
+      no_checked: 0,
       serverAddress: "",
       textWrapClass: "text-nowrap",
       showBarChart: false,
@@ -107,12 +96,46 @@ export default {
       barChartHeight: 0,
       chartColors: [
         'rgba(255, 99, 132, 0.2)',
-        'rgba(75, 192, 192, 0.2)'
+        'rgba(75, 192, 192, 0.2)',
+        'rgba(26, 171, 38, 0.2)',
+        'rgba(127, 16, 237, 0.2)',
       ],
       chartBorderColors: [
         'rgba(255,99,132,1)',
-        'rgba(75, 192, 192, 1)'
+        'rgba(75, 192, 192, 1)',
+        'rgba(9, 129, 19, 0.2)',
+        'rgba(70, 30, 110, 0.2)',
       ],
+      lineChartTimeData: {
+        labels: [],
+        datasets: [
+          {
+            label: "",
+            backgroundColor: "",
+            borderColor: "",
+            borderWidth: 0,
+            data: []
+          }
+        ]
+      },
+      lineChartOptions: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          xAxes: [{
+            gridLines: {
+              display: true,
+              color: "rgba(0, 0, 0, 0.1)"
+            }
+          }],
+          yAxes: [{
+            gridLines: {
+              display: true,
+              color: "rgba(0, 0, 0, 0.1)"
+            }
+          }]
+        }
+      },
       calculatedTableHeight: 0,
     }
   },
@@ -120,76 +143,77 @@ export default {
     window.addEventListener('resize', this.onResize)
     this.onResize()
     this.serverAddress = process.env.VUE_APP_SERVER_ADDRESS
-    this.fetchBenchmarkResults()
+    this.initBenchmarkResults()
   },
   methods: {
-    fetchBenchmarkResults() {
-      fetch(`${this.serverAddress}/results/`)
-        .then(response => response.json())
-        .then(function(data) {
-          let hovered_sorts = {}
-          let hovered_headers = {}
-          let headers_sorted = {}
-          let hovered_filters = {}
-          let uniques = []
-          let selected_values = {}
-          let filtered_rows = []
-          let show_log_file_styles = []
-          let delete_button_styles = []
-          let displayed_modals = []
-          let modal_messages = []
-          for (let i = 0; i < data.columns.length; i++) {
-            hovered_sorts[data.columns[i].label] = "color: #e65100;"
-            hovered_headers[data.columns[i].label] = this.unhovered_style
-            hovered_filters[data.columns[i].label] = this.unhovered_style
-            headers_sorted[data.columns[i].label] = "none"
-            selected_values[data.columns[i].label] = "Show all"
+    async initBenchmarkResults() {
+      let data = await results_comm.fetchBenchmarkResults(this.serverAddress)
+      let headers_sorted = {}
+      let uniques = []
+      let selected_values = {}
+      let filtered_rows = []
+      let displayed_modals = []
+      let modal_messages = []
+      for (let i = 0; i < data.columns.length; i++) {
+        headers_sorted[data.columns[i].label] = "none"
+        selected_values[data.columns[i].label] = "Show all"
 
-            // each column has a special "categorized"
-            // attribute which shows whether there should
-            // be a filter for selecting one of the unique
-            // values of rows in the column
-            if (data.columns[i].categorized) {
-              uniques.push(new Set())
-              uniques[i].add("Show all")
-            } else {
-              uniques.push(null)
-            }
+        // each column has a special "categorized"
+        // attribute which shows whether there should
+        // be a filter for selecting one of the unique
+        // values of rows in the column
+        if (data.columns[i].categorized) {
+          uniques.push(new Set())
+          uniques[i].add("Show all")
+        } else {
+          uniques.push(null)
+        }
+      }
+      for (let i = 0; i < data.rows.length; i++) {
+        for (let j = 0; j < data.columns.length; j++) {
+          if (data.columns[j].categorized) {
+            uniques[j].add(data.rows[i][data.columns[j].label])
           }
-          for (let i = 0; i < data.rows.length; i++) {
-            for (let j = 0; j < data.columns.length; j++) {
-              if (data.columns[j].categorized) {
-                uniques[j].add(data.rows[i][data.columns[j].label])
-              }
-            }
-            data.rows[i].checked = "is_unchecked"
-            data.rows[i].originalIndex = i
-            filtered_rows.push(data.rows[i])
+        }
+        data.rows[i].checked = "is_unchecked"
+        data.rows[i].originalIndex = i
+        filtered_rows.push(data.rows[i])
 
-            show_log_file_styles.push(this.unhovered_show_log_file_style)
-            delete_button_styles.push(this.unhovered_show_log_file_style)
-            displayed_modals.push(false)
-            modal_messages.push(false)
+        displayed_modals.push(false)
+        modal_messages.push(false)
+      }
+      this.data = data
+      this.uniques = uniques
+      this.selected_values = selected_values
+      this.filtered_rows = filtered_rows
+      this.displayed_modals = displayed_modals
+      this.modal_messages = modal_messages
+      this.calculateTableHeight()
+    },
+    canBePressedClass(colHeader) {
+      if (colHeader.can_be_pressed) {
+        return "can-be-pressed"
+      } else {
+        return ""
+      }
+    },
+    tableDataContent(colHeader, row) {
+      if (colHeader.can_be_pressed) {
+        return "Show"
+      }
+
+      // each float displayed with only 2 decimals
+      if (this.isFloat(row[colHeader.label])) {
+        return row[colHeader.label].toLocaleString(
+          "en-US",
+          { 
+            maximumFractionDigits: 2,
+            minimumFractionDigits: 2 
           }
-          this.data = data
-          this.hovered_sorts = hovered_sorts
-          this.hovered_headers = hovered_headers
-          this.hovered_filters = hovered_filters
-          this.uniques = uniques
-          this.selected_values = selected_values
-          this.filtered_rows = filtered_rows
-          this.show_log_file_styles = show_log_file_styles
-          this.delete_button_styles = delete_button_styles
-          this.displayed_modals = displayed_modals
-          this.modal_messages = modal_messages
-          this.calculateTableHeight()
-        }.bind(this))
-    },
-    setHovered(array, index) {
-      Vue.set(array, index, this.hovered_style)
-    },
-    unsetHovered(array, index) {
-      Vue.set(array, index, this.unhovered_style)
+        )
+      }
+
+      return row[colHeader.label]
     },
     sortRowsByIndex(index) {
       if (this.headers_sorted[index] != "asc") {
@@ -202,21 +226,24 @@ export default {
     },
     filterRows() {
       let filtered_rows = []
+      this.no_checked = 0
       for (let i = 0; i < this.filtered_rows.length; i++) {
         this.data.rows[this.filtered_rows[i].originalIndex].checked = this.filtered_rows[i].checked
       }
       for (let i = 0; i < this.data.rows.length; i++) {
         let equal_on_everything = true
         for (let j = 0; j < this.data.columns.length; j++) {
-          if (this.selected_values[this.data.columns[j].label] != "Show all" && this.data.rows[i][this.data.columns[j].label] != this.selected_values[this.data.columns[j].label]) {
+          if (this.selected_values[this.data.columns[j].label] != "Show all" &&
+              this.data.rows[i][this.data.columns[j].label] != this.selected_values[this.data.columns[j].label]) {
             equal_on_everything = false
             break
           }
         }
         if (equal_on_everything) {
           filtered_rows.push(this.data.rows[i])
-        } else {
-          this.data.rows[i].checked = "is_unchecked"
+          if (this.data.rows[i].checked == "is_checked") {
+            this.no_checked++
+          }
         }
       }
       this.filtered_rows = filtered_rows
@@ -229,8 +256,10 @@ export default {
         newValue.checked = value
       } else {
         if (oldValue.checked === "is_checked") {
+          this.no_checked--
           newValue.checked = "is_unchecked"
         } else {
+          this.no_checked++
           newValue.checked = "is_checked"
         }
       }
@@ -242,15 +271,15 @@ export default {
       } 
     },
     checkAll() {
-      if (this.all_checked) {
+      if (this.no_checked !== 0) {
         this.checkAllImpl("is_unchecked")
-        this.all_checked = false
+        this.no_checked = 0
       } else {
         this.checkAllImpl("is_checked")
-        this.all_checked = true
+        this.no_checked = this.filtered_rows.length
       }
     },
-    toggleGraphCreation() {
+    cumulativeVisualizationCreation(checked) {
       let barChartData = {
         labels: [],
         datasets: []
@@ -258,6 +287,7 @@ export default {
       for (let j = 0; j < this.data.columns.length; j++) {
         if (this.data.columns[j].plotted) {
           barChartData.datasets.push({
+             // time/unit props etc. are examples of datasets
             label: this.data.columns[j].label,
             data: [],
             backgroundColor: [],
@@ -265,15 +295,6 @@ export default {
             borderWidth: 1
           })
         }
-      }
-      let checked = []
-      for (let i = 0; i < this.filtered_rows.length; i++) {
-        if (this.filtered_rows[i].checked == "is_checked") {
-          checked.push(this.filtered_rows[i])
-        }
-      }
-      if (checked.length === 0) {
-        return
       }
       for (let i = 0; i < checked.length; i++) {
         barChartData.labels.push(`${checked[i]["Algorithm"]} ${checked[i]["Benchmark"]}`)
@@ -289,8 +310,74 @@ export default {
         }
       }
       this.barChartData = barChartData
-      this.showBarChart = true
       this.barChartHeight = 80 + checked.length * 50
+    },
+    visualizationCreation(checked, nameOfField) {
+      let chartData = {
+        labels: [],
+        datasets: []
+      }
+      // datasets are sets of time results of algorithms
+      // labels are names of benchmarks
+      let datasetNamesSet = new Set();
+      let labelsSet = new Set();
+      for (let i = 0; i < checked.length; i++) {
+        datasetNamesSet.add(checked[i]["Algorithm"])
+        labelsSet.add(checked[i]["Benchmark"])
+      }
+      let datasetNames = Array.from(datasetNamesSet)
+      let labelNames = Array.from(labelsSet)
+      chartData.labels = labelNames
+      for (let i = 0; i < datasetNames.length; i++) {
+        chartData.datasets.push({
+          label: datasetNames[i],
+          data: [],
+          backgroundColor: this.chartColors[i],
+          borderColor: this.chartBorderColors[i],
+          borderWidth: 1
+        })
+      }
+
+      for (let dix = 0; dix < datasetNames.length; dix++) {
+        for (let lnix = 0; lnix < labelNames.length; lnix++) {
+          let data = undefined;
+          for (let cix = 0; cix < checked.length; cix++) {
+            if (checked[cix]["Algorithm"] == datasetNames[dix] &&
+                checked[cix]["Benchmark"] == labelNames[lnix]) {
+              data = checked[cix][nameOfField]
+            }
+          }
+          chartData.datasets[dix].data.push(data)
+        }
+      }
+      return chartData
+    },
+    getCheckedRows() {
+      let checked = []
+      for (let i = 0; i < this.filtered_rows.length; i++) {
+        if (this.filtered_rows[i].checked == "is_checked") {
+          checked.push(this.filtered_rows[i])
+        }
+      }
+      return checked
+    },
+    toggleGraphCreation() {
+      let checked = this.getCheckedRows()
+      if (checked.length === 0) {
+        return
+      }
+      this.cumulativeVisualizationCreation(checked)
+      this.visualizations = []
+      for (let i = 0; i < this.data.columns.length; i++) {
+        if (this.data.columns[i].plotted) {
+          let d = this.visualizationCreation(checked, this.data.columns[i].label)
+          this.visualizations.push({
+            title: this.data.columns[i].label,
+            data: d
+          })
+        }
+      }
+      this.showBarChart = true
     },
     downloadCsv() {
       // write headers
@@ -305,11 +392,9 @@ export default {
       }
 
       // select checked rows
-      let checked = []
-      for (let i = 0; i < this.filtered_rows.length; i++) {
-        if (this.filtered_rows[i].checked == "is_checked") {
-          checked.push(this.filtered_rows[i])
-        }
+      let checked = this.getCheckedRows()
+      if (checked.length == 0) {
+        return
       }
 
       // write data
@@ -368,28 +453,16 @@ export default {
     closeModal(index) {
       Vue.set(this.displayed_modals, index, false)
     },
-    showLogFile(index) {
-      fetch(`${this.serverAddress}/results/get_log_file`, {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({log_file: this.filtered_rows[index]["Log File"]})
-      }).then(response => response.json())
-      .then(function(data) {
-        if (data["result"] === "failure") {
-          return
-        }
-        Vue.set(this.displayed_modals, index, true)
-        Vue.set(this.modal_messages, index, data["result"])
-      }.bind(this))
-    },
-    setShowLogFileHovered(index) {
-      Vue.set(this.show_log_file_styles, index, this.hovered_show_log_file_style)
-    }, 
-    unsetShowLogFileHovered(index) {
-      Vue.set(this.show_log_file_styles, index, this.unhovered_show_log_file_style)
+    async showLogFile(index) {
+      let data = await results_comm.fetchLogFile(
+        this.serverAddress,
+        this.filtered_rows[index]["Log File"]
+      )
+      if (data["result"] === "failure") {
+        return
+      }
+      Vue.set(this.displayed_modals, index, true)
+      Vue.set(this.modal_messages, index, data["result"])
     },
     removeLogFileFromDataRows(index) {
       let log_file = this.filtered_rows[index]["Log File"]
@@ -403,28 +476,16 @@ export default {
       }
       this.data.rows.splice(theIndex, 1)
     },
-    deleteLogFile(index) {
-      fetch(`${this.serverAddress}/results/remove_log_file`, {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({log_file: this.filtered_rows[index]["Log File"]})
-      }).then(response => response.json())
-      .then(function(data) {
-        if (data["result"] === "failure") {
-          return
-        }
-        this.removeLogFileFromDataRows(index)
-        this.filtered_rows.splice(index, 1)
-      }.bind(this))
+    async deleteLogFile(index) {
+      let data = await results_comm.fetchDeleteLogFile(
+        this.serverAddress,
+        this.filtered_rows[index]["Log File"]
+      )
+      if (data["result"] === "failure") {
+        return
+      }
+      this.removeLogFileFromDataRows(index)
+      this.filtered_rows.splice(index, 1)
     },
-    setDeleteHovered(index) {
-      Vue.set(this.delete_button_styles, index, this.hovered_show_log_file_style)
-    },
-    unsetDeleteHovered(index) {
-      Vue.set(this.delete_button_styles, index, this.unhovered_show_log_file_style)
-    }
   }
 }

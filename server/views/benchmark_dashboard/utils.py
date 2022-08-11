@@ -8,15 +8,23 @@ from server.task_runner import (
   get_job_log_file,
   has_job_finished,
   has_job_started,
+  task_runner_get_all_benchmarks_progress,
   task_runner_get_benchmark_progress,
   task_runner_get_job,
+  task_runner_start_algorithm_on_all_benchmarks,
   task_runner_start_algorithm_on_benchmark,
+  task_runner_stop_all_run_job,
   task_runner_stop_job
 )
 from server.utils.log_utils import get_log_file_content
 from server.utils.redis_utils import (
   get_saved_jobs
 )
+
+def get_post_algo_name():
+  post_data = request.get_json()
+  algorithm_name = post_data.get('algorithm')
+  return algorithm_name
 
 def get_post_data():
   post_data = request.get_json()
@@ -49,6 +57,19 @@ def find_running_benchmark(algo_name, saved_jobs):
   # checks whether they're still running
   for key in saved_jobs.keys():
     key_parts = key.split(',')
+    if len(key_parts) == 1:
+      if algo_name == key:
+        try:
+          job = task_runner_get_job(saved_jobs[key])
+        except:
+          continue
+        if job_is_running(job):
+          logger.warning(f"FOUND RUNNING JOB: {job.meta}")
+          return {
+            "running": True,
+            "all":     True
+          }
+      continue
     if len(key_parts) > 2:
       continue
     if algo_name in key:
@@ -59,13 +80,15 @@ def find_running_benchmark(algo_name, saved_jobs):
       
       if job_is_running(job):
         benchmark_name = key.split(',')[1]
-        logger.warning(job.meta)
+        logger.warning(f"FOUND RUNNING JOB: {job.meta}")
         return {
           "running": True,
+          "all":     False,
           "benchmarkName": benchmark_name
         }
   return {
     "running": False,
+    "all": False,
     "benchmarkName": ""
   }
 
@@ -89,6 +112,13 @@ def get_running_benchmark(saved_jobs):
     key_parts = key.split(',')
     if len(key_parts) > 2:
       continue
+    if len(key_parts) == 1:
+      try:
+        job = task_runner_get_job(saved_jobs[key])
+      except:
+        continue
+      if job_is_running(job):
+        return create_running_job_dict(key, "__all__")
     algo, bench = key_parts
     try:
       job = task_runner_get_job(saved_jobs[key])
@@ -109,14 +139,29 @@ def save_job(job: rq.job.Job, algorithm_name, benchmark_name, saved_jobs):
     "interrupted": False 
   }
 
+def save_job_all_benchmarks(job: rq.job.Job, algorithm_name, saved_jobs):
+  saved_jobs[algorithm_name] = {
+    "job": job.get_id(),
+    "logs": None,
+    "interrupted": False
+  }
+
 def stop_job(algorithm_name, benchmark_name, saved_jobs):
   job_info = get_job_info(algorithm_name, benchmark_name, saved_jobs)
   job = task_runner_get_job(job_info)
   if has_job_started(job) and not has_job_finished(job):
     task_runner_stop_job(job, algorithm_name, benchmark_name)
     return True
-  logger.warning("Job cannot be stopped!")
+  logger.warning(f"Job [{construct_index(algorithm_name, benchmark_name)}] cannot be stopped!")
   return False
+
+def stop_job_all_run(algorithm_name, saved_jobs):
+  job_info = get_all_run_job_info(algorithm_name, saved_jobs)
+  job = task_runner_get_job(job_info)
+  if has_job_started(job) and not has_job_finished(job):
+    task_runner_stop_all_run_job(job, algorithm_name)
+    return True
+  logger.warning(f"Job [{algorithm_name}] cannot be stopped!")
 
 def benchmark_name_sorting_criterion(x):
   if "uuf" in x:
@@ -143,10 +188,23 @@ def get_job_info(algorithm_name, benchmark_name, saved_jobs):
     raise RuntimeError(f"{index} not in saved_jobs")
   return saved_jobs[index]
 
+def get_all_run_job_info(algorithm_name, saved_jobs):
+  if algorithm_name not in saved_jobs:
+    raise RuntimeError(f"{algorithm_name} not in saved_jobs: {saved_jobs}")
+  return saved_jobs[algorithm_name]
+
 def get_benchmark_progress(algorithm_name, benchmark_name):
   saved_jobs = get_saved_jobs()
   job_info = get_job_info(algorithm_name, benchmark_name, saved_jobs)
   return task_runner_get_benchmark_progress(job_info)
 
+def get_all_run_progress(algorithm_name):
+  saved_jobs = get_saved_jobs()
+  job_info = get_all_run_job_info(algorithm_name, saved_jobs)
+  return task_runner_get_all_benchmarks_progress(job_info)
+
 def start_algorithm_on_benchmark(algorithm_name, benchmark_name, debug_level):
   return task_runner_start_algorithm_on_benchmark(algorithm_name, benchmark_name, debug_level)
+
+def start_algorithm_on_all_benchmarks(algorithm_name, debug_level):
+  return task_runner_start_algorithm_on_all_benchmarks(algorithm_name, debug_level)

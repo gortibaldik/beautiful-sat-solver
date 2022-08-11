@@ -24,6 +24,10 @@
   border-radius: 5px;
 }
 
+.rounded-border {
+  border-radius: 5px;
+}
+
 .custom-margin-top {
   margin-top: 0px
 }
@@ -40,6 +44,10 @@ td {
   overflow: hidden;
 }
 
+.spaced-title {
+  margin: 5px;
+}
+
 .header-button-style {
   float: right;
   padding-top:13px;
@@ -51,11 +59,11 @@ td {
   border-width: thin;
 }
 
-.dark-blue-background {
+.dark-blue-background-hoverable {
   background-color: #1452b6;
 }
 
-.light-blue-background {
+.dark-blue-background-hoverable:hover {
   background-color: #5595fb
 }
 
@@ -69,6 +77,58 @@ td {
   height: 50px;
 }
 
+.white-background {
+  background-color: white;
+}
+
+.top-table-header {
+  padding-top: 0.75rem;
+  padding-bottom: 0rem;
+}
+
+.red-color {
+  color: #e65100;
+}
+
+.orange-background {
+  background-color: #f9a825;
+}
+
+.hoverable-table-header {
+  background-color: #f9a825;
+}
+
+.hoverable-table-header:hover {
+  background-color: #f57f17;
+}
+
+.hoverable-table-button {
+  padding: 0.25rem;
+  padding-bottom: 0.75rem;
+  padding-left: 0.75rem;
+  background-color: #f9b74c;
+}
+
+.dark-blue-color {
+  color: #455a64;
+}
+
+.hoverable-table-button:hover {
+  background-color: #f57f17;
+}
+
+.quarter-padding {
+  padding: 0.25rem;
+}
+
+.can-be-pressed {
+  background-color: #e8f7ff;
+}
+
+.can-be-pressed:hover {
+  background-color: #ceefff;
+}
+
 /* CSS styles for checkboxes: https://www.sliderrevolution.com/resources/css-checkbox/
 - author: thelaazyguy
 -  
@@ -78,6 +138,7 @@ td {
   height: 40px;
   position: relative;
   cursor: pointer;
+  scale: 0.75;
 }
 
 .input_wrapper input[type="checkbox"]{

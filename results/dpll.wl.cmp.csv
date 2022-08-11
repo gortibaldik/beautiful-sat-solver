@@ -1,0 +1,25 @@
+Derivations of Decision Variables, No. Checked UP Clauses, Time of Execution, Unit Propagations, Algorithm, Benchmark, Date of Run, Log File
+78.2, 511.6, 0.007011426399913034, 231.6, DPLL.v4, task1, "Sun, 07 Aug 2022 14:06:24 GMT", logs/result_logs/DPLL.v4_task1_2022_08_07_14_06_24
+78.2, 480, 0.00851640060027421, 231.6, Watched Literals.v1, task1, "Sun, 07 Aug 2022 14:06:26 GMT", logs/result_logs/Watched Literals.v1_task1_2022_08_07_14_06_26
+15, 540, 0.00613335600010032, 75, DPLL.v4, flat30-60, "Sun, 07 Aug 2022 14:06:30 GMT", logs/result_logs/DPLL.v4_flat30-60_2022_08_07_14_06_29
+15, 510, 0.00788892219970876, 75, Watched Literals.v1, flat30-60, "Sun, 07 Aug 2022 14:06:52 GMT", logs/result_logs/Watched Literals.v1_flat30-60_2022_08_07_14_06_52
+22.7, 975, 0.005913522300215845, 127.3, DPLL.v4, flat50-115, "Sun, 07 Aug 2022 14:06:55 GMT", logs/result_logs/DPLL.v4_flat50-115_2022_08_07_14_06_55
+22.7, 925, 0.012593428899890569, 127.3, Watched Literals.v1, flat50-115, "Sun, 07 Aug 2022 14:06:58 GMT", logs/result_logs/Watched Literals.v1_flat50-115_2022_08_07_14_06_58
+563.5, 46416.8, 0.2376590211999428, 17231.9, DPLL.v4, flat75-180, "Sun, 07 Aug 2022 14:07:03 GMT", logs/result_logs/DPLL.v4_flat75-180_2022_08_07_14_07_00
+563.5, 42548.7, 0.34413778919988547, 17231.9, Watched Literals.v1, flat75-180, "Sun, 07 Aug 2022 14:07:09 GMT", logs/result_logs/Watched Literals.v1_flat75-180_2022_08_07_14_07_05
+44.9, 1995, 0.017200656599743524, 255.1, DPLL.v4, flat100-239, "Sun, 07 Aug 2022 14:07:12 GMT", logs/result_logs/DPLL.v4_flat100-239_2022_08_07_14_07_11
+44.9, 1895, 0.027656236599796102, 255.1, Watched Literals.v1, flat100-239, "Sun, 07 Aug 2022 14:07:15 GMT", logs/result_logs/Watched Literals.v1_flat100-239_2022_08_07_14_07_14
+22.94, 573.51, 0.005284646510081075, 81.6, DPLL.v4, uf20-91, "Sun, 07 Aug 2022 14:07:20 GMT", logs/result_logs/DPLL.v4_uf20-91_2022_08_07_14_07_17
+22.94, 302.54, 0.0038400520099276035, 81.82, Watched Literals.v1, uf20-91, "Sun, 07 Aug 2022 14:07:23 GMT", logs/result_logs/Watched Literals.v1_uf20-91_2022_08_07_14_07_22
+236.34, 8074.38, 0.03641870236002433, 1649.94, DPLL.v4, uf50-218, "Sun, 07 Aug 2022 14:07:28 GMT", logs/result_logs/DPLL.v4_uf50-218_2022_08_07_14_07_26
+236.34, 3678.26, 0.04769432657994912, 1653.06, Watched Literals.v1, uf50-218, "Sun, 07 Aug 2022 14:07:33 GMT", logs/result_logs/Watched Literals.v1_uf50-218_2022_08_07_14_07_30
+3055.9, 127260.6, 0.579912631300067, 27962.7, DPLL.v4, uf75-325, "Sun, 07 Aug 2022 14:07:41 GMT", logs/result_logs/DPLL.v4_uf75-325_2022_08_07_14_07_35
+3055.9, 55426.1, 0.7213852725000833, 28225.3, Watched Literals.v1, uf75-325, "Sun, 07 Aug 2022 14:07:50 GMT", logs/result_logs/Watched Literals.v1_uf75-325_2022_08_07_14_07_43
+9358, 494468.3, 2.0170102838001185, 108533.2, DPLL.v4, uf100-430, "Sun, 07 Aug 2022 14:08:14 GMT", logs/result_logs/DPLL.v4_uf100-430_2022_08_07_14_07_54
+9358, 205366, 2.544899945199904, 109167.6, Watched Literals.v1, uf100-430, "Sun, 07 Aug 2022 14:08:42 GMT", logs/result_logs/Watched Literals.v1_uf100-430_2022_08_07_14_08_17
+631.52, 22323.64, 0.10185014848015271, 4634.3, DPLL.v4, uuf50-218, "Sun, 07 Aug 2022 14:09:20 GMT", logs/result_logs/DPLL.v4_uuf50-218_2022_08_07_14_09_14
+631.52, 9354.7, 0.12996462315993995, 4649.16, Watched Literals.v1, uuf50-218, "Sun, 07 Aug 2022 14:09:29 GMT", logs/result_logs/Watched Literals.v1_uuf50-218_2022_08_07_14_09_22
+4893.8, 214306.7, 0.966344555699834, 46776.3, DPLL.v4, uuf75-325, "Sun, 07 Aug 2022 14:09:41 GMT", logs/result_logs/DPLL.v4_uuf75-325_2022_08_07_14_09_31
+4893.8, 86604.3, 1.1581078713999886, 46500.2, Watched Literals.v1, uuf75-325, "Sun, 07 Aug 2022 14:09:55 GMT", logs/result_logs/Watched Literals.v1_uuf75-325_2022_08_07_14_09_44
+53648.8, 2688577.8, 13.117600103000223, 601712.9, DPLL.v4, uuf100-430, "Sun, 07 Aug 2022 14:12:09 GMT", logs/result_logs/DPLL.v4_uuf100-430_2022_08_07_14_09_58
+53648.8, 1098449.5, 16.55725954010013, 598505.8, Watched Literals.v1, uuf100-430, "Sun, 07 Aug 2022 14:14:57 GMT", logs/result_logs/Watched Literals.v1_uuf100-430_2022_08_07_14_12_11

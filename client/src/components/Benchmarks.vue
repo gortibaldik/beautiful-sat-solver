@@ -32,33 +32,39 @@
                     {{value}}
                   </option>
                 </select>
-                <div class="text-center" style="margin-top: 10px;">
-                  <!-- Default inline 1-->
+                <mdb-row class="logSelector">
+                  SELECT LOG LEVEL:
+                </mdb-row>
+                <mdb-row class="justify-content-center">
                   <div class="custom-control custom-radio custom-control-inline">
                     <input type="radio" :name="`radioLogLevel__${index}`" class="custom-control-input" :id="`${index}__LogLevelDebug`" value="DEBUG" v-model="selectedLogLevels[index]">
                     <label class="custom-control-label" :for="`${index}__LogLevelDebug`">DEBUG</label>
                   </div>
-                  <!-- Default inline 2-->
                   <div class="custom-control custom-radio custom-control-inline">
                     <input type="radio" :name="`radioLogLevel__${index}`" class="custom-control-input" :id="`${index}__LogLevelInfo`" value="INFO" v-model="selectedLogLevels[index]">
                     <label class="custom-control-label" :for="`${index}__LogLevelInfo`">INFO</label>
                   </div>
-                  <!-- Default inline 3-->
                   <div class="custom-control custom-radio custom-control-inline">
                     <input type="radio" :name="`radioLogLevel__${index}`" class="custom-control-input" :id="`${index}__LogLevelWarning`" value="WARNING" v-model="selectedLogLevels[index]">
                     <label class="custom-control-label" :for="`${index}__LogLevelWarning`">WARNING</label>
                   </div>
-                </div>
-                <div class="text-center">
+                </mdb-row>
+                <mdb-row class="justify-content-center">
                   <mdb-btn :color="runButtonColor(index)" class="runButton" @click="runBenchmarkClicked(algorithm.name,selected[index][0], index)" :disabled="runButtonIsDisabled(index)">{{runButtonText(index)}}</mdb-btn>
-                </div>
-                <div class="text-center" :style="displayModalButton(index)">
+                  <mdb-btn :color="runButtonColor(index)" class="runButton" @click="runAllClicked(algorithm.name, index)" v-if="! runButtonDisplaysStopMessage(index)" :disabled="runButtonIsDisabled(index)">RUN ALL</mdb-btn>
+                </mdb-row>
+                <mdb-row v-if="displayedModalButtons[index]" class="justify-content-center">
                   <mdb-btn color="primary" class="runButton" @click="clickDisplayModalButton(index)" >Display results</mdb-btn>
-                </div>
-                <div class="progress" :style="displayProgressBar(index)">
-                  <div aria-valuemax="100" aria-valuemin="0" :aria-valuenow="progressBarValue" class="progress-bar bg-primary" role="progressbar"
-                    :style="progressBarStyle"></div>
-                </div>
+                </mdb-row>
+                <section v-if="shouldProgressBeDisplayed(index)">
+                  <mdb-row class="logSelector" >
+                    RUNNING: {{runningBenchmark}}
+                  </mdb-row>
+                  <mdb-row class="progress">
+                    <div aria-valuemax="100" aria-valuemin="0" :aria-valuenow="progressBarValue" class="progress-bar bg-primary" role="progressbar"
+                      :style="progressBarStyle"></div>
+                  </mdb-row>
+                </section>
                 <mdb-modal size="lg" :show="displayedModals[index]" @close="closeModal(index)" scrollable>
                   <mdb-modal-header>
                     <mdb-modal-title>Algorithm result</mdb-modal-title>
