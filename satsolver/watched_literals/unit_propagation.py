@@ -1,15 +1,15 @@
 from logzero import logger
 from satsolver.utils.enums import UnitPropagationResult
+from satsolver.utils.representation import lit_is_none, lit_is_satisfied, lit_is_unsatisfied
 from satsolver.utils.stats import SATSolverStats
-from satsolver.watched_literals.assignment import assign_true, get_literal_int, unassign_multiple
-from satsolver.watched_literals.representation import SATClause, lit_is_none, lit_is_satisfied, lit_is_unsatisfied, debug_str
+from satsolver.watched_literals.assignment import assign_true, unassign_multiple
+from satsolver.watched_literals.representation import SATClause
 from typing import List, Tuple
 
-# TODO
 def find_unit_clauses(
-  itv,
+  itv: List[str], # int to variable
   c: List[Tuple[SATClause, int]], # clauses
-  assignment,
+  assignment: List[bool],
   stats: SATSolverStats
 ):
   unit_clauses: List[Tuple[SATClause, int]] = []
@@ -61,20 +61,18 @@ def unit_propagation(
     result, clauses = find_unit_clauses(itv, cs, assignment, stats)
 
     if result == UnitPropagationResult.CONFLICT:
-      unassign_multiple(assigned_literals, assignment, itc)
+      unassign_multiple(assigned_literals, assignment, itc, itv)
       return UnitPropagationResult.CONFLICT, []
 
     # implicitly result == (UnitPropagationResult.NOTHING_FOUND or UnitPropagationResult.UNIT_FOUND)
     for clause, n_of_wl in clauses:
       lit_int = clause.get_w(n_of_wl)
-      if itv[lit_int >> 1] == "x3":
-        print("something")
 
       if lit_is_satisfied(lit_int, assignment):
         continue
 
       elif lit_is_unsatisfied(lit_int, assignment):
-        unassign_multiple(assigned_literals, assignment, itc)
+        unassign_multiple(assigned_literals, assignment, itc, itv)
         return UnitPropagationResult.CONFLICT, []
 
       assign_true(

@@ -1,30 +1,18 @@
-from satsolver.utils.representation import SATLiteral, SATVariable
-
-def get_literal_int(literal: SATLiteral):
-  if literal.positive:
-    lit_int = literal.satVariable.positive_int
-    other_int = literal.satVariable.negative_int
-  else:
-    lit_int = literal.satVariable.negative_int
-    other_int = literal.satVariable.positive_int
-  return lit_int, other_int
-
 def assign_variable_to_structures(
     variable,
+    itv, # int to variable name
     vti, # variable to int
-    itl, # int to literal
+    assignment,
     itc, # int to clauses
-    create_sat_literal_f = SATLiteral
 ):
     if len(variable.children) != 0:
         raise RuntimeError(f"`{str(variable)}` is supposed to be a variable")
     var_name = str(variable)
     if var_name not in vti:
-        var_int = len(itl)
-        vti[var_name] = (var_int, var_int + 1)
-        variable = SATVariable(var_int, var_int + 1, var_name)
-        itl.append(create_sat_literal_f(variable, True))
-        itl.append(create_sat_literal_f(variable, False))
+        var_int = len(assignment)
+        vti[var_name] = var_int
+        itv.append(var_name)
+        assignment.append(None)
         itc.append([])
         itc.append([])
     
@@ -32,29 +20,30 @@ def assign_variable_to_structures(
 
 def assign_literal_to_structures(
     literal,
+    itv, # int to variable name
     vti, # variable to int
-    itl, # int to literal
+    assignment,
     itc, # int to clauses
-    create_sat_literal_f = SATLiteral
 ):
     # it is a positive literal
     if len(literal.children) == 0:
-        pos_int, neg_int = assign_variable_to_structures(
+        # vix == variable index
+        vix = assign_variable_to_structures(
             literal,
+            itv,
             vti,
-            itl,
-            itc,
-            create_sat_literal_f=create_sat_literal_f
+            assignment,
+            itc
         )
-        return pos_int
+        return vix << 1
     elif len(literal.children) == 1:
-        pos_int, neg_int = assign_variable_to_structures(
+        vix = assign_variable_to_structures(
             literal.children[0],
+            itv,
             vti,
-            itl,
+            assignment,
             itc,
-            create_sat_literal_f=create_sat_literal_f
         )
-        return neg_int
+        return vix << 1 | 1
     else:
         raise RuntimeError(f"`{str(literal)}` is supposed to be a literal")

@@ -1,26 +1,27 @@
 from logzero import logger
-from satsolver.dpll.assignment import assign_true, get_literal_int, unassign_multiple
+from satsolver.dpll.assignment import assign_true, unassign_multiple
 from satsolver.dpll.representation import SATClause
 from satsolver.utils.enums import UnitPropagationResult
+from satsolver.utils.representation import debug_str, lit_is_none, lit_is_satisfied
 from satsolver.utils.stats import SATSolverStats
 from typing import List
 
-def find_not_assigned(clause: SATClause):
-  unassigned_literal = None
+def find_not_assigned(clause: SATClause, itv, assignment):
+  unassigned_lit_int = None
   at_least_one_true = False
-  for literal in clause.children:
-    if not literal.is_assigned():
-      unassigned_literal = literal
+  for lit_int in clause.children:
+    if lit_is_none(lit_int, assignment):
+      unassigned_lit_int = lit_int
       break
-    if literal.is_satisfied():
+    if lit_is_satisfied(lit_int, assignment):
        at_least_one_true = True
     
   # conflict
-  if unassigned_literal is None and not at_least_one_true:
+  if unassigned_lit_int is None and not at_least_one_true:
     # logger.warning(f"{str(clause)} was expected to contain unassigned literal!")
     return UnitPropagationResult.CONFLICT
 
-  return unassigned_literal
+  return unassigned_lit_int
 
 def find_unit_clause(
   c: List[SATClause], # clauses
@@ -47,9 +48,10 @@ def find_unit_clause(
   return UnitPropagationResult.NOTHING_FOUND, None
 
 def unit_propagation(
+  itv, # int to variable
   itc, # int to clauses
+  assignment,
   cs,  # clauses to search
-  ca,  # all clauses
   stats: SATSolverStats
 ):
   assigned_literals = []
@@ -59,28 +61,29 @@ def unit_propagation(
     result, clauses = find_unit_clause(cs, stats)
 
     if result == UnitPropagationResult.CONFLICT:
-      unassign_multiple(assigned_literals, itc)
+      unassign_multiple(assigned_literals, assignment, itc, itv)
       return UnitPropagationResult.CONFLICT, []
     
     if clauses is None:
       continue
 
     for clause in clauses:
-      literal = find_not_assigned(clause)
+      lit_int = find_not_assigned(clause, itv, assignment)
 
-      if literal is None:
+      if lit_int is None:
         continue
-      elif literal == UnitPropagationResult.CONFLICT:
-        unassign_multiple(assigned_literals, itc)
+      elif lit_int == UnitPropagationResult.CONFLICT:
+        unassign_multiple(assigned_literals, assignment, itc, itv)
         return UnitPropagationResult.CONFLICT, []
 
       assign_true(
-        literal,
+        lit_int,
+        itv,
+        assignment,
         itc,
         assigned_literals
       )
       stats.unitProps += 1
-      lit_int, other_int = get_literal_int(literal)
-      list_of_cs.append(itc[other_int])
+      list_of_cs.append(itc[lit_int ^ 1])
 
   return UnitPropagationResult.NOTHING_FOUND, assigned_literals

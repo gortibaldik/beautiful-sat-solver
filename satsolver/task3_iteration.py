@@ -1,5 +1,5 @@
 from satsolver.dpll.decision_variable_selection import dec_var_selection
-from satsolver.dpll.dpll_cycle import DPLLCycle
+from satsolver.dpll.dpll_iter import DPLLIter
 import satsolver.utils.general_setup as general_setup
 from satsolver.watched_literals.assignment import assign_true, unassign, unassign_multiple
 from satsolver.watched_literals.structures_preparation import prepare_structures
@@ -9,7 +9,7 @@ def get_info():
   return general_setup.get_info(
     name="Watched Literals.v5.iter",
     taskName="TASK 3 - iter",
-    benchmarkable=False # TODO: make True
+    benchmarkable=True
   )
 
 def find_model(
@@ -20,7 +20,7 @@ def find_model(
   output_to_stdout=False,
   nnf_reduce_implications=True
 ):
-  dpll = DPLLCycle(
+  dpll = DPLLIter(
     prepare_structures=prepare_structures,
     unit_propagation=unit_propagation,
     dec_var_selection=dec_var_selection,

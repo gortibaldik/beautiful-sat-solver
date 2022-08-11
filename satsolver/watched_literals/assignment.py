@@ -1,9 +1,8 @@
 from logzero import logger
-from satsolver.watched_literals.representation import SATClause, SATLiteral, debug_str, lit_is_assigned, lit_is_none, lit_is_satisfied, satisfy_lit, unassign_lit
-from satsolver.utils.structures_preparation import get_literal_int
+from satsolver.utils.representation import debug_str, lit_is_assigned, lit_is_none, lit_is_satisfied, satisfy_lit, unassign_lit
+from satsolver.watched_literals.representation import SATClause
 from typing import List, Tuple
 
-# TODO
 def assign_true(
   lit_int: int,
   itv,
@@ -71,6 +70,7 @@ def unassign(
   lit_int: int,
   assignment,
   itc: List[List[SATClause]], # int to clauses
+  itv: List[str]
 ):
   if lit_is_none(lit_int, assignment):
     raise RuntimeError(f"`{debug_str(lit_int)}` was supposed to be assigned!")
@@ -78,9 +78,10 @@ def unassign(
   unassign_lit(lit_int, assignment)
 
 def unassign_multiple(
-  ls: List[SATLiteral],
+  ls: List[int],
   assignment,
-  itc: List[List[SATClause]]
+  itc: List[List[SATClause]],
+  itv: List[str]
 ):
   for l in ls:
-    unassign(l, assignment, itc)
+    unassign(l, assignment, itc, itv)

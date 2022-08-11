@@ -4,11 +4,11 @@ from satsolver.dpll.structures_preparation import health_check, prepare_structur
 from satsolver.dpll.unit_propagation import unit_propagation
 import satsolver.utils.general_setup as general_setup
 
-from satsolver.dpll.dpll_cycle import DPLLCycle
+from satsolver.dpll.dpll_iter import DPLLIter
 
 def get_info():
   return general_setup.get_info(
-    name="DPLL.v4.iter",
+    name="DPLL.v5.iter",
     taskName="TASK 2 - iter",
     benchmarkable=True
   )
@@ -21,7 +21,7 @@ def find_model(
   output_to_stdout=False,
   nnf_reduce_implications=True
 ):
-  dpll = DPLLCycle(
+  dpll = DPLLIter(
     prepare_structures=prepare_structures,
     unit_propagation=unit_propagation,
     dec_var_selection=dec_var_selection,
