@@ -5,22 +5,6 @@ from ..utils.stats import SATSolverStats
 from satsolver.watched_literals.representation import SATClause
 from typing import List
 
-def debug_print_multiple(debug, multi, itv):
-  if debug:
-    logger.debug(f"DPLL: Conflict: {debug_str_multi(multi, itv)}")
-
-def debug_print_DEC(debug, dec_lit_int, itv):
-  if debug:
-    logger.debug(f"DEC: {debug_str(dec_lit_int, itv)}")
-
-def debug_print_UNDEC(debug, dec_lit_int, itv):
-  if debug:
-    logger.debug(f"UNDEC: {debug_str(dec_lit_int, itv)}")
-
-def debug_print_UP(debug, multi, itv):
-  if debug:
-    logger.debug(f"UP: {debug_str_multi(multi, itv)}")
-
 class DPLLIter:
   """Implementation of DPLL that uses cycle instead of recursion"""
   def __init__(
@@ -88,35 +72,35 @@ class DPLLIter:
       else:
         dec_var_int = stack_dec_var_int[ix]
         if decision == 0:
-          dec_lit_int = dec_var_int << 1
+          dec_lit_int = dec_var_int + dec_var_int
           stack_decisions[ix] += 1
           n_assigned_variables += 1
           stats.decVars += 1
         elif decision == 1:
           # unassign last decision literal
-          debug_print_UNDEC(debug, dec_var_int << 1, itv)
-          self.unassign(dec_var_int << 1, assignment, itc, itv)
-          dec_lit_int = (dec_var_int << 1) | 1
+          dec_lit_int = dec_var_int + dec_var_int
+          if debug: logger.debug(f"UNDEC: {debug_str(dec_lit_int, itv)}")
+          self.unassign(dec_lit_int, assignment, itc, itv)
+          dec_lit_int += 1
           stack_decisions[ix] += 1
           stats.decVars += 1
         else:
           # unassign last decision literal
-          debug_print_UNDEC(debug, (dec_var_int << 1) | 1, itv)
-          self.unassign((dec_var_int << 1) | 1, assignment, itc, itv)
+          dec_lit_int = dec_var_int + dec_var_int + 1
+          if debug: logger.debug(f"UNDEC: {debug_str(dec_lit_int, itv)}")
+          self.unassign(dec_lit_int, assignment, itc, itv)
 
           assigned_literals = stack_assigned_literals[ix]
-          debug_print_multiple(debug, assigned_literals, itv)
+          if debug: logger.debug(f"DPLL: Conflict: {debug_str_multi(assigned_literals, itv)}")
           self.unassign_multiple(assigned_literals, assignment, itc, itv)
           
           # restore structures
-          stack_assigned_literals[ix] = None
           stack_decisions[ix] = 0
-          stack_dec_var_int[ix] = None
           ix -= 1
           n_assigned_variables -= (1 + len(assigned_literals))
           continue
         
-        debug_print_DEC(debug, dec_lit_int, itv)
+        if debug: logger.debug(f"DEC: {debug_str(dec_lit_int, itv)}")
         self.assign_true(dec_lit_int, itv, assignment, itc)
         cs = itc[dec_lit_int ^ 1]
 
@@ -124,7 +108,7 @@ class DPLLIter:
       if unitPropResult == UnitPropagationResult.CONFLICT:
         continue
 
-      debug_print_UP(debug, assigned_literals, itv)
+      if debug: logger.debug(f"UP: {debug_str_multi(assigned_literals, itv)}")
       
       ix += 1
       n_assigned_variables += len(assigned_literals)
