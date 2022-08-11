@@ -1,0 +1,21 @@
+Derivations of Decision Variables, No. Checked UP Clauses, Time of Execution, Unit Propagations, Algorithm, Benchmark, Date of Run, Log File
+3055.9, 127260.6, 0.7063112289000856, 27962.7, DPLL.v5.iter, uf75-325, "08/11/2022, 13:12:08", logs/result_logs/DPLL.v5.iter_uf75-325_2022_08_11_13_12_01
+4893.8, 214306.7, 1.0733630489001371, 46776.3, DPLL.v5.iter, uuf75-325, "08/11/2022, 13:12:20", logs/result_logs/DPLL.v5.iter_uuf75-325_2022_08_11_13_12_10
+78.2, 511.6, 0.005630951999046374, 231.6, DPLL.v5.iter, task1, "08/11/2022, 13:12:21", logs/result_logs/DPLL.v5.iter_task1_2022_08_11_13_12_20
+9358, 494468.3, 2.440328592700098, 108533.2, DPLL.v5.iter, uf100-430, "08/11/2022, 13:12:45", logs/result_logs/DPLL.v5.iter_uf100-430_2022_08_11_13_12_21
+53648.8, 2688577.8, 14.160221259000172, 601712.9, DPLL.v5.iter, uuf100-430, "08/11/2022, 13:15:08", logs/result_logs/DPLL.v5.iter_uuf100-430_2022_08_11_13_12_46
+3055.9, 55426.1, 0.7191569514994626, 28225.3, Watched Literals.v5.iter, uf75-325, "08/11/2022, 13:19:22", logs/result_logs/Watched Literals.v5.iter_uf75-325_2022_08_11_13_19_14
+4893.8, 86604.3, 1.1384805827994569, 46500.2, Watched Literals.v5.iter, uuf75-325, "08/11/2022, 13:19:33", logs/result_logs/Watched Literals.v5.iter_uuf75-325_2022_08_11_13_19_22
+78.2, 480, 0.006176865798624931, 231.6, Watched Literals.v5.iter, task1, "08/11/2022, 13:19:33", logs/result_logs/Watched Literals.v5.iter_task1_2022_08_11_13_19_33
+9358, 205366, 2.94983817320026, 109167.6, Watched Literals.v5.iter, uf100-430, "08/11/2022, 13:20:03", logs/result_logs/Watched Literals.v5.iter_uf100-430_2022_08_11_13_19_33
+53648.8, 1098449.5, 17.70461290700041, 598505.8, Watched Literals.v5.iter, uuf100-430, "08/11/2022, 13:23:00", logs/result_logs/Watched Literals.v5.iter_uuf100-430_2022_08_11_13_20_03
+3055.9, 127260.6, 0.683795941399876, 27962.7, DPLL.v5, uf75-325, "08/11/2022, 13:08:18", logs/result_logs/DPLL.v5_uf75-325_2022_08_11_13_08_11
+4893.8, 214306.7, 1.1841042592997837, 46776.3, DPLL.v5, uuf75-325, "08/11/2022, 13:08:30", logs/result_logs/DPLL.v5_uuf75-325_2022_08_11_13_08_18
+78.2, 511.6, 0.005455790599808097, 231.6, DPLL.v5, task1, "08/11/2022, 13:08:30", logs/result_logs/DPLL.v5_task1_2022_08_11_13_08_30
+9358, 494468.3, 3.1643511736998335, 108533.2, DPLL.v5, uf100-430, "08/11/2022, 13:09:02", logs/result_logs/DPLL.v5_uf100-430_2022_08_11_13_08_30
+53648.8, 2688577.8, 15.77473290209964, 601712.9, DPLL.v5, uuf100-430, "08/11/2022, 13:11:40", logs/result_logs/DPLL.v5_uuf100-430_2022_08_11_13_09_02
+3055.9, 55426.1, 0.7275947149999411, 28225.3, Watched Literals.v5, uf75-325, "08/11/2022, 13:15:27", logs/result_logs/Watched Literals.v5_uf75-325_2022_08_11_13_15_19
+4893.8, 86604.3, 1.2331773203000922, 46500.2, Watched Literals.v5, uuf75-325, "08/11/2022, 13:15:39", logs/result_logs/Watched Literals.v5_uuf75-325_2022_08_11_13_15_27
+78.2, 480, 0.007198690600489499, 231.6, Watched Literals.v5, task1, "08/11/2022, 13:15:40", logs/result_logs/Watched Literals.v5_task1_2022_08_11_13_15_40
+9358, 205366, 2.8014973142999224, 109167.6, Watched Literals.v5, uf100-430, "08/11/2022, 13:16:08", logs/result_logs/Watched Literals.v5_uf100-430_2022_08_11_13_15_40
+53648.8, 1098449.5, 16.475640558699887, 598505.8, Watched Literals.v5, uuf100-430, "08/11/2022, 13:18:53", logs/result_logs/Watched Literals.v5_uuf100-430_2022_08_11_13_16_08
