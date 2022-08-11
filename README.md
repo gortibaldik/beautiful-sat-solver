@@ -39,6 +39,7 @@
 - Assumption: Since I use pretty ingenious implementation of adjacency lists (instead of traversing the clauses to find out whether they are unit, I keep 2 stats, `clause.n_satisfied` and `clause.n_unsatisfied`), I expected the average times of execution to be similar.
   - Result: In [the results graph (time)](results/dpll.wl.cmp.time.png) we can see that the average times of execution actually got worse by about 10% in all the cases. I assume that it is because while in `adjacency lists` I initialize all the data-structures in the beginning, in `watched literals` I update the lists of clauses where the literal is watched with operations `.append`. Therefore I assume that the extra memory allocation worsens the results.
 - To conclude, `watched literals` allow us to search through lower number of clauses when looking for unit and conflicting clauses. However a more clever implementation would be needed to beat `adjacency lists` when no `non-chronological` backtracking is used.
+- __UPDATE__: I implemented new encoding of literals and variables, and also an iterative solution. It seems like iterative dpll.v5 is the best yet, however the time of execution varies greatly, hence I'm not quite sure about [the results](./results/dpll.wl.cmp.02.csv). 
 
 -----
 
