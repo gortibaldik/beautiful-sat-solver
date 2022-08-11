@@ -7,7 +7,7 @@ from satsolver.watched_literals.unit_propagation import unit_propagation
 
 def get_info():
   return general_setup.get_info(
-    name="Watched Literals.v5",
+    name="Watched Literals.v6",
     taskName="TASK 3",
     benchmarkable=True
   )

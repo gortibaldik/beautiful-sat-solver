@@ -1,6 +1,5 @@
 from logzero import logger
 from satsolver.utils.enums import UnitPropagationResult
-from satsolver.utils.representation import lit_is_none, lit_is_satisfied, lit_is_unsatisfied
 from satsolver.utils.stats import SATSolverStats
 from satsolver.watched_literals.assignment import assign_true, unassign_multiple
 from satsolver.watched_literals.representation import SATClause
@@ -28,17 +27,23 @@ def find_unit_clauses(
       continue
       
     # satisfied clause
-    if lit_is_satisfied(clause.get_w(0), assignment) or lit_is_satisfied(clause.get_w(1), assignment):
+    lit_w = clause.get_w(watched_index)
+    a_w = assignment[lit_w >> 1]
+    if a_w == ((lit_w & 1) ^ 1):
+      continue
+
+    lit_o = clause.get_w(watched_index ^ 1)
+    a_o = assignment[lit_o >> 1]
+    if a_o == ((lit_o & 1) ^ 1):
       continue
 
     # assignment => watched literal in clause becomes False
     # => new literal is found
     # => if it is unsatisfied then it means that the clause is either
     # unit of conflict
-    if lit_is_unsatisfied(clause.get_w(watched_index), assignment):
-      other_watched = watched_index ^ 1
-      if lit_is_none(clause.get_w(other_watched), assignment):
-        unit_clauses.append((clause, other_watched))
+    if a_w is not None:
+      if a_o is None:
+        unit_clauses.append((clause, watched_index ^ 1))
       else:
         return UnitPropagationResult.CONFLICT, None
 
@@ -67,13 +72,16 @@ def unit_propagation(
     # implicitly result == (UnitPropagationResult.NOTHING_FOUND or UnitPropagationResult.UNIT_FOUND)
     for clause, n_of_wl in clauses:
       lit_int = clause.get_w(n_of_wl)
+      a_l = assignment[lit_int >> 1]
 
-      if lit_is_satisfied(lit_int, assignment):
-        continue
-
-      elif lit_is_unsatisfied(lit_int, assignment):
+      # is unsatisfied
+      if a_l == (lit_int & 1):
         unassign_multiple(assigned_literals, assignment, itc, itv)
         return UnitPropagationResult.CONFLICT, []
+
+      # is satisfied (not unsatisfied and not None)
+      if a_l is not None:
+        continue
 
       assign_true(
         lit_int,

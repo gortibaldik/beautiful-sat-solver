@@ -1,5 +1,5 @@
 from logzero import logger
-from satsolver.utils.representation import debug_str, lit_is_assigned, lit_is_none, lit_is_satisfied, satisfy_lit, unassign_lit
+from satsolver.utils.representation import debug_str, lit_is_assigned
 from satsolver.watched_literals.representation import SATClause
 from typing import List, Tuple
 
@@ -10,11 +10,14 @@ def assign_true(
   itc: List[List[Tuple[SATClause, int]]], # int to clauses
   assigned_literals=None
 ):
-  if lit_is_assigned(lit_int, assignment):
+  vix = lit_int >> 1
+  if assignment[vix] is not None:
     raise RuntimeError(f"`{debug_str(lit_int, itv)}` was supposed to be unassigned!")
   if assigned_literals is not None:
     assigned_literals.append(lit_int)
-  satisfy_lit(lit_int, assignment)
+
+  # satisfy lit_int
+  assignment[vix] = (lit_int & 1) ^ 1
 
   # we do not have to do anything with positive_clauses
   # watched literal in these clauses needs to remain on
@@ -29,7 +32,7 @@ def assign_true(
     clause, watched_index = entry
 
     # index of the second watched literal
-    second_watched_literal_index = clause.watched[watched_index ^ 1]
+    swli = clause.watched[watched_index ^ 1]
 
     # watched literal index
     wli = clause.watched[watched_index]
@@ -40,26 +43,22 @@ def assign_true(
     #
     # if second watched literal is false, there isn't any
     # other unassigned literal in the clause
-    if lit_is_assigned(clause[second_watched_literal_index], assignment):
+    if lit_is_assigned(clause[swli], assignment):
       clauses_to_keep.append(entry)
       continue
 
     # find new watched literal for the clause
-    found_new_watched = False
-    for _ in range(1, len_clause):
-      wli += 1
-      if wli == len_clause:
-        wli = 0
-      if wli == second_watched_literal_index:
+    for i, c_lit in enumerate(clause.children):
+      if i == wli or i == swli:
         continue
-      candidate_lit_int = clause[wli]
-      if lit_is_none(candidate_lit_int, assignment) or lit_is_satisfied(candidate_lit_int, assignment):
-        found_new_watched = True
-        itc[candidate_lit_int].append(entry)
-        clause.watched[watched_index] = wli
+      
+      # candidate literal c_lit
+      a_c = assignment[c_lit >> 1]
+      if a_c is None or a_c != (c_lit & 1):
+        itc[c_lit].append(entry)
+        clause.watched[watched_index] = i
         break
-    
-    if not found_new_watched:
+    else:
       clauses_to_keep.append(entry)
 
   # until this assignment the data structures are in inconsistent
@@ -72,10 +71,11 @@ def unassign(
   itc: List[List[SATClause]], # int to clauses
   itv: List[str]
 ):
-  if lit_is_none(lit_int, assignment):
+  vix = lit_int >> 1
+  if assignment[vix] is None:
     raise RuntimeError(f"`{debug_str(lit_int)}` was supposed to be assigned!")
 
-  unassign_lit(lit_int, assignment)
+  assignment[vix] = None
 
 def unassign_multiple(
   ls: List[int],
