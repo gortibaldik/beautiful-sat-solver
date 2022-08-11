@@ -5,8 +5,10 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 import store from './store'
+import titleMixin from '@/assets/js/titleMixin'
 
 Vue.config.productionTip = false
+Vue.mixin(titleMixin)
 
 new Vue({
   router,

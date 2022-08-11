@@ -11,6 +11,10 @@ from satsolver.benchmark_preparation.filter_benchmark_files import filter_files
 
 satlib_benchmark_urls = [
   ("http://ktiml.mff.cuni.cz/~kucerap/satsmt/practical/task1.zip", 5),
+  ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/GCP/flat30-60.tar.gz", 10),
+  ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/GCP/flat50-115.tar.gz", 10),
+  ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/GCP/flat75-180.tar.gz", 10),
+  ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/GCP/flat100-239.tar.gz", 10),
   ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/RND3SAT/uf20-91.tar.gz", 100),
   ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/RND3SAT/uf50-218.tar.gz", 50),
   ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/RND3SAT/uuf50-218.tar.gz", 50),

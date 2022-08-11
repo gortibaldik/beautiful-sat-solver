@@ -16,7 +16,8 @@ import {
 import redis_logs from '@/assets/js/get_redis_logs'
 
 export default {
-  name: 'Profile',
+  name: 'Redis Logs',
+  title: 'SAT: Logs',
   components: {
     mdbRow,
     mdbCol,

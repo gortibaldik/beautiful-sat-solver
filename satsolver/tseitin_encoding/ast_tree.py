@@ -1,3 +1,4 @@
+from typing import List
 from satsolver.tseitin_encoding.symbols import Symbols
 
 class ASTNodeFactory:
@@ -109,3 +110,4 @@ class ASTVariableNode(ASTAbstractNode):
     
     def copy(self):
         return ASTVariableNode(self._type, self._value)
+        

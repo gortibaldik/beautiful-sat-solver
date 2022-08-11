@@ -1,63 +1,91 @@
-
-from satsolver.dpll.pure_literal_elimination import pure_literal_elimination
-from satsolver.dpll.unit_propagation import unit_propagation
 from logzero import logger
-from satsolver.tseitin_encoding.ast_tree import ASTAbstractNode
-from satsolver.tseitin_encoding.tseitin_transformation import negate_literal
+from satsolver.dpll.assignment import assign_true, get_literal_int, unassign, unassign_multiple
+from satsolver.dpll.decision_variable_selection import dec_var_selection
+from satsolver.dpll.structures_preparation import prepare_structures
+from satsolver.dpll.unit_propagation import unit_propagation
+from satsolver.utils.enums import DecisionVariableResult, UnitPropagationResult, SATSolverResult
+from satsolver.utils.representation import SATLiteral
+from satsolver.utils.stats import SATSolverStats
+from typing import List
 
-def combine_assignments(unit_assignment, pure_elimination_assignment):
-    if len(unit_assignment) < len(pure_elimination_assignment):
-        return combine_assignments(pure_elimination_assignment, unit_assignment)
-    
-    for variable, assignment in pure_elimination_assignment.items():
-        unit_assignment[variable] = assignment
-    
-    return unit_assignment
 
-def remove_clauses_from_root(ast_tree_root: ASTAbstractNode, removed_clauses):
-    for clause_idx in sorted(removed_clauses, reverse=True):
-        ast_tree_root.children.pop(clause_idx)
+def __dpll(
+    dec_var_int,
+    itc, # int to clause
+    itl: List[SATLiteral], # int to literal
+    c, # clauses
+    stats: SATSolverStats
+):
+    cs = c # cs == clauses to search
+    if dec_var_int is not None:
+        cs = itc[dec_var_int]
+    unitPropResult, assigned_literals = unit_propagation(itc, cs, c, stats)
 
-def choose_literal(ast_tree_root: ASTAbstractNode):
-    first_child = ast_tree_root.children[0]
-    # first_child must have at least 2 children, because this is run
-    # right after unit propagation
-    if len(first_child.children) <= 1:
-        raise RuntimeError(f"Error in DPLL - found child {first_child} with too little children!")
-    
-    return first_child.children[0]
+    if unitPropResult == UnitPropagationResult.CONFLICT:
+        return SATSolverResult.UNSAT, assigned_literals
+    elif unitPropResult == UnitPropagationResult.ALL_SATISFIED:
+        return SATSolverResult.SAT, None
 
-def dpll(ast_tree_root: ASTAbstractNode):
-    unit_assignment, vcm, removed_clauses = unit_propagation(ast_tree_root)
-    if unit_assignment == None:
-        return "UNSAT", None, 0, 0
-    unit_propagation_steps = len(unit_assignment)
+    decVarResult, pos_int, neg_int = dec_var_selection(itl)
 
-    pure_elimination_assignment = pure_literal_elimination(vcm, removed_clauses, unit_assignment)
-    
-    remove_clauses_from_root(ast_tree_root, removed_clauses)
-    model = combine_assignments(unit_assignment, pure_elimination_assignment)
-    if len(ast_tree_root.children) == 0:
-        return "SAT", model, 0, unit_propagation_steps
-    
-    decision_literal = choose_literal(ast_tree_root)
-    logger.debug(f"-- DECISION: {decision_literal}")
+    if decVarResult == DecisionVariableResult.FAILURE:
+        logger.warning("DecVarResult is FAILURE")
+        return SATSolverResult.UNSAT
 
-    new_ast_tree_root = ast_tree_root.copy()
-    new_ast_tree_root.children.append(decision_literal)
-    result, model_recursion, number_of_decisions_rec1, unit_propagation_steps_rec1 = dpll(new_ast_tree_root)
+    satResultPos = _dpll(pos_int, itc, itl, c, stats)
+    if satResultPos == SATSolverResult.SAT:
+        return satResultPos, None
 
-    number_of_decisions_rec2, unit_propagation_steps_rec2 = 0, 0
-    if result == "UNSAT":
-        ast_tree_root.children.append(negate_literal(decision_literal))
-        result, model_recursion, number_of_decisions_rec2, unit_propagation_steps_rec2 = dpll(ast_tree_root)
+    satResultNeg = _dpll(neg_int, itc, itl, c, stats)
+    if satResultNeg == SATSolverResult.SAT:
+        return satResultNeg, None
 
-    if result != "UNSAT":
-        model = combine_assignments(model, model_recursion)
-    else:
-        model = None
+    return SATSolverResult.UNSAT, assigned_literals
 
-    return  result, \
-            model, \
-            1 + number_of_decisions_rec1 + number_of_decisions_rec2, \
-            unit_propagation_steps + unit_propagation_steps_rec1 + unit_propagation_steps_rec2
+def _dpll(
+    dec_var_int,
+    itc, # int to clause
+    itl: List[SATLiteral], # int to literal
+    c, # clauses
+    stats: SATSolverStats
+):
+    """
+    Assigns true to literal which has index `dec_var_int` in table `itl` (int to literal). Calls `__dpll`.
+    Also unassigns in case of `UNSAT` (e.g. removes the need for unassignments in all cases where `__dpll`
+    can return `UNSAT`)
+    """
+    other_int, literal = None, None
+    if dec_var_int is not None:
+        literal = itl[dec_var_int]
+        lit_int, other_int, is_positive = get_literal_int(literal)
+        result = assign_true(literal, itc)
+        stats.decVars += 1
+        if result == UnitPropagationResult.CONFLICT:
+            unassign(literal, itc)
+            return SATSolverResult.UNSAT
+    result, assigned_variables = __dpll(other_int, itc, itl, c, stats)
+    if result == SATSolverResult.UNSAT:
+        unassign_multiple(assigned_variables, itc)
+        if literal is not None:
+            unassign(literal, itc)
+
+    return result
+
+def dpll(ast_tree_root):
+    itl, vti, itc, c, stats = prepare_structures(ast_tree_root)
+    result = _dpll(None, itc, itl, c, stats)
+
+    # health check
+    if result == SATSolverResult.UNSAT:
+        for clause in c:
+            if clause.n_satisfied != 0 or clause.n_unsatisfied != 0:
+                raise RuntimeError(f"SATSolverResult == UNSAT while there are still assignments pending!")
+
+    # construct model
+    model = None
+    if result == SATSolverResult.SAT:
+        model = {}
+        for var_name, (ipos, ineg) in vti.items():
+            model[var_name] = itl[ipos].satVariable.truth_value
+
+    return result.value, model, stats

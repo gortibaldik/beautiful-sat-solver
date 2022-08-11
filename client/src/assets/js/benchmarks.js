@@ -20,6 +20,7 @@ import custom_run_comm from '@/assets/js/customRun_communication'
 
 export default {
   name: 'Dashboard',
+  title: 'SAT: Benchmarks',
   components: {
     mdbBtn,
     mdbRow,
@@ -147,7 +148,6 @@ export default {
       if (data.result === "failure") {
         console.log("Server failure pollInfoAboutCustomRun")
       }
-      console.log(data)
       if (data.running_job.entry === "none") {
         this.isCustomRunRunning = false
         if (this.customRunInterval) {
@@ -332,7 +332,6 @@ export default {
   created() {
     //debugger;  // eslint-disable-line no-debugger
     this.serverAddress = process.env.VUE_APP_SERVER_ADDRESS
-    console.log(`server address: "${this.serverAddress}"`)
     this.getInfoAboutCustomRun()
     this.getAlgorithms()
   },

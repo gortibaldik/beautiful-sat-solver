@@ -21,6 +21,7 @@ import Vue from 'vue'
 
 export default {
   name: 'Results',
+  title: 'SAT: Results',
   components: {
     mdbRow,
     mdbCol,
@@ -119,7 +120,6 @@ export default {
     window.addEventListener('resize', this.onResize)
     this.onResize()
     this.serverAddress = process.env.VUE_APP_SERVER_ADDRESS
-    console.log(`server address: ${this.serverAddress}`)
     this.fetchBenchmarkResults()
   },
   methods: {
@@ -280,7 +280,7 @@ export default {
         let k = 0
         for (let j = 0; j < this.data.columns.length; j++) {
           if (this.data.columns[j].plotted) {
-            barChartData.datasets[k].data.push(Math.floor(checked[i][this.data.columns[j].label]))
+            barChartData.datasets[k].data.push(checked[i][this.data.columns[j].label])
             barChartData.datasets[k].backgroundColor.push(this.chartColors[k])
             barChartData.datasets[k].borderColor.push(this.chartBorderColors[k])
 
@@ -291,7 +291,6 @@ export default {
       this.barChartData = barChartData
       this.showBarChart = true
       this.barChartHeight = 80 + checked.length * 50
-      console.log(this.barChartHeight)
     },
     downloadCsv() {
       // write headers
@@ -351,7 +350,6 @@ export default {
       } else {
         this.textWrapClass = "text-nowrap"
       }
-      console.log(` ${this.textWrapClass}, ${this.getViewportWidth()}`)
     },
     isFloat(n) {
       return n === +n && n !== (n|0);
@@ -366,7 +364,6 @@ export default {
       } else {
         this.calculatedTableHeight = "70vh"
       }
-      console.log(this.calculatedTableHeight)
     },
     closeModal(index) {
       Vue.set(this.displayed_modals, index, false)

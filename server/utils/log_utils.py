@@ -19,7 +19,7 @@ def is_correct_redis_log_file(log_file):
   return os.path.exists(os.path.join(log_dir, filename))
 
 def read_log_file(log_file, redis_log_file=False):
-  logs = "<code>"
+  logs = []
   if (not redis_log_file and not is_correct_log_file(log_file)) or \
     (redis_log_file and not is_correct_redis_log_file(log_file)):
     logs = f"<strong>Incorrect filename returned ({log_file})</strong></br>"
@@ -27,9 +27,13 @@ def read_log_file(log_file, redis_log_file=False):
     with open(log_file, 'r') as l:
       for line in l:
         line = line.strip()
-        logs += f"{line}</br>"
+        logs.append(line)
   
-  logs += " </code>"
+    if len(logs) > Config.SERVER_LOG_FILE_LINE_LIMIT:
+      logs = logs[len(logs) - Config.SERVER_LOG_FILE_LINE_LIMIT : ]
+    
+    logs = "</br>".join(logs)
+    logs = "<code>"  + logs + "</code>"
 
   return logs
 
