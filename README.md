@@ -64,6 +64,10 @@
 - [publishing docker images to docker repositories](https://docs.docker.com/docker-hub/repos/#pushing-a-docker-container-image-to-docker-hub)
 - [publishing docker images with github actions](https://docs.github.com/en/actions/publishing-packages/publishing-docker-images)
 - [simple satsolver implementation](https://sahandsaba.com/understanding-sat-by-implementing-a-simple-sat-solver-in-python.html)
+- [cdcl 1](https://cse442-17f.github.io/Conflict-Driven-Clause-Learning/)
+- [cdcl - handbook on satisfiability](https://www.ics.uci.edu/~dechter/courses/ics-275a/winter-2016/readings/SATHandbook-CDCL.pdf)
+- [cdcl - some python implementation](https://github.com/z11i/pysat)
+- [cdcl - presentation on the topic](http://ssa-school-2016.it.uu.se/wp-content/uploads/2016/06/LaurentSimon.pdf)
 
 #### Problems with installation of `psycopg2`
 
