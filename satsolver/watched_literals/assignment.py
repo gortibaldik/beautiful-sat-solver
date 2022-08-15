@@ -74,7 +74,7 @@ def unassign(
 ):
   vix = lit_int >> 1
   if assignment[vix] is None:
-    raise RuntimeError(f"`{debug_str(lit_int)}` was supposed to be assigned!")
+    raise RuntimeError(f"`{debug_str(lit_int, itv)}` was supposed to be assigned!")
 
   assignment[vix] = None
 
@@ -87,6 +87,6 @@ def unassign_multiple(
   for lit_int in ls:
     vix = lit_int >> 1
     if assignment[vix] is None:
-      raise RuntimeError(f"`{debug_str(lit_int)}` was supposed to be assigned!")
+      raise RuntimeError(f"`{debug_str(lit_int, itv)}` was supposed to be assigned!")
 
     assignment[vix] = None
