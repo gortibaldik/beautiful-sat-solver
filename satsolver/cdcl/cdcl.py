@@ -39,7 +39,7 @@ class CDCL:
     dec_vars = [None] * n_variables
     antecedents = [None] * n_variables
     dec_lvls_of_vars = [-1] * n_variables
-    current_dec_lvl = 0
+    current_dec_lvl = -2
     cs = c
 
     unitPropResult, al = self.unit_propagation(
@@ -56,35 +56,18 @@ class CDCL:
       return SATSolverResult.UNSAT
     if debug: logger.debug(f"UP: {debug_str_multi(al, itv)}")
     n_assigned_variables = len(al)
+    current_dec_lvl = 0
 
     while True:
       decision = decisions[current_dec_lvl]
-      decisions[current_dec_lvl] += 1
       if decision == 0:
         var_int = self.dec_var_selection(assignment)
         dec_vars[current_dec_lvl] = var_int
         lit_int = var_int + var_int
         n_assigned_variables += 1
-      elif decision == 1:
-        var_int = dec_vars[current_dec_lvl]
-        lit_int = var_int + var_int
-        if debug: logger.debug(f"UNDEC: {debug_str(lit_int, itv)}")
-        self.unassign(lit_int, assignment, dec_lvls_of_vars, itc, itv)
-        lit_int += 1
       else:
         var_int = dec_vars[current_dec_lvl]
-        decisions[current_dec_lvl] = 0
         lit_int = var_int + var_int + 1
-        if debug: logger.debug(f"UNDEC: {debug_str(lit_int, itv)}")
-        self.unassign(lit_int, assignment, dec_lvls_of_vars, itc, itv)
-
-        current_dec_lvl -= 1
-        if current_dec_lvl < 0:
-          break
-        if debug and len(assigned_literals[current_dec_lvl]) > 0: logger.debug(f"DPLL: Conflict: {debug_str_multi(assigned_literals[current_dec_lvl], itv)}")
-        self.unassign_multiple(assigned_literals[current_dec_lvl], assignment, dec_lvls_of_vars, itc, itv)
-        n_assigned_variables -= (1+ len(assigned_literals[current_dec_lvl]))
-        continue
 
       if debug: logger.debug(f"DEC: {debug_str(lit_int, itv)}")
       stats.decVars += 1
@@ -102,6 +85,31 @@ class CDCL:
       )
       if conflict_clause is not None:
         self.unassign_multiple(assigned_literals[current_dec_lvl], assignment, dec_lvls_of_vars, itc, itv)
+
+        # multi level backtrack
+        while decisions[current_dec_lvl] == 1:
+          if debug: logger.debug(f"UNDEC: {debug_str(lit_int, itv)}")
+          var_int = dec_vars[current_dec_lvl]
+          lit_int = var_int + var_int + 1
+          self.unassign(lit_int, assignment, dec_lvls_of_vars, itc, itv)
+          decisions[current_dec_lvl] = 0
+
+          # backtrack as many 
+          # unassign unit propagation from that level
+          current_dec_lvl -= 1
+          if current_dec_lvl < 0:
+            break
+          if debug and len(assigned_literals[current_dec_lvl]) > 0:
+            logger.debug(f"DPLL: Conflict: {debug_str_multi(assigned_literals[current_dec_lvl], itv)}")
+          self.unassign_multiple(assigned_literals[current_dec_lvl], assignment, dec_lvls_of_vars, itc, itv)
+          n_assigned_variables -= (1+ len(assigned_literals[current_dec_lvl]))
+        
+        if current_dec_lvl < 0:
+          break
+        decisions[current_dec_lvl] = 1
+        var_int = dec_vars[current_dec_lvl]
+        lit_int = var_int + var_int
+        self.unassign(lit_int, assignment, dec_lvls_of_vars, itc, itv)
         continue
       n_assigned_variables += len(assigned_literals[current_dec_lvl])
 

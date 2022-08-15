@@ -48,7 +48,7 @@ def find_unit_clauses(
       if a_o is None:
         unit_clauses.append((clause, lit_o))
       else:
-        return UnitPropagationResult.CONFLICT, children
+        return UnitPropagationResult.CONFLICT, clause
 
   if len(unit_clauses) > 0:
     return UnitPropagationResult.UNIT_FOUND, unit_clauses
@@ -83,7 +83,7 @@ def unit_propagation(
 
       # clause is unsatisfied
       if a_l == (lit_int & 1):
-        return clause.children, assigned_literals
+        return clause, assigned_literals
 
       # is satisfied (not unsatisfied and not None)
       if a_l is not None:
