@@ -63,6 +63,7 @@ class DPLL:
     if debug:
       logger.debug(f"UP: {debug_str_multi(assigned_literals, itv)}")
     if n_assigned_variables == n_variables:
+      logger.debug(f"RESULT: {debug_str_multi([i + i for i, v in enumerate(assignment) if v == 1], itv)}")
       return SATSolverResult.SAT, None
 
     var_int = self.dec_var_selection(assignment)
