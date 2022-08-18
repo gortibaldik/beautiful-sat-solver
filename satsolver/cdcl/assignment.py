@@ -1,6 +1,8 @@
 from satsolver.utils.representation import debug_str
 from satsolver.watched_literals.representation import SATClause
-from typing import List
+from typing import List, Tuple
+
+_def_dec_lvl = (-1, -1)
 
 def unassign(
   lit_int: int,
@@ -14,12 +16,12 @@ def unassign(
     raise RuntimeError(f"`{debug_str(lit_int, itv)}` was supposed to be assigned!")
 
   assignment[vix] = None
-  dec_lvls_of_vars[vix] = -1
+  dec_lvls_of_vars[vix] = _def_dec_lvl
 
 def unassign_multiple(
   ls: List[int],
-  assignment,
-  dec_lvls_of_vars,
+  assignment: List[int],
+  dec_lvls_of_vars: List[Tuple[int, int]],
   itc: List[List[SATClause]],
   itv: List[str]
 ):
@@ -29,4 +31,4 @@ def unassign_multiple(
       raise RuntimeError(f"`{debug_str(lit_int, itv)}` was supposed to be assigned!")
 
     assignment[vix] = None
-    dec_lvls_of_vars[vix] = -1
+    dec_lvls_of_vars[vix] = _def_dec_lvl
