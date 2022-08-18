@@ -99,6 +99,20 @@
       <mdb-row v-show="showRunResults" class="row-with-logs">
         <mdb-col xl="6" md="12" class="mb-r col-with-logs">
           <mdb-card class="card-with-logs rounded-border custom-margin-top ">
+            <mdb-card-title class="blue darken-2 rounded-border text-center card-header-hoverable">
+              <h4 class="h4-responsive text-white spaced-title"
+                  @click="switchOnModalStd()">Standard Logs from Algorithm</h4>
+            </mdb-card-title>
+            <mdb-card-body>
+              <div class="scrollbar-class">
+                <mdb-scrollbar v-html="stdLogs">
+                </mdb-scrollbar>
+              </div>
+            </mdb-card-body>
+          </mdb-card>
+        </mdb-col>
+        <mdb-col xl="6" md="12" class="mb-r col-with-logs">
+          <mdb-card class="card-with-logs rounded-border custom-margin-top ">
             <mdb-card-title
               class="blue darken-2 rounded-border text-center">
               <li class="list-inline-item card-header-hoverable"
@@ -113,20 +127,6 @@
             <mdb-card-body>
               <div class="scrollbar-class">
                 <mdb-scrollbar v-html="redisStdLogs">
-                </mdb-scrollbar>
-              </div>
-            </mdb-card-body>
-          </mdb-card>
-        </mdb-col>
-        <mdb-col xl="6" md="12" class="mb-r col-with-logs">
-          <mdb-card class="card-with-logs rounded-border custom-margin-top ">
-            <mdb-card-title class="blue darken-2 rounded-border text-center card-header-hoverable">
-              <h4 class="h4-responsive text-white spaced-title"
-                  @click="switchOnModalStd()">Standard Logs from Algorithm</h4>
-            </mdb-card-title>
-            <mdb-card-body>
-              <div class="scrollbar-class">
-                <mdb-scrollbar v-html="stdLogs">
                 </mdb-scrollbar>
               </div>
             </mdb-card-body>
