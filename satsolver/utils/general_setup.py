@@ -144,7 +144,8 @@ def get_info(
   *,
   name: str,
   taskName: str,
-  benchmarkable: bool
+  benchmarkable: bool,
+  symbol: str
 ):
   """Provides information needed by server/frontend for correctly displaying the benchmark in client browser
   
@@ -152,11 +153,13 @@ def get_info(
     @name: str              name of the benchmark
     @taskName: str          name of the task
     @benchmarkable: bool    whether to display task in the benchmark/custom run menu (whether it can be ran on benchmarks)
+    @symbol: str            symbol which to display in frontend
   """
   return {
     "name": name,
     "taskName": taskName,
-    "benchmarkable": benchmarkable
+    "benchmarkable": benchmarkable,
+    "symbol": symbol
   }
 
 def find_model(

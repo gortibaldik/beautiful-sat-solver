@@ -12,7 +12,8 @@ def get_info():
   return general_setup.get_info(
     name="CDCL.v2",
     taskName="TASK 4",
-    benchmarkable=True
+    benchmarkable=True,
+    symbol="dove"
   )
 
 def find_model(
@@ -33,7 +34,7 @@ def find_model(
     conflict_analysis=conflict_analysis
   )
   return general_setup.find_model(
-    cdcl.cdcl,
+    cdcl.cdcl_no_restarts,
     input_file=input_file,
     warning=warning,
     debug=debug,
