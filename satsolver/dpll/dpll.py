@@ -56,6 +56,7 @@ class DPLL:
     unitPropResult, assigned_literals = self.unit_propagation(itv, itc, assignment, cs, stats)
 
     if unitPropResult == UnitPropagationResult.CONFLICT:
+      stats.conflicts += 1
       return SATSolverResult.UNSAT, assigned_literals
 
     # end condition -> each variable is assigned and there is no conflict

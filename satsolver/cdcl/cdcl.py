@@ -426,6 +426,7 @@ class CDCL:
       if conflict_clause is not None:
         if decision >= 2:
           decisions[current_dec_lvl + 1] = 0
+        stats.conflicts += 1
         current_dec_lvl, next_unit_prop_lit_int, rfav = self._backtrack(
           conflict_clause,
           assigned_literals,
