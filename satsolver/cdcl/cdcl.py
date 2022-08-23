@@ -369,12 +369,19 @@ class CDCL:
     n_variables,
     debug,
     conflict_limit,
-    lbd_limit
+    lbd_limit,
+    use_luby=False
   ):
     learned_clauses = []
     def_dec_lvl = (-1, -1)
     size_of_arrays = n_variables + 1
     current_dec_lvl = 0
+    n_restarts = 0
+    luby_sequence = [1]
+    base_unit = conflict_limit
+    k = 1
+    if use_luby:
+      conflict_limit = luby_sequence[n_restarts] * base_unit
 
     while True:
       if current_dec_lvl == -1:
@@ -400,6 +407,7 @@ class CDCL:
         first_index=-1
       )
       if unitPropResult == UnitPropagationResult.CONFLICT:
+        if debug and use_luby: logger.debug(f"LUBY SEQUENCE: {luby_sequence}")
         return SATSolverResult.UNSAT
       if debug: logger.debug(f"UP: {debug_str_multi(assigned_literals[current_dec_lvl], itv)}")
       n_assigned_variables = len(assigned_literals[current_dec_lvl])
@@ -453,13 +461,24 @@ class CDCL:
         assigned_literals[current_dec_lvl] += assigned_literals_to_be_added
         if conflict_clause is not None:
           if conflict_limit and stats.conflicts == int(conflict_limit):
-            # there should be a restart
             if debug: logger.debug(f"RESTART -> LC before: {len(learned_clauses)}")
             learned_clauses = self._restart(learned_clauses, itc, lbd_limit)
             if debug: logger.debug(f"RESTART -> LC after: {len(learned_clauses)}")
-            lbd_limit *= 1.1
-            conflict_limit *= 1.1
-            pass
+            if use_luby:
+              n_restarts += 1
+              if n_restarts == (1 << k) - 1:
+                luby_sequence.append(1 << (k - 1))
+                k += 1
+              elif n_restarts >= (1 << (k - 1)) and n_restarts < ((1 << k) - 1):
+                luby_sequence.append(luby_sequence[n_restarts - (1 << (k - 1)) + 1])
+              else:
+                raise RuntimeError(f"n_restarts: {n_restarts}, k: {k}")
+              conflict_limit += luby_sequence[n_restarts] * base_unit
+              # keeping lbd at 2 for the whole run leaves the best results
+              # lbd_limit *= 1.05
+            else:
+              lbd_limit *= 1.1
+              conflict_limit *= 1.1
           if decision >= 2:
             decisions[current_dec_lvl + 1] = 0
           stats.conflicts += 1
@@ -486,11 +505,14 @@ class CDCL:
 
         if n_assigned_variables == n_variables:
           logger.debug(f"RESULT: {debug_str_multi([i + i for i, v in enumerate(assignment) if v == 1], itv)}")
+          if debug and use_luby: logger.debug(f"LUBY SEQUENCE: {luby_sequence}")
           return SATSolverResult.SAT
         current_dec_lvl += 1
+
+      if debug and use_luby: logger.debug(f"LUBY SEQUENCE: {luby_sequence}")
       return SATSolverResult.UNSAT
   
-  def cdcl(self, ast_tree_root, debug, conflict_limit, lbd_limit):
+  def cdcl(self, ast_tree_root, debug, conflict_limit, lbd_limit, use_luby=False):
     assignment, itv, vti, itc, c, stats = self.prepare_structures(ast_tree_root)
     n_variables = len(vti) # vti == variable to integer
     result = self._cdcl(
@@ -502,7 +524,8 @@ class CDCL:
       n_variables,
       debug,
       conflict_limit,
-      lbd_limit
+      lbd_limit,
+      use_luby
     )
 
     # health check
@@ -526,3 +549,12 @@ class CDCL:
 
   def cdcl_r200_lbd2(self, ast_tree_root, debug):
     return self.cdcl(ast_tree_root, debug, 200, 2)
+
+  def cdcl_luby32_lbd2(self, ast_tree_root, debug):
+    return self.cdcl(ast_tree_root, debug, 32, 2, use_luby=True)
+
+  def cdcl_luby32_lbd3(self, ast_tree_root, debug):
+    return self.cdcl(ast_tree_root, debug, 32, 3, use_luby=True)
+
+  def cdcl_luby32_lbd4(self, ast_tree_root, debug):
+    return self.cdcl(ast_tree_root, debug, 32, 4, use_luby=True)

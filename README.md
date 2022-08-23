@@ -58,6 +58,9 @@
   - Setup: The restarts occur each time, the number of conflicts breaks the bareer of `conflict_limit`, which increases by a factor of `1.1`. On every restart each clause with _Lateral Block Distance_ bigger than `lbd_limit` is deleted, the `lbd_limit` increases by a factor of `1.1`. The initial values are 200 for `conflict_limit` and `3` for the `lbd_limit`.
   - Result: On [the time comparison picture](results/cdcl.restarts.cmp.time.png) we can see that these settings of restarts slightly help. I may try some further finetuning of the values to gain even better results, however now I'm satisfied with even little improvement when using restarts.
 
+__UPDATE__:
+  - Since the results of geometrically increasing `conflict_limit` and `lbd_limit` weren't persuasive I spent some time reading about _luby_ which is the SotA. After implementing _luby_ I can conclude that this strategy helps a lot (lowering the runtime by more than 40% on the hardest problems). One particularity which is kind of puzzling for me is that I achieved the best results when I didn't increase `lbd_limit` by any factor. Hence the best results are for constant `lbd_limit` = 4. [The results picture](results/cdcl.restarts.luby.cmp.png)
+
 -----
 
 #### Resources
@@ -84,6 +87,8 @@
 - [cdcl - handbook on satisfiability](https://www.ics.uci.edu/~dechter/courses/ics-275a/winter-2016/readings/SATHandbook-CDCL.pdf)
 - [cdcl - some python implementation](https://github.com/z11i/pysat)
 - [cdcl - presentation on the topic](http://ssa-school-2016.it.uu.se/wp-content/uploads/2016/06/LaurentSimon.pdf)
+- [glucose cdcl solver](https://www.ijcai.org/Proceedings/09/Papers/074.pdf)
+- [ipynb with various sat improvements](https://github.com/aimacode/aima-python/blob/master/improving_sat_algorithms.ipynb)
 
 #### Problems with installation of `psycopg2`
 
