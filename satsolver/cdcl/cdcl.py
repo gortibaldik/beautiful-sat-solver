@@ -451,7 +451,7 @@ class CDCL:
         n_assigned_variables += len(assigned_literals[current_dec_lvl])
         assigned_literals[current_dec_lvl] += assigned_literals_to_be_added
         if conflict_clause is not None:
-          if conflict_limit and stats.conflicts == conflict_limit:
+          if conflict_limit and stats.conflicts == int(conflict_limit):
             # there should be a restart
             logger.info(f"RESTART -> LC before: {len(learned_clauses)}")
             learned_clauses = self._restart(learned_clauses, itc, lbd_limit)
@@ -521,4 +521,4 @@ class CDCL:
     return self.cdcl(ast_tree_root, debug, None, None)
   
   def cdcl_r200_lbd3(self, ast_tree_root, debug):
-    return self.cdcl(ast_tree_root, debug, 200, 3)
+    return self.cdcl(ast_tree_root, debug, 200, 2)
