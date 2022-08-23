@@ -118,6 +118,8 @@ export default {
             this.startMonitoringProgress(this.algorithms[i].name, running_statuses[i].benchmarkName, i)
             Vue.set(this.selected, i, [running_statuses[i].benchmarkName])
           }
+          // only one can be running
+          break
         }
       }
     },
