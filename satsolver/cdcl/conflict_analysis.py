@@ -24,12 +24,13 @@ def init_literals_from_clause(
   for lit_int in clause.children:
     var_int = lit_int >> 1
     tpl = dec_lvls_of_vars[var_int]
-    if tpl[0] == current_dec_lvl and tpl[1] <= 0:
-      heappush(priority_queue, (*tpl, lit_int))
+    if tpl[0] == current_dec_lvl:
+      if tpl[1] <= 0:
+        heappush(priority_queue, (*tpl, lit_int))
 
-      # prevents the dec var to be traversed multiple
-      # times
-      dec_lvls_of_vars[var_int] = (tpl[0], 1)
+        # prevents the dec var to be traversed multiple
+        # times
+        dec_lvls_of_vars[var_int] = (tpl[0], 1)
     else:
       dec_lvl_set[tpl[0]] = True
       if highest_dec_lvl < tpl[0]:
@@ -55,8 +56,8 @@ def get_literals_from_clause(
         # prevents the dec var to be traversed multiple
         # times
         dec_lvls_of_vars[var_int] = (tpl[0], 1)
-      else:
-        dec_lvl_set[tpl[0]] = True
+    else:
+      dec_lvl_set[tpl[0]] = True
 
 def conflict_analysis(
   conflict_clause: SATClause,
