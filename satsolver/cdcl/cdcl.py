@@ -69,6 +69,7 @@ class CDCL:
       else:
         _s += "[T]"
       s.append(_s)
+    
     return s
 
   def _add_to_structures(
@@ -295,7 +296,7 @@ class CDCL:
     )
     if debug:
       logger.debug(f"{current_dec_lvl}: ASSERTIVE CLAUSE: {self._clause_str(assertive_clause, dec_lvls_of_vars, current_dec_lvl, assignment, itv)}" + \
-        f"; AL: {assertion_lvl}")
+        f"LBD: {assertive_clause.lbd}"+ f"; AL: {assertion_lvl}")
       #logger.debug(f"{current_dec_lvl}: CL UP UNDO: {debug_str_multi(assigned_literals[current_dec_lvl], itv)}")
     self.unassign_multiple(
       assigned_literals[current_dec_lvl],
@@ -453,9 +454,9 @@ class CDCL:
         if conflict_clause is not None:
           if conflict_limit and stats.conflicts == int(conflict_limit):
             # there should be a restart
-            logger.info(f"RESTART -> LC before: {len(learned_clauses)}")
+            if debug: logger.debug(f"RESTART -> LC before: {len(learned_clauses)}")
             learned_clauses = self._restart(learned_clauses, itc, lbd_limit)
-            logger.info(f"RESTART -> LC after: {len(learned_clauses)}")
+            if debug: logger.debug(f"RESTART -> LC after: {len(learned_clauses)}")
             lbd_limit *= 1.1
             conflict_limit *= 1.1
             pass
@@ -519,6 +520,9 @@ class CDCL:
   
   def cdcl_no_restarts(self, ast_tree_root, debug):
     return self.cdcl(ast_tree_root, debug, None, None)
-  
+
   def cdcl_r200_lbd3(self, ast_tree_root, debug):
+    return self.cdcl(ast_tree_root, debug, 200, 3)
+
+  def cdcl_r200_lbd2(self, ast_tree_root, debug):
     return self.cdcl(ast_tree_root, debug, 200, 2)
