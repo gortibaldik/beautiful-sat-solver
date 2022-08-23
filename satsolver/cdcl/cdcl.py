@@ -1,7 +1,7 @@
 from typing import List, Protocol, Tuple
 from logzero import logger
 
-from satsolver.watched_literals.representation import SATClause
+from satsolver.cdcl.representation import SATClause
 from satsolver.utils.enums import SATSolverResult, UnitPropagationResult
 from satsolver.utils.representation import debug_str, debug_str_multi
 from ..utils.stats import SATSolverStats
@@ -337,6 +337,26 @@ class CDCL:
       remove_from_assigned_variables += nrl
       return new_dec_lvl, next_unit_prop_lit_int, remove_from_assigned_variables
 
+  def _restart(
+    self,
+    learned_clauses: List[SATClause],
+    itc: List[List[SATClause]],
+    lbd_limit
+  ):
+    new_learned_clauses = []
+    for c in learned_clauses:
+      if c.lbd <= lbd_limit:
+        new_learned_clauses.append(c)
+      else:
+        # remove learned clause from watched
+        # structures
+        if len(c) == 1:
+          itc[c[0]].remove(c)
+        else:
+          itc[c.get_w(0)].remove((c, 0))
+          itc[c.get_w(1)].remove((c, 1))
+    
+    return new_learned_clauses
 
   def _cdcl(
     self,
@@ -346,118 +366,143 @@ class CDCL:
     c,
     stats: SATSolverStats,
     n_variables,
-    debug
+    debug,
+    conflict_limit,
+    lbd_limit
   ):
+    learned_clauses = []
     def_dec_lvl = (-1, -1)
     size_of_arrays = n_variables + 1
-    decisions = [0] * size_of_arrays
-    assigned_literals = [None] * size_of_arrays
-    dec_vars = [None] * size_of_arrays
-    antecedents = [None] * size_of_arrays
-    dec_lvls_of_vars = [def_dec_lvl] * size_of_arrays
-    learned_clauses = []
     current_dec_lvl = 0
-    cs = c
-    next_unit_prop_lit_int = None
-
-    unitPropResult, assigned_literals[current_dec_lvl] = self.unit_propagation(
-      itv,
-      itc,
-      assignment,
-      antecedents,
-      dec_lvls_of_vars,
-      current_dec_lvl,
-      c,
-      stats,
-      first_index=-1
-    )
-    if unitPropResult == UnitPropagationResult.CONFLICT:
-      return SATSolverResult.UNSAT
-    if debug: logger.debug(f"UP: {debug_str_multi(assigned_literals[current_dec_lvl], itv)}")
-    n_assigned_variables = len(assigned_literals[current_dec_lvl])
-    current_dec_lvl += 1
 
     while True:
-      decision = decisions[current_dec_lvl]
-      if decision == 0:
-        var_int = self.dec_var_selection(assignment)
-        dec_vars[current_dec_lvl] = var_int
-      
-      if decision < 2:
-        n_assigned_variables += 1
-        var_int = dec_vars[current_dec_lvl]
+      if current_dec_lvl == -1:
+        break
 
-        # unit propagation in previous step
-        # derived var_int
-        if assignment[var_int] is not None:
-          decisions[current_dec_lvl] = 0
-          var_int = self.dec_var_selection(assignment)
-          dec_vars[current_dec_lvl] = var_int
-          lit_int = var_int + var_int
-        else:
-          lit_int = var_int + var_int + (decision & 1)
-        
-        if debug:logger.debug(f"{current_dec_lvl}: DEC: {debug_str(lit_int, itv)}")
-        self.assign_true(lit_int, itv, assignment, itc)
-        stats.decVars += 1
-        dec_lvls_of_vars[var_int] = (current_dec_lvl, -1)
-        cs = itc[lit_int ^ 1]
-        assigned_literals_to_be_added = []
-        first_index = -2
-      else:
-        decisions[current_dec_lvl] &= 1
-        cs = itc[next_unit_prop_lit_int]
-        assigned_literals_to_be_added = assigned_literals[current_dec_lvl]
-        first_index = -2 - len(assigned_literals_to_be_added)
+      decisions = [0] * size_of_arrays
+      assigned_literals = [None] * size_of_arrays
+      dec_vars = [None] * size_of_arrays
+      antecedents = [None] * size_of_arrays
+      dec_lvls_of_vars = [def_dec_lvl] * size_of_arrays
+      cs = c
+      next_unit_prop_lit_int = None
 
-      conflict_clause, assigned_literals[current_dec_lvl] = self.unit_propagation(
+      unitPropResult, assigned_literals[current_dec_lvl] = self.unit_propagation(
         itv,
         itc,
         assignment,
         antecedents,
         dec_lvls_of_vars,
         current_dec_lvl,
-        cs,
+        c,
         stats,
-        first_index
+        first_index=-1
       )
-      n_assigned_variables += len(assigned_literals[current_dec_lvl])
-      assigned_literals[current_dec_lvl] += assigned_literals_to_be_added
-      if conflict_clause is not None:
-        if decision >= 2:
-          decisions[current_dec_lvl + 1] = 0
-        stats.conflicts += 1
-        current_dec_lvl, next_unit_prop_lit_int, rfav = self._backtrack(
-          conflict_clause,
-          assigned_literals,
-          current_dec_lvl,
-          dec_vars,
-          decisions,
-          dec_lvls_of_vars,
-          learned_clauses,
-          antecedents,
-          assignment,
-          itc,
-          itv,
-          debug
-        )
-        if current_dec_lvl == -1:
-          break
-        n_assigned_variables -= rfav
-        continue
-
-      if debug: logger.debug(f"{current_dec_lvl}: UP: {debug_str_multi(assigned_literals[current_dec_lvl], itv)}")
-
-      if n_assigned_variables == n_variables:
-        logger.debug(f"RESULT: {debug_str_multi([i + i for i, v in enumerate(assignment) if v == 1], itv)}")
-        return SATSolverResult.SAT
+      if unitPropResult == UnitPropagationResult.CONFLICT:
+        return SATSolverResult.UNSAT
+      if debug: logger.debug(f"UP: {debug_str_multi(assigned_literals[current_dec_lvl], itv)}")
+      n_assigned_variables = len(assigned_literals[current_dec_lvl])
       current_dec_lvl += 1
-    return SATSolverResult.UNSAT
+
+      while True:
+        decision = decisions[current_dec_lvl]
+        if decision == 0:
+          var_int = self.dec_var_selection(assignment)
+          dec_vars[current_dec_lvl] = var_int
+        
+        if decision < 2:
+          n_assigned_variables += 1
+          var_int = dec_vars[current_dec_lvl]
+
+          # unit propagation in previous step
+          # derived var_int
+          if assignment[var_int] is not None:
+            decisions[current_dec_lvl] = 0
+            var_int = self.dec_var_selection(assignment)
+            dec_vars[current_dec_lvl] = var_int
+            lit_int = var_int + var_int
+          else:
+            lit_int = var_int + var_int + (decision & 1)
+          
+          if debug:logger.debug(f"{current_dec_lvl}: DEC: {debug_str(lit_int, itv)}")
+          self.assign_true(lit_int, itv, assignment, itc)
+          stats.decVars += 1
+          dec_lvls_of_vars[var_int] = (current_dec_lvl, -1)
+          cs = itc[lit_int ^ 1]
+          assigned_literals_to_be_added = []
+          first_index = -2
+        else:
+          decisions[current_dec_lvl] &= 1
+          cs = itc[next_unit_prop_lit_int]
+          assigned_literals_to_be_added = assigned_literals[current_dec_lvl]
+          first_index = -2 - len(assigned_literals_to_be_added)
+
+        conflict_clause, assigned_literals[current_dec_lvl] = self.unit_propagation(
+          itv,
+          itc,
+          assignment,
+          antecedents,
+          dec_lvls_of_vars,
+          current_dec_lvl,
+          cs,
+          stats,
+          first_index
+        )
+        n_assigned_variables += len(assigned_literals[current_dec_lvl])
+        assigned_literals[current_dec_lvl] += assigned_literals_to_be_added
+        if conflict_clause is not None:
+          if conflict_limit and stats.conflicts == conflict_limit:
+            # there should be a restart
+            logger.info(f"RESTART -> LC before: {len(learned_clauses)}")
+            learned_clauses = self._restart(learned_clauses, itc, lbd_limit)
+            logger.info(f"RESTART -> LC after: {len(learned_clauses)}")
+            lbd_limit *= 1.1
+            conflict_limit *= 1.1
+            pass
+          if decision >= 2:
+            decisions[current_dec_lvl + 1] = 0
+          stats.conflicts += 1
+          current_dec_lvl, next_unit_prop_lit_int, rfav = self._backtrack(
+            conflict_clause,
+            assigned_literals,
+            current_dec_lvl,
+            dec_vars,
+            decisions,
+            dec_lvls_of_vars,
+            learned_clauses,
+            antecedents,
+            assignment,
+            itc,
+            itv,
+            debug
+          )
+          if current_dec_lvl == -1:
+            break
+          n_assigned_variables -= rfav
+          continue
+
+        if debug: logger.debug(f"{current_dec_lvl}: UP: {debug_str_multi(assigned_literals[current_dec_lvl], itv)}")
+
+        if n_assigned_variables == n_variables:
+          logger.debug(f"RESULT: {debug_str_multi([i + i for i, v in enumerate(assignment) if v == 1], itv)}")
+          return SATSolverResult.SAT
+        current_dec_lvl += 1
+      return SATSolverResult.UNSAT
   
-  def cdcl(self,ast_tree_root, debug):
+  def cdcl(self, ast_tree_root, debug, conflict_limit, lbd_limit):
     assignment, itv, vti, itc, c, stats = self.prepare_structures(ast_tree_root)
     n_variables = len(vti) # vti == variable to integer
-    result = self._cdcl(itv, itc, assignment, c, stats, n_variables, debug)
+    result = self._cdcl(
+      itv,
+      itc,
+      assignment,
+      c,
+      stats,
+      n_variables,
+      debug,
+      conflict_limit,
+      lbd_limit
+    )
 
     # health check
     if result == SATSolverResult.UNSAT and self.health_check is not None:
@@ -471,3 +516,9 @@ class CDCL:
         model[var_name] = assignment[ipos]
 
     return result.value, model, stats
+  
+  def cdcl_no_restarts(self, ast_tree_root, debug):
+    return self.cdcl(ast_tree_root, debug, None, None)
+  
+  def cdcl_r200_lbd3(self, ast_tree_root, debug):
+    return self.cdcl(ast_tree_root, debug, 200, 3)

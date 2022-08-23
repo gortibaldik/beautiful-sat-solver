@@ -3,7 +3,7 @@ from heapq import heappop, heappush
 from typing import Deque, List, Set
 from satsolver.cdcl.assignment import _def_dec_lvl
 from satsolver.utils.representation import debug_str_multi
-from satsolver.watched_literals.representation import SATClause
+from satsolver.cdcl.representation import SATClause
 
 def init_literals_from_clause(
   clause: SATClause,
@@ -19,6 +19,8 @@ def init_literals_from_clause(
   # variables are assigned 1
   highest_dec_lvl = -1
   highest_lit_int = None
+  dec_lvl_set     = [False] * (current_dec_lvl + 1)
+  dec_lvl_set[current_dec_lvl] = True
   for lit_int in clause.children:
     var_int = lit_int >> 1
     tpl = dec_lvls_of_vars[var_int]
@@ -28,26 +30,33 @@ def init_literals_from_clause(
       # prevents the dec var to be traversed multiple
       # times
       dec_lvls_of_vars[var_int] = (tpl[0], 1)
-    elif highest_dec_lvl < tpl[0]:
-      highest_dec_lvl = tpl[0]
-      highest_lit_int = lit_int
-  return priority_queue, highest_dec_lvl, highest_lit_int
+    else:
+      dec_lvl_set[tpl[0]] = True
+      if highest_dec_lvl < tpl[0]:
+        highest_dec_lvl = tpl[0]
+        highest_lit_int = lit_int
+
+  return priority_queue, highest_dec_lvl, highest_lit_int, dec_lvl_set
 
 def get_literals_from_clause(
   clause: SATClause,
   current_dec_lvl,
   dec_lvls_of_vars,
-  priority_queue
+  priority_queue,
+  dec_lvl_set
 ):
   for lit_int in clause.children:
     var_int = lit_int >> 1
     tpl = dec_lvls_of_vars[var_int]
-    if tpl[0] == current_dec_lvl and tpl[1] <= 0:
-      heappush(priority_queue, (*tpl, lit_int))
+    if tpl[0] == current_dec_lvl:
+      if tpl[1] <= 0:
+        heappush(priority_queue, (*tpl, lit_int))
 
-      # prevents the dec var to be traversed multiple
-      # times
-      dec_lvls_of_vars[var_int] = (tpl[0], 1)
+        # prevents the dec var to be traversed multiple
+        # times
+        dec_lvls_of_vars[var_int] = (tpl[0], 1)
+      else:
+        dec_lvl_set[tpl[0]] = True
 
 def conflict_analysis(
   conflict_clause: SATClause,
@@ -56,7 +65,7 @@ def conflict_analysis(
   antecedents: List[SATClause],
   itv
 ):
-  priority_queue, highest_dec_lvl, highest_lit_int = init_literals_from_clause(
+  priority_queue, highest_dec_lvl, highest_lit_int, dec_lvl_set = init_literals_from_clause(
     conflict_clause,
     current_dec_lvl,
     itv,
@@ -75,7 +84,8 @@ def conflict_analysis(
       ant,
       current_dec_lvl,
       dec_lvls_of_vars,
-      priority_queue
+      priority_queue,
+      dec_lvl_set
     )
     
     # resolution
@@ -91,7 +101,10 @@ def conflict_analysis(
         highest_dec_lvl = dec_lvl
         highest_lit_int = lit_int
 
-  satClause = SATClause(list(assertive_clause))
+  satClause = SATClause(
+    children=list(assertive_clause),
+    lbd=sum(dec_lvl_set)
+  )
   satClause._len = len(satClause.children)
 
   if len(satClause) == 1:
