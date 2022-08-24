@@ -338,7 +338,7 @@ class CDCL:
       remove_from_assigned_variables += nrl
       return new_dec_lvl, next_unit_prop_lit_int, remove_from_assigned_variables
 
-  def _restart(
+  def _clause_deletion(
     self,
     learned_clauses: List[SATClause],
     itc: List[List[SATClause]],
@@ -462,7 +462,7 @@ class CDCL:
         if conflict_clause is not None:
           if conflict_limit and stats.conflicts == int(conflict_limit):
             if debug: logger.debug(f"RESTART -> LC before: {len(learned_clauses)}")
-            learned_clauses = self._restart(learned_clauses, itc, lbd_limit)
+            learned_clauses = self._clause_deletion(learned_clauses, itc, lbd_limit)
             if debug: logger.debug(f"RESTART -> LC after: {len(learned_clauses)}")
             if use_luby:
               n_restarts += 1

@@ -52,9 +52,6 @@ def find_unit_clauses(
       else:
         return UnitPropagationResult.CONFLICT, clause
 
-  if len(unit_clauses) > 0:
-    return UnitPropagationResult.UNIT_FOUND, unit_clauses
-
   return UnitPropagationResult.NOTHING_FOUND, unit_clauses
 
 def unit_propagation(
