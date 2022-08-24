@@ -470,11 +470,10 @@ export default {
       Vue.set(this.displayed_modals, index, true)
       Vue.set(this.modal_messages, index, data["result"])
     },
-    removeLogFileFromDataRows(index) {
-      let log_file = this.filtered_rows[index]["Log File"]
+    removeLogFileFromDataRows(log_filename) {
       let theIndex = -1
       for (let i = 0; i < this.data.rows.length; i++) {
-        if (this.data.rows[i]["Log File"] === log_file) {
+        if (this.data.rows[i]["Log File"] === log_filename) {
           theIndex = i
         } else if (theIndex != -1) {
           this.data.rows[i].originalIndex = i - 1
@@ -483,15 +482,16 @@ export default {
       this.data.rows.splice(theIndex, 1)
     },
     async deleteLogFile(index) {
+      let log_filename = this.filtered_rows[index]["Log File"]
+      this.filtered_rows.splice(index, 1)
       let data = await results_comm.fetchDeleteLogFile(
         this.serverAddress,
-        this.filtered_rows[index]["Log File"]
+        log_filename
       )
       if (data["result"] === "failure") {
         return
       }
-      this.removeLogFileFromDataRows(index)
-      this.filtered_rows.splice(index, 1)
+      this.removeLogFileFromDataRows(log_filename)
     },
   }
 }
