@@ -182,6 +182,12 @@ export default {
         displayed_modals.push(false)
         modal_messages.push(false)
       }
+      for (let j = 0; j < data.columns.length; j++) {
+        if (data.columns[j].categorized) {
+          uniques[j] = Array.from(uniques[j])
+          uniques[j].sort((a, b) => (a === "Show all") ? false : (b === "Show all") ? true : a > b) 
+        }
+      }
       this.data = data
       this.uniques = uniques
       this.selected_values = selected_values
