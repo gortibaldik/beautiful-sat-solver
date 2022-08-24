@@ -10,7 +10,7 @@ from satsolver.watched_literals.structures_preparation import prepare_structures
 
 def get_info():
   return general_setup.get_info(
-    name="CDCL.v2.r200.lbd3",
+    name="CDCL.v3.r200.lbd3",
     taskName="TASK 4",
     benchmarkable=True,
     symbol="dove"
