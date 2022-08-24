@@ -2,15 +2,15 @@
 from satsolver.cdcl.assignment import unassign, unassign_multiple
 from satsolver.cdcl.cdcl import CDCL
 from satsolver.cdcl.conflict_analysis import conflict_analysis
+from satsolver.cdcl.decision_variable_selection import dec_var_selection
 from satsolver.cdcl.unit_propagation import unit_propagation
-from satsolver.dpll.decision_variable_selection import dec_var_selection
 import satsolver.utils.general_setup as general_setup
 from satsolver.watched_literals.assignment import assign_true
 from satsolver.watched_literals.structures_preparation import prepare_structures
 
 def get_info():
   return general_setup.get_info(
-    name="CDCL.v4.luby32.lbd4",
+    name="CDCL.v5.luby32.lbd4",
     taskName="TASK 4",
     benchmarkable=True,
     symbol="dove"

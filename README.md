@@ -61,6 +61,9 @@
 __UPDATE__:
   - Since the results of geometrically increasing `conflict_limit` and `lbd_limit` weren't persuasive I spent some time reading about _luby_ which is the SotA. After implementing _luby_ I can conclude that this strategy helps a lot (lowering the runtime by more than 40% on the hardest problems). One particularity which is kind of puzzling for me is that I achieved the best results when I didn't increase `lbd_limit` by any factor. Hence the best results are for constant `lbd_limit` = 4. [The results picture](results/cdcl.restarts.luby.cmp.png)
 
+__UPDATE 2__:
+  - After few more experiments I found out that what I have been referring to as _clause deletion and restarts_ was in reality only _clause deletion_ because of a bug in the code. After resolving the bug I'm not able to achieve better results with restarts than with only _clause deletion_. I cannot answer why it is so. I tried implementing some sort of basic heuristic (number of clauses where the literal is present at the moment of the restart is the criterion), but while lowering the runtime by a factor of 3, I still suffer that _restarts_ seem to hurt more than help. [New restarts comparison](results/cdcl.restarts.02.png) 
+
 -----
 
 #### Resources

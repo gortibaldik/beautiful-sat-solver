@@ -291,10 +291,10 @@ class CDCL:
     else:
       data.lbd_limit *= 1.1
       data.conflict_limit *= 1.1
-  
+
   def _set_decision_lit(self, data: CDCLData, decision, debug, next_unit_prop_lit_int):
     if decision == 0:
-      var_int = self.dec_var_selection(data.assignment)
+      var_int = self.dec_var_selection(data)
       data.dec_vars[data.current_dec_lvl] = var_int
     
     if decision < 2:
@@ -305,7 +305,7 @@ class CDCL:
       # derived var_int
       if data.assignment[var_int] is not None:
         data.decisions[data.current_dec_lvl] = 0
-        var_int = self.dec_var_selection(data.assignment)
+        var_int = self.dec_var_selection(data)
         data.dec_vars[data.current_dec_lvl] = var_int
         lit_int = var_int + var_int
       else:
@@ -325,14 +325,27 @@ class CDCL:
       first_index = -2 - len(assigned_literals_to_be_added)
     return first_index, assigned_literals_to_be_added
 
-  def _cdcl(self, data: CDCLData, config):
+  def _restart(self, data: CDCLData, config: CDCLConfig):
+    if config.debug: logger.debug(f"RESTART")
+    data.current_dec_lvl = 1
+    for i in range(len(data.assignment)):
+      if data.dec_lvls_of_vars[i][0] > 0:
+        data.dec_lvls_of_vars[i] = data.def_dec_lvl
+        data.assignment[i] = None
+        data.n_assigned_variables -= 1
+    for i in range(1, len(data.decisions)):
+      data.decisions[i] = 0
+    data.generate_new_order_of_vars()
+    data.lbd_limit *= 1.1
+
+  def _cdcl(self, data: CDCLData, config: CDCLConfig):
     data.initialize()
     config.base_unit = data.conflict_limit
     next_unit_prop_lit_int = None
     if config.use_luby:
       data.conflict_limit = data.luby_sequence[data.n_restarts] * config.base_unit
 
-    unitPropResult= self.unit_propagation(data, first_index=-1)
+    unitPropResult = self.unit_propagation(data, first_index=-1)
     if unitPropResult == UnitPropagationResult.CONFLICT:
       if config.debug and config.use_luby: logger.debug(f"LUBY SEQUENCE: {data.luby_sequence}")
       return SATSolverResult.UNSAT
@@ -357,6 +370,11 @@ class CDCL:
         # restart / clause_deletion
         if data.conflict_limit and data.stats.conflicts == int(data.conflict_limit):
           self._update_on_conflict_limit(data, config)
+          if config.use_restarts:
+            if data.current_dec_lvl == 0:
+              continue
+            else:
+              self._restart(data, config)
         continue
 
       if config.debug: logger.debug(f"{data.current_dec_lvl}: UP: {debug_str_multi(data.assigned_literals[data.current_dec_lvl], data.itv)}")
@@ -403,17 +421,8 @@ class CDCL:
   def cdcl_no_restarts(self, ast_tree_root, debug):
     return self.cdcl(ast_tree_root, debug, None, None)
 
-  def cdcl_r200_lbd3(self, ast_tree_root, debug):
-    return self.cdcl(ast_tree_root, debug, 200, 3)
-
-  def cdcl_r200_lbd2(self, ast_tree_root, debug):
-    return self.cdcl(ast_tree_root, debug, 200, 2)
-
-  def cdcl_luby32_lbd2(self, ast_tree_root, debug):
-    return self.cdcl(ast_tree_root, debug, 32, 2, use_luby=True)
-
-  def cdcl_luby32_lbd3(self, ast_tree_root, debug):
-    return self.cdcl(ast_tree_root, debug, 32, 3, use_luby=True)
+  def cdcl_luby32_lbd3_restarts(self, ast_tree_root, debug):
+    return self.cdcl(ast_tree_root, debug, 32, 3, use_luby=True, use_restarts=True)
 
   def cdcl_luby32_lbd4(self, ast_tree_root, debug):
     return self.cdcl(ast_tree_root, debug, 32, 4, use_luby=True)
