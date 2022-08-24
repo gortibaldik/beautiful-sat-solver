@@ -1,9 +1,6 @@
-from collections import deque
 from heapq import heappop, heappush
-from typing import Deque, List, Set
-from satsolver.cdcl.assignment import _def_dec_lvl
 from satsolver.utils.representation import debug_str_multi
-from satsolver.cdcl.representation import SATClause
+from satsolver.cdcl.representation import CDCLData, SATClause
 
 def init_literals_from_clause(
   clause: SATClause,
@@ -59,18 +56,12 @@ def get_literals_from_clause(
     else:
       dec_lvl_set[tpl[0]] = True
 
-def conflict_analysis(
-  conflict_clause: SATClause,
-  current_dec_lvl,
-  dec_lvls_of_vars,
-  antecedents: List[SATClause],
-  itv
-):
+def conflict_analysis(conflict_clause: SATClause, data: CDCLData):
   priority_queue, highest_dec_lvl, highest_lit_int, dec_lvl_set = init_literals_from_clause(
     conflict_clause,
-    current_dec_lvl,
-    itv,
-    dec_lvls_of_vars
+    data.current_dec_lvl,
+    data.itv,
+    data.dec_lvls_of_vars
   )
   assertive_clause = set(conflict_clause.children)
 
@@ -80,11 +71,11 @@ def conflict_analysis(
     _, _, lit_int = heappop(priority_queue)
     var_int = lit_int >> 1
 
-    ant = antecedents[var_int]
+    ant = data.antecedents[var_int]
     get_literals_from_clause(
       ant,
-      current_dec_lvl,
-      dec_lvls_of_vars,
+      data.current_dec_lvl,
+      data.dec_lvls_of_vars,
       priority_queue,
       dec_lvl_set
     )
@@ -97,8 +88,8 @@ def conflict_analysis(
         continue
       assertive_clause.add(lit_int)
       var_int = lit_int >> 1
-      dec_lvl = dec_lvls_of_vars[var_int][0]
-      if dec_lvl != current_dec_lvl and dec_lvl > highest_dec_lvl:
+      dec_lvl = data.dec_lvls_of_vars[var_int][0]
+      if dec_lvl != data.current_dec_lvl and dec_lvl > highest_dec_lvl:
         highest_dec_lvl = dec_lvl
         highest_lit_int = lit_int
 
@@ -124,5 +115,3 @@ def conflict_analysis(
     satClause.watched = [w_1, w_2]
 
   return satClause, highest_dec_lvl
-  
-
