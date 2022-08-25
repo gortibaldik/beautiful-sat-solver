@@ -160,6 +160,7 @@ def get_running_job(saved_jobs):
     job_info = saved_jobs[key]
     is_finished = task_runner_is_custom_run_finished(job_info)
 
+    # algorithm name contains algo;parameter1;parameter2 ...
     if not is_finished:
       return create_running_job_dict(algo, bench, entry)
   return create_running_job_dict("none", "none", "none")

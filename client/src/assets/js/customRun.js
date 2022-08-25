@@ -137,6 +137,16 @@ export default {
     startMonitoringBenchmarkAll(algo) {
       this.pollingInterval = setInterval(this.pollRunningBenchmarkAll.bind(this, algo), 1000)
     },
+    createAlgorithmName(algo) {
+      let runningAlgorithm = algo.name
+      if (algo.options.length > 0) {
+        let options = algo.options
+        for (let i = 0; i < options.length; i++) {
+          runningAlgorithm += ';' + options[i].name + '=' + options[i].default
+        }
+      }
+      return runningAlgorithm
+    },
     async runButtonClicked(algo, bench, benchIn, logLevel) {
       if (this.runButtonText === "Stop") {
         this.stopRunFunction()
@@ -146,7 +156,8 @@ export default {
       if ( !algo || !bench || !benchIn) {
         return
       }
-      let data = await custom_run_communication.fetchStart(this.serverAddress, algo, bench, benchIn, logLevel)
+      let algoName = this.createAlgorithmName(algo)
+      let data = await custom_run_communication.fetchStart(this.serverAddress, algoName, bench, benchIn, logLevel)
 
       if (data.result !== "success") {
         return
@@ -157,6 +168,9 @@ export default {
       this.showBenchmarkInputContent = true;
       let data = await custom_run_communication.fetchBenchmarkInput(this.serverAddress, bench, benchIn)
       this.benchmarkInputContent = `<code>${data.result}</code>`
+    },
+    extractAlgorithmName(algorithmName) {
+      return algorithmName.split(';')[0]
     },
     async fetchInfoFromServer() {
       let [benchmarks, algorithms, running_job] = await custom_run_communication.fetchBasicInfoFromServer(this.serverAddress)
@@ -174,7 +188,7 @@ export default {
       this.benchmarks = benchmarks
       this.algorithms = algorithms
       if (running_job.algorithm !== "none") {
-        this.selectedAlgorithmName      = running_job.algorithm
+        this.selectedAlgorithmName      = this.extractAlgorithmName(running_job.algorithm)
         this.selectedBenchmarkName      = running_job.benchmark
         this.selectedBenchmarkInputName = running_job.entry
         this.showRunResults             = true
@@ -208,7 +222,8 @@ export default {
       }
       return {
         name: this.selectedAlgorithmName,
-        taskName: "TASK --none--"
+        taskName: "TASK --none--",
+        options: []
       }
     },
     selectedBenchmark: function() {

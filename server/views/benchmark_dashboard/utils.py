@@ -56,23 +56,32 @@ def find_running_benchmark(algo_name, saved_jobs):
   # finds all the jobs executing algorithm algo_name and
   # checks whether they're still running
   for key in saved_jobs.keys():
+    # comma separates algo,benchmark,entry
     key_parts = key.split(',')
+
+    # if there is only one part it means, that
+    # run algorithm on all benchmarks is running
     if len(key_parts) == 1:
-      if algo_name == key:
+      # parameters of the algorithm are separated by ';'
+      algo_stripped = key.split(';')[0]
+      if algo_name == algo_stripped:
         try:
           job = task_runner_get_job(saved_jobs[key])
         except:
           continue
         if job_is_running(job):
-          logger.warning(f"FOUND RUNNING JOB: {job.meta}")
+          logger.warning(f"FOUND RUNNING JOB: {job.meta}; (key: {key})")
           return {
             "running": True,
-            "all":     True
+            "all":     True,
+            "options": ";".join(key.split(';')[1:])
           }
       continue
     if len(key_parts) > 2:
       continue
-    if algo_name in key:
+    key_algo_name = key.split(",")[0]
+    key_algo_name_stripped = key_algo_name.split(";")[0]
+    if algo_name == key_algo_name_stripped:
       try:
         job = task_runner_get_job(saved_jobs[key])
       except:
@@ -80,11 +89,12 @@ def find_running_benchmark(algo_name, saved_jobs):
       
       if job_is_running(job):
         benchmark_name = key.split(',')[1]
-        logger.warning(f"FOUND RUNNING JOB: {job.meta}")
+        logger.warning(f"FOUND RUNNING JOB: {job.meta}; (key: {key})")
         return {
           "running": True,
           "all":     False,
-          "benchmarkName": benchmark_name
+          "benchmarkName": benchmark_name,
+          "options": ";".join(key_algo_name.split(';')[1:])
         }
   return {
     "running": False,

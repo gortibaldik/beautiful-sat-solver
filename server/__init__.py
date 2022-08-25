@@ -42,4 +42,4 @@ app.register_blueprint(custom_run_page, url_prefix='/custom_run')
 CORS(app, resources={r'/*': {'origins': '*'}})
 
 from server.models import job
-migrate = Migrate(app, db, directory=Config.MIGRATIONS_DIR)
+migrate = Migrate(app, db, directory=Config.MIGRATIONS_DIR, compare_type=True)

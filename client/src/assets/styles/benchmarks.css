@@ -45,6 +45,23 @@
   margin-left: 0px;
 }
 
+.parameterSelector {
+  color: #999999;
+  margin-bottom: -0.05rem;
+  font-size: 13px;
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+.hintClass {
+  display: none;
+  margin-left: 10px;
+}
+
+a:hover + div.hintClass {
+  display: block;
+}
+
 .cascading-admin-card .benchmarkPossibilities {
   color: #1f71ff;
   font-size: 12px;

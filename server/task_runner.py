@@ -38,12 +38,21 @@ def create_sat_job(
   log_file,
   avg_time,
   stats: SATSolverStats):
+  algo_split = algorithm_name.split(";")
+  algo_name_to_save = algo_split[0]
+  for i in range(1, len(algo_split)):
+    parameter, value = algo_split[i].split('=')
+    if value in ["false", "true", "None"]:
+      if value == "true":
+        algo_name_to_save += "_" + parameter
+      continue
+    algo_name_to_save += f"_{parameter}{value}"
   sat_job = SATJob(
     unit_prop_vals  = stats.unitProps,
     decision_vars   = stats.decVars,
     conflicts       = stats.conflicts,
     time            = avg_time,
-    algorithm       = algorithm_name,
+    algorithm       = algo_name_to_save,
     benchmark       = benchmark_name,
     log_file        = log_file,
     unit_checked    = stats.unitPropCheckedClauses
@@ -72,10 +81,25 @@ def create_n_commit_satjob(
     db.commit()
 
 def retrieve_algorithm(algorithms, algorithm_name):
+  algorithm_name, *algorithm_parameters = algorithm_name.split(";")
+  parameter_dict = {}
+  for p in algorithm_parameters:
+    parameter, value = p.split("=")
+    if value == "true":
+      value = True
+    elif value == "false":
+      value = False
+    elif value == "None":
+      value = None
+    try:
+      value = int(value)
+    except: pass
+    parameter_dict[parameter] = value
+
   for _, algo_module in algorithms.items():
     task_info = algo_module.get_info()
     if task_info["name"] == algorithm_name:
-      return algo_module
+      return lambda **kwargs: algo_module.find_model(**kwargs, **parameter_dict)
   return None
 
 def retrieve_benchmark_basedir(benchmark_name):
@@ -172,7 +196,7 @@ def benchmark(file, algorithm_name, benchmark_name, debug_level):
     for i, filename in enumerate(benchmark_filenames):
       job.meta['progress'] = i * 100 / total_number_of_benchmarks
       job.save_meta()
-      result = algo_module.find_model(
+      result = algo_module(
         input_file=filename,
         debug=debug,
         warning=warning,
@@ -231,7 +255,7 @@ def custom_run(
     debug, info, warning = log_level_per_debug_level(debug_level)
     check_debug, check_info, check_warning = log_level_per_debug_level(Config.CHECK_LOG_LEVEL)
     logzero.logger.warning(f"Algorithm: {algorithm_name}, Benchmark: {benchmark_name}, Entry: {entry_name} Log Level: {debug_level}")
-    result = algo_module.find_model(
+    result = algo_module(
       input_file=benchmark_filename,
       debug=debug,
       warning=warning,

@@ -385,7 +385,7 @@ class CDCL:
         return SATSolverResult.SAT
       data.current_dec_lvl += 1
   
-  def cdcl(self, ast_tree_root, debug, conflict_limit, lbd_limit, use_luby=False, use_restarts=False):
+  def cdcl(self, ast_tree_root, debug, conflict_limit=None, lbd_limit=None, use_luby=False, use_restarts=False):
     assignment, itv, vti, itc, c, stats = self.prepare_structures(ast_tree_root)
     n_variables = len(vti) # vti == variable to integer
     data = CDCLData(
@@ -417,12 +417,4 @@ class CDCL:
         model[var_name] = assignment[ipos]
 
     return result.value, model, stats
-  
-  def cdcl_no_restarts(self, ast_tree_root, debug):
-    return self.cdcl(ast_tree_root, debug, None, None)
 
-  def cdcl_luby32_lbd3_restarts(self, ast_tree_root, debug):
-    return self.cdcl(ast_tree_root, debug, 32, 3, use_luby=True, use_restarts=True)
-
-  def cdcl_luby32_lbd4(self, ast_tree_root, debug):
-    return self.cdcl(ast_tree_root, debug, 32, 4, use_luby=True)

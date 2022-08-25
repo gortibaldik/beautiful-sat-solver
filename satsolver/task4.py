@@ -13,7 +13,31 @@ def get_info():
     name="CDCL.v3",
     taskName="TASK 4",
     benchmarkable=True,
-    symbol="dove"
+    symbol="dove",
+    options=[
+      general_setup.create_option(
+        name="conflict_limit",
+        hint="Tested values: 32, with luby/restarts",
+        type=general_setup.TypeOfOption.VALUE,
+        default="32" 
+      ),
+      general_setup.create_option(
+        name="lbd_limit",
+        hint="Tested values: 3 with restarts and luby, 4 with only luby",
+        type=general_setup.TypeOfOption.VALUE,
+        default="4"
+      ),
+      general_setup.create_option(
+        name="use_restarts",
+        type=general_setup.TypeOfOption.CHECKBOX,
+        default=False
+      ),
+      general_setup.create_option(
+        name="use_luby",
+        type=general_setup.TypeOfOption.CHECKBOX,
+        default=True
+      )
+    ]
   )
 
 def find_model(
@@ -22,7 +46,8 @@ def find_model(
   warning=False,
   debug=False,
   output_to_stdout=False,
-  nnf_reduce_implications=True
+  nnf_reduce_implications=True,
+  **kwargs
 ):
   cdcl = CDCL(
     prepare_structures=prepare_structures,
@@ -34,12 +59,13 @@ def find_model(
     conflict_analysis=conflict_analysis
   )
   return general_setup.find_model(
-    cdcl.cdcl_no_restarts,
+    cdcl.cdcl,
     input_file=input_file,
     warning=warning,
     debug=debug,
     output_to_stdout=output_to_stdout,
-    nnf_reduce_implications=nnf_reduce_implications
+    nnf_reduce_implications=nnf_reduce_implications,
+    **kwargs
   )
 
 if __name__ == "__main__":
