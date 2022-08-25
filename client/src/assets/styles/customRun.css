@@ -148,3 +148,8 @@ strong {
 a:hover + div.hintClass {
   display: block;
 }
+
+.special-width {
+  width: 100px;
+  max-width: 100px;
+}

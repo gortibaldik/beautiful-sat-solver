@@ -49,7 +49,7 @@
                       @change="selectedBenchmarkInputName=defaultBenchmarkInputName"
                     >
                       <option selected disabled>{{defaultBenchmarkName}}</option>
-                      <option v-for="(bench, index) in benchmarks" :key="index">
+                      <option v-for="(bench, bench_index) in benchmarks" :key="bench_index">
                         {{bench.name}}
                       </option>
                     </select>
@@ -61,7 +61,7 @@
                       v-model="selectedBenchmarkInputName"
                     >
                       <option selected disabled>{{defaultBenchmarkInputName}}</option>
-                      <option v-for="(benchIn, index) in selectedBenchmark.inputs" :key="index">
+                      <option v-for="(benchIn, entry_index) in selectedBenchmark.inputs" :key="entry_index">
                         {{benchIn}}
                       </option>
                     </select>
@@ -82,13 +82,21 @@
                         </div>
                         <div v-if="option.type=='value'"
                         class="align-self-center">
-                          <input v-model="option.default" class="benchmarkPossibilities"/>
+                          <input v-model="option.default" class="benchmarkPossibilities special-width"/>
                         </div>
                         <div v-if="option.type=='checkbox'"
                         class="align-self-center">
                           <input type="checkbox"
-                          :id="`${option_index}_${index}_checkbox`"
+                          :id="`${option_index}_checkbox`"
                           v-model="option.default" />
+                        </div>
+                        <div v-if="option.type==='list'"
+                        class="align-self-center">
+                          <select class="browser-default custom-select benchmarkPossibilities special-width" v-model="option.default">
+                            <option v-for="value in option.options" :key="value">
+                              {{value}}
+                            </option>
+                          </select>
                         </div>
                       </mdb-row>
                     </section>
