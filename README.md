@@ -45,10 +45,12 @@
 -----
 
 ## Task 4: CDCL
-- [executable (no restarts)](satsolver/task4.py), [executable (restarts and clause deletion)](satsolver/task4_r200lbd3.py)
+- [executable (no restarts)](satsolver/task4.py), [executable (clause deletion)](satsolver/task4_luby32lbd4.py) [executable (restarts and clause deletion)](satsolver/task4_restarts.py)
 - [sources](satsolver/cdcl/)
-- CDCL without restarts `python3 satsolver/task4.py <input_file>`
-- CDCL with restarts `python3 satsolver/task4_r200lbd3.py <input_file>`
+#### How to run
+- CDCL pure `python3 satsolver/task4.py <input_file>`
+- CDCL with clause deletion `python3 satsolver/task4_luby32lbd4.py <input_file>`
+- CDCL with restarts and clause deletion `python3 satsolver/task4_restarts.py <input_file>`
 - or by using frontend
 
 ### Results
