@@ -10,7 +10,13 @@ def get_info():
     name="Watched Literals.v6",
     taskName="TASK 3",
     benchmarkable=True,
-    symbol="crow"
+    symbol="crow",
+    options=[general_setup.create_option(
+      name="iterative",
+      type=general_setup.TypeOfOption.CHECKBOX,
+      default=False,
+      hint="Whether to use iterative version of the algorithm or the recursive one"
+    )]
   )
 
 def find_model(
