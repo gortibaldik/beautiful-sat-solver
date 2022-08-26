@@ -129,6 +129,8 @@ def get_running_benchmark(saved_jobs):
         continue
       if job_is_running(job):
         return create_running_job_dict(key, "__all__")
+      else:
+        continue
     algo, bench = key_parts
     try:
       job = task_runner_get_job(saved_jobs[key])
