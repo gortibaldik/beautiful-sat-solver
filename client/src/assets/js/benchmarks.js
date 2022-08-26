@@ -224,13 +224,13 @@ export default {
       this.runningAlgorithm = this.createAlgorithmName(algorithmName, selectedIndex)
       let data = await benchmark_comm.fetchStartAll(
         this.serverAddress,
-        algorithmName,
+        this.runningAlgorithm,
         this.selectedLogLevels[selectedIndex]
       )
       if (data['result'] === "failure") {
         return
       }
-      this.startMonitoringProgressAll(algorithmName, selectedIndex)
+      this.startMonitoringProgressAll(this.runningAlgorithm, selectedIndex)
     },
     startMonitoringProgressAll(algorithmName, selectedIndex) {
       this.allBenchmarksAreRunning = true
