@@ -83,10 +83,22 @@ class CDCL:
       itc[lit_1].append((assertive_clause, -1))
     return lit_1
   
-  def _deep_backtrack(self, data, debug):
+  def _deep_backtrack(self, data: CDCLData, debug):
+    # decision cheat sheet
+    # decision == 0 -> dec_var_selection should be done in _set_decision_lit
+    # decision == 1 == 001 -> False literal should be selected in _set_decision_lit as the first option
+    # decision == 2 == 010 -> True literal should be selected in _set_decision_lit as the first option
+    #
+    # decision == 4 == 100 -> True literal should be selected in _set_decision_lit as the second option
+    # decision == 5 == 101 -> False literal should be selected in _set_decision_lit as the second option
+    #
+    # when only backjumping (e.g. assertion lvl is 4, so we need to backjump at lvl 4, but not undo
+    # unit propagation or dec var selection, then decision > 5 (we add 6 to decision, so its value
+    # varies from 7 to 11) and then modulo it by 6 to get it back to where it was)
     new_dec_lvl = data.current_dec_lvl
     n_removed_literals = 0
-    while data.decisions[new_dec_lvl] & 1 == 1:
+    
+    while data.decisions[new_dec_lvl] > 3:
       data.decisions[new_dec_lvl] = 0
       var_int = data.dec_vars[new_dec_lvl]
       lit_int = var_int + var_int + 1
@@ -117,16 +129,27 @@ class CDCL:
       # with learning is done
       return n_removed_literals, -1
     
-    # else we backtracked to some positive literal
-    # decision, so now we need to redo that decision
+    # else we backtracked to some previous literal
+    # decision, so now we need to invert that decision
     var_int = data.dec_vars[new_dec_lvl]
-    lit_int = var_int + var_int
+    lit_int = var_int + var_int + (data.decisions[new_dec_lvl] & 1)
     self.unassign(lit_int, data.assignment, data.dec_lvls_of_vars, data.itc, data.itv)
-    data.decisions[new_dec_lvl] = 1
+    data.decisions[new_dec_lvl] += 3
     n_removed_literals += 1
     return n_removed_literals, new_dec_lvl
 
   def _shallow_backtrack(self, data, debug):
+    # decision cheat sheet
+    # decision == 0 -> dec_var_selection should be done in _set_decision_lit
+    # decision == 1 == 001 -> False literal should be selected in _set_decision_lit as the first option
+    # decision == 2 == 010 -> True literal should be selected in _set_decision_lit as the first option
+    #
+    # decision == 4 == 100 -> True literal should be selected in _set_decision_lit as the second option
+    # decision == 5 == 101 -> False literal should be selected in _set_decision_lit as the second option
+    #
+    # when only backjumping (e.g. assertion lvl is 4, so we need to backjump at lvl 4, but not undo
+    # unit propagation or dec var selection, then decision > 5 (we add 6 to decision, so its value
+    # varies from 7 to 11) and then modulo it by 6 to get it back to where it was)
     decision = data.decisions[data.current_dec_lvl]
     var_int = data.dec_vars[data.current_dec_lvl]
     lit_int = var_int + var_int + (decision & 1)
@@ -134,35 +157,38 @@ class CDCL:
     n_removed_literals = 0
 
 
-    # if we took positive literal
+    # if we took some literal
     # then it still remains to check the
-    # negative one
+    # other one
     #
     # hence we need to remove unit propagation
     # and retry the second branch 
-    if decision & 1 == 0:
+    if decision < 3:
       if debug: logger.debug(f"{data.current_dec_lvl}: UNDEC CL: {debug_str(lit_int, data.itv)}")
       self.unassign(lit_int, data.assignment, data.dec_lvls_of_vars, data.itc, data.itv)
       n_removed_literals += 1
 
       # tell the algorithm to take another branch next time
       # on this level
-      dec = data.decisions[new_dec_lvl]
-      data.decisions[new_dec_lvl] = (dec & 1) ^ 1
+      data.decisions[new_dec_lvl] += 3
 
 
       # unit propagation was done at the previous level
       new_dec_lvl -= 1
 
-      # decision == 2
-      # unit propagation will be taken with
-      # next_unit_prop_lit_int
-      data.decisions[new_dec_lvl] += 2
+      # assertive clause is unit at new_dec_lvl so the unit propagation
+      # needs to be redone, however there is no need to repeat the decision
+      # and original unit propagation at new_dec_lvl
+      data.decisions[new_dec_lvl] += 6
       return n_removed_literals, new_dec_lvl
     else:
       return self._deep_backtrack(data, debug)
 
   def _backjump(self, data: CDCLData, assertion_lvl, debug):
+    # decision cheat sheet
+    # when only backjumping (e.g. assertion lvl is 4, so we need to backjump at lvl 4, but not undo
+    # unit propagation or dec var selection, then decision > 5 (we add 6 to decision, so its value
+    # varies from 7 to 11) and then modulo it by 6 to get it back to where it was)
     new_dec_lvl = data.current_dec_lvl
     n_removed_literals = 0
 
@@ -210,14 +236,14 @@ class CDCL:
     n_removed_literals += 1
 
     new_dec_lvl -= 1
-    data.decisions[new_dec_lvl] += 2
+    data.decisions[new_dec_lvl] += 6
 
     return n_removed_literals, new_dec_lvl
 
 
   def _backtrack(self, conflict_clause, data: CDCLData, debug):
     # if backtrack happens only for one step, then data.decisions[lvl]
-    # is incremented by 2, so that the literal selection is remembered
+    # is incremented by 6, so that the literal selection is remembered
     #
     # when up finds conflict, we need to set the value to 0
     data.decisions[data.current_dec_lvl + 1] = 0
@@ -293,24 +319,35 @@ class CDCL:
       data.conflict_limit *= 1.1
 
   def _set_decision_lit(self, data: CDCLData, decision, debug, next_unit_prop_lit_int):
+    # decision cheat sheet
+    # decision == 0 -> dec_var_selection should be done in _set_decision_lit
+    # decision == 1 == 001 -> False literal should be selected in _set_decision_lit as the first option
+    # decision == 2 == 010 -> True literal should be selected in _set_decision_lit as the first option
+    #
+    # decision == 4 == 100 -> True literal should be selected in _set_decision_lit as the second option
+    # decision == 5 == 101 -> False literal should be selected in _set_decision_lit as the second option
+    #
+    # when only backjumping (e.g. assertion lvl is 4, so we need to backjump at lvl 4, but not undo
+    # unit propagation or dec var selection, then decision > 5 (we add 6 to decision, so its value
+    # varies from 7 to 11) and then modulo it by 6 to get it back to where it was)
+
     if decision == 0:
-      var_int = self.dec_var_selection(data)
+      var_int, data.decisions[data.current_dec_lvl] = self.dec_var_selection(data)
       data.dec_vars[data.current_dec_lvl] = var_int
     
-    if decision < 2:
+    if decision < 6:
       data.n_assigned_variables += 1
       var_int = data.dec_vars[data.current_dec_lvl]
 
       # unit propagation in previous step
       # derived var_int
       if data.assignment[var_int] is not None:
-        data.decisions[data.current_dec_lvl] = 0
-        var_int = self.dec_var_selection(data)
+        var_int, decision = self.dec_var_selection(data)
         data.dec_vars[data.current_dec_lvl] = var_int
-        lit_int = var_int + var_int
-      else:
-        lit_int = var_int + var_int + (decision & 1)
+        data.decisions[data.current_dec_lvl] = decision
       
+      lit_int = var_int + var_int + (decision & 1)
+
       if debug:logger.debug(f"{data.current_dec_lvl}: DEC: {debug_str(lit_int, data.itv)}")
       self.assign_true(lit_int, data.itv, data.assignment, data.itc)
       data.stats.decVars += 1
@@ -319,7 +356,7 @@ class CDCL:
       assigned_literals_to_be_added = []
       first_index = -2
     else:
-      data.decisions[data.current_dec_lvl] &= 1
+      data.decisions[data.current_dec_lvl] %= 6
       data.cs = data.itc[next_unit_prop_lit_int]
       assigned_literals_to_be_added = data.assigned_literals[data.current_dec_lvl]
       first_index = -2 - len(assigned_literals_to_be_added)
@@ -328,6 +365,7 @@ class CDCL:
   def _restart(self, data: CDCLData, config: CDCLConfig):
     if config.debug: logger.debug(f"RESTART")
     data.current_dec_lvl = 1
+    # TODO: change to range(data.current_dec_lvl)
     for i in range(len(data.assignment)):
       if data.dec_lvls_of_vars[i][0] > 0:
         data.dec_lvls_of_vars[i] = data.def_dec_lvl
