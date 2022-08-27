@@ -192,6 +192,28 @@ export default {
         this.selectedBenchmarkName      = running_job.benchmark
         this.selectedBenchmarkInputName = running_job.entry
         this.showRunResults             = true
+        let options_array = running_job.algorithm.split(';')
+        let selAlgo = undefined
+        for (let k = 0; k < this.algorithms.length; k++) {
+          if (this.algorithms[k].name == this.selectedAlgorithmName) {
+            selAlgo = this.algorithms[k]
+            break
+          }
+        }
+        for (let j = 0; j < options_array.length; j++) {
+          let [option, value] = options_array[j].split('=')
+          if (value === "true") {
+            value = true
+          } else if (value === "false") {
+            value = false
+          }
+          for (let k = 0; k < selAlgo.options.length; k++) {
+            if (selAlgo.options[k].name == option) {
+              selAlgo.options[k].default = value
+              break
+            }
+          }
+        }
         this.startMonitoringCustomRun(
           this.selectedAlgorithmName,
           this.selectedBenchmarkName,
