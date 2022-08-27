@@ -8,7 +8,10 @@ def dec_var_selection_static_sum(
   """
   for i in data.order_of_vars:
     if data.assignment[i] is None:
-      return i, 2
+      if data.negative_first:
+        return i, 1
+      else:
+        return i, 2
   raise RuntimeError("Each variable is assigned!")
 
 def dec_var_selection_basic(
@@ -19,5 +22,8 @@ def dec_var_selection_basic(
   """
   for i, v in enumerate(data.assignment):
     if v is None:
-      return i, 2
+      if data.negative_first:
+        return i, 1
+      else:
+        return i, 2
   raise RuntimeError("Each variable is assigned!")

@@ -2,7 +2,6 @@
 from satsolver.cdcl.assignment import unassign, unassign_multiple
 from satsolver.cdcl.cdcl import CDCL
 from satsolver.cdcl.conflict_analysis import conflict_analysis
-from satsolver.cdcl.decision_variable_selection import dec_var_selection_static_sum, dec_var_selection_basic
 from satsolver.cdcl.unit_propagation import unit_propagation
 import satsolver.utils.general_setup as general_setup
 from satsolver.watched_literals.assignment import assign_true
@@ -10,22 +9,21 @@ from satsolver.watched_literals.structures_preparation import prepare_structures
 
 def get_info():
   return general_setup.get_info(
-    name="CDCL.v3",
+    name="CDCL.v5.1",
     taskName="TASK 4",
     benchmarkable=True,
     symbol="dove",
     options=[
       general_setup.create_option(
-        name="conflict_limit",
+        name="conflict_limit_restarts",
         hint="Tested values: 32, with luby/restarts",
         type=general_setup.TypeOfOption.VALUE,
         default="32" 
       ),
       general_setup.create_option(
-        name="lbd_limit",
-        hint="Tested values: 3 with restarts and luby, 4 with only luby",
+        name="conflict_limit_deletion",
         type=general_setup.TypeOfOption.VALUE,
-        default="4"
+        default="200"
       ),
       general_setup.create_option(
         name="use_restarts",
@@ -45,6 +43,12 @@ def get_info():
           "No Heuristic",
           "Static Sum"
         ]
+      ),
+      general_setup.create_option(
+        name="negative_first",
+        type=general_setup.TypeOfOption.CHECKBOX,
+        default=False,
+        hint="Whether to take negative literal as first during decision variable selection"
       )
     ]
   )
@@ -56,19 +60,11 @@ def find_model(
   debug=False,
   output_to_stdout=False,
   nnf_reduce_implications=True,
-  dec_var_heuristic: str="No Heuristic",
   **kwargs
 ):
-  if dec_var_heuristic == "No Heuristic":
-    dec_var_selection = dec_var_selection_basic
-  elif dec_var_heuristic == "Static Sum":
-    dec_var_selection = dec_var_selection_static_sum
-  else:
-    raise RuntimeError(f"Incorrect heuristic name ! ({dec_var_heuristic})")
   cdcl = CDCL(
     prepare_structures=prepare_structures,
     unit_propagation=unit_propagation,
-    dec_var_selection=dec_var_selection,
     assign_true=assign_true,
     unassign=unassign,
     unassign_multiple=unassign_multiple,

@@ -2,6 +2,7 @@ from typing import List, Protocol, Tuple
 from logzero import logger
 
 from satsolver.cdcl.representation import CDCLConfig, CDCLData, SATClause
+from satsolver.cdcl.decision_variable_selection import dec_var_selection_basic, dec_var_selection_static_sum
 from satsolver.utils.enums import SATSolverResult, UnitPropagationResult
 from satsolver.utils.representation import debug_str, debug_str_multi
 from ..utils.stats import SATSolverStats
@@ -25,27 +26,35 @@ class Unassign(Protocol):
     itv: List[str]
   ): ...
 
+def no_op(data: CDCLData):
+  pass
 
+def no_op2(data: CDCLData, assertive_clause: SATClause):
+  pass
 
 class CDCL:
   def __init__(
     self,
-    prepare_structures,
-    unit_propagation,
-    dec_var_selection,
-    assign_true,
-    unassign,
-    unassign_multiple,
-    conflict_analysis
+    prepare_structures=None,
+    unit_propagation=None,
+    dec_var_selection=None,
+    assign_true=None,
+    unassign=None,
+    unassign_multiple=None,
+    conflict_analysis=None
   ):
-    self.prepare_structures = prepare_structures
-    self.unit_propagation   = unit_propagation
-    self.dec_var_selection  = dec_var_selection
-    self.assign_true        = assign_true
+    self.prepare_structures               = prepare_structures
+    self.unit_propagation                 = unit_propagation
+    self.dec_var_selection                = dec_var_selection
+    self.assign_true                      = assign_true
     self.unassign: Unassign                   = unassign
     self.unassign_multiple: UnassignMultiple  = unassign_multiple
-    self.conflict_analysis  = conflict_analysis
-    self.health_check       = None
+    self.conflict_analysis                = conflict_analysis
+    self.health_check                     = None
+    self.use_static_heuristic             = False
+    self.conflict_found_callback          = no_op
+    self.after_conflict_analysis_callback = no_op2
+    self.clause_deleted_callback          = no_op2
   
   def _clause_str(self, clause, data):
     s = []
@@ -255,6 +264,7 @@ class CDCL:
       data.current_dec_lvl = -1
       return 0, 0
     assertive_clause, assertion_lvl = self.conflict_analysis(conflict_clause, data)
+    self.after_conflict_analysis_callback(data, assertive_clause)
     if debug:
       logger.debug(f"{data.current_dec_lvl}: ASSERTIVE CLAUSE: {self._clause_str(assertive_clause, data)}" + \
         f"LBD: {assertive_clause.lbd}"+ f"; AL: {assertion_lvl}")
@@ -278,13 +288,20 @@ class CDCL:
 
     data.current_dec_lvl = new_dec_lvl
     data.n_assigned_variables -= remove_from_assigned_variables
-    return next_unit_prop_lit_int
+    return next_unit_prop_lit_int, assertive_clause
 
-  def _clause_deletion(self, data, debug):
+  def _clause_deletion(self, data: CDCLData, debug, assertive_clause: SATClause):
     if debug: logger.debug(f"RESTART -> LC before: {len(data.learned_clauses)}")
     new_learned_clauses = []
-    for c in data.learned_clauses:
-      if c.lbd <= data.lbd_limit:
+    new_learned_clauses = sorted(data.learned_clauses, key=lambda x: x.lbd)
+    n_to_keep = int(len(new_learned_clauses) * 0.5)
+    data.learned_clauses = new_learned_clauses[:n_to_keep]
+    locked_clauses = set(data.antecedents)
+    for i in range(n_to_keep, len(new_learned_clauses)):
+      c = new_learned_clauses[i]
+      if c == assertive_clause:
+        new_learned_clauses.append(c)
+      elif c in locked_clauses:
         new_learned_clauses.append(c)
       else:
         # remove learned clause from watched
@@ -294,29 +311,16 @@ class CDCL:
         else:
           data.itc[c.get_w(0)].remove((c, 0))
           data.itc[c.get_w(1)].remove((c, 1))
-    data.learned_clauses = new_learned_clauses
+        self.clause_deleted_callback(data, c)
     if debug: logger.debug(f"RESTART -> LC after: {len(data.learned_clauses)}")
+    data.conflict_limit_deletion_additive *= 1.1
+    data.conflict_limit_deletion += data.conflict_limit_deletion_additive
+    if self.use_static_heuristic:
+      data.generate_new_order_of_vars()
     return new_learned_clauses
 
-  def _update_on_conflict_limit(self, data, config):
-    self._clause_deletion(data, config.debug)
-    if config.use_luby:
-      data.n_restarts += 1
-      k = data.k
-      n_restarts = data.n_restarts
-      if n_restarts == (1 << k) - 1:
-        data.luby_sequence.append(1 << (k - 1))
-        data.k += 1
-      elif n_restarts >= (1 << (k - 1)) and n_restarts < ((1 << k) - 1):
-        data.luby_sequence.append(data.luby_sequence[n_restarts - (1 << (k - 1)) + 1])
-      else:
-        raise RuntimeError(f"n_restarts: {n_restarts}, data.k: {data.k}")
-      data.conflict_limit += data.luby_sequence[n_restarts] * config.base_unit
-      # keeping lbd at 2 for the whole run leaves the best results
-      # data.lbd_limit *= 1.05
-    else:
-      data.lbd_limit *= 1.1
-      data.conflict_limit *= 1.1
+  def _update_on_conflict_limit(self, data, config, assertive_clause):
+    self._clause_deletion(data, config.debug, assertive_clause)
 
   def _set_decision_lit(self, data: CDCLData, decision, debug, next_unit_prop_lit_int):
     # decision cheat sheet
@@ -332,7 +336,8 @@ class CDCL:
     # varies from 7 to 11) and then modulo it by 6 to get it back to where it was)
 
     if decision == 0:
-      var_int, data.decisions[data.current_dec_lvl] = self.dec_var_selection(data)
+      var_int, decision = self.dec_var_selection(data)
+      data.decisions[data.current_dec_lvl] = decision
       data.dec_vars[data.current_dec_lvl] = var_int
     
     if decision < 6:
@@ -364,24 +369,45 @@ class CDCL:
 
   def _restart(self, data: CDCLData, config: CDCLConfig):
     if config.debug: logger.debug(f"RESTART")
-    data.current_dec_lvl = 1
-    # TODO: change to range(data.current_dec_lvl)
+    data.decisions[0] += 6
     for i in range(len(data.assignment)):
       if data.dec_lvls_of_vars[i][0] > 0:
         data.dec_lvls_of_vars[i] = data.def_dec_lvl
         data.assignment[i] = None
+        data.antecedents[i] = None
         data.n_assigned_variables -= 1
     for i in range(1, len(data.decisions)):
       data.decisions[i] = 0
-    data.generate_new_order_of_vars()
-    data.lbd_limit *= 1.1
+    if self.use_static_heuristic:
+      data.generate_new_order_of_vars()
+
+    if config.use_luby:
+      data.n_restarts += 1
+      k = data.k
+      n_restarts = data.n_restarts
+      if n_restarts == (1 << k) - 1:
+        data.luby_sequence.append(1 << (k - 1))
+        data.k += 1
+      elif n_restarts >= (1 << (k - 1)) and n_restarts < ((1 << k) - 1):
+        data.luby_sequence.append(data.luby_sequence[n_restarts - (1 << (k - 1)) + 1])
+      else:
+        raise RuntimeError(f"n_restarts: {n_restarts}, data.k: {data.k}")
+      data.conflict_limit_restarts += data.luby_sequence[n_restarts] * config.base_unit
+
+    data.current_dec_lvl = 0
+    #data.lbd_limit *= 1.1
+
+  def collect_stats_callback(self, data: CDCLData):
+    len_learned = len(data.learned_clauses)
+    if len_learned > data.stats.learnedClausesPeak:
+      data.stats.learnedClausesPeak = len_learned
 
   def _cdcl(self, data: CDCLData, config: CDCLConfig):
     data.initialize()
-    config.base_unit = data.conflict_limit
+    config.base_unit = data.conflict_limit_restarts
     next_unit_prop_lit_int = None
     if config.use_luby:
-      data.conflict_limit = data.luby_sequence[data.n_restarts] * config.base_unit
+      data.conflict_limit_restarts = data.luby_sequence[data.n_restarts] * config.base_unit
 
     unitPropResult = self.unit_propagation(data, first_index=-1)
     if unitPropResult == UnitPropagationResult.CONFLICT:
@@ -391,6 +417,7 @@ class CDCL:
     data.current_dec_lvl += 1
 
     while True:
+      self.collect_stats_callback(data)
       decision = data.decisions[data.current_dec_lvl]
       # previous_literals -> previously assigned literals
       first_index, previous_literals = self._set_decision_lit(data, decision, config.debug, next_unit_prop_lit_int)
@@ -401,13 +428,15 @@ class CDCL:
 
       # conflict resolution
       if conflict_clause is not None:
-        next_unit_prop_lit_int = self._backtrack(conflict_clause, data, config.debug)
+        self.conflict_found_callback(data)
+        next_unit_prop_lit_int, assertive_clause = self._backtrack(conflict_clause, data, config.debug)
         if data.current_dec_lvl == -1:
           return SATSolverResult.UNSAT
 
         # restart / clause_deletion
-        if data.conflict_limit and data.stats.conflicts == int(data.conflict_limit):
-          self._update_on_conflict_limit(data, config)
+        if len(data.learned_clauses) > len(data.c) or (data.conflict_limit_deletion and int(data.conflict_limit_deletion) == data.stats.conflicts):
+          self._update_on_conflict_limit(data, config, assertive_clause)
+        if data.conflict_limit_restarts and data.stats.conflicts == int(data.conflict_limit_restarts):
           if config.use_restarts:
             if data.current_dec_lvl == 0:
               continue
@@ -422,8 +451,29 @@ class CDCL:
         if config.debug and config.use_luby: logger.debug(f"LUBY SEQUENCE: {data.luby_sequence}")
         return SATSolverResult.SAT
       data.current_dec_lvl += 1
-  
-  def cdcl(self, ast_tree_root, debug, conflict_limit=None, lbd_limit=None, use_luby=False, use_restarts=False):
+
+  def heuristic_setup(self, dec_var_heuristic, data, **kwargs):
+    if dec_var_heuristic == "No Heuristic":
+      self.dec_var_selection = dec_var_selection_basic
+    elif dec_var_heuristic == "Static Sum":
+      self.dec_var_selection = dec_var_selection_static_sum
+      self.use_static_heuristic = True
+    else:
+      raise RuntimeError(f"Incorrect heuristic name ! ({dec_var_heuristic})")
+
+  def cdcl(
+    self,
+    ast_tree_root,
+    debug,
+    conflict_limit_restarts=None,
+    conflict_limit_deletion=None,
+    lbd_limit=None,
+    use_luby=False,
+    use_restarts=False,
+    dec_var_heuristic="No Heuristic",
+    negative_first=False,
+    **kwargs
+  ):
     assignment, itv, vti, itc, c, stats = self.prepare_structures(ast_tree_root)
     n_variables = len(vti) # vti == variable to integer
     data = CDCLData(
@@ -432,15 +482,19 @@ class CDCL:
       assignment=assignment,
       c=c,
       stats=stats,
-      conflict_limit=conflict_limit,
+      conflict_limit_restarts=conflict_limit_restarts,
+      conflict_limit_deletion=conflict_limit_deletion,
+      conflict_limit_deletion_additive=conflict_limit_deletion,
       lbd_limit=lbd_limit,
-      n_variables=n_variables
+      n_variables=n_variables,
+      negative_first=negative_first
     )
     config = CDCLConfig(
       debug=debug,
       use_luby=use_luby,
       use_restarts=use_restarts
     )
+    self.heuristic_setup(dec_var_heuristic, data, **kwargs)
     result = self._cdcl(data, config)
 
     # health check
