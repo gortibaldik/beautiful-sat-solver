@@ -20,6 +20,8 @@ def get_timestamp():
   return strftime("%Y_%m_%d_%H_%M_%S", gmtime())
 
 def ensure_storage_file(algorithm_name, benchmark_name):
+  if not algorithm_name or not benchmark_name:
+    return None
   storage_folder = Config.SATSMT_RESULT_LOGS
   Path(storage_folder).mkdir(parents=True, exist_ok=True)
   storage_file = os.path.join(storage_folder, f"{algorithm_name}_{benchmark_name}_{get_timestamp()}")
@@ -51,6 +53,7 @@ def create_sat_job(
     unit_prop_vals  = stats.unitProps,
     decision_vars   = stats.decVars,
     conflicts       = stats.conflicts,
+    learned_clauses = stats.learnedClausesPeak,
     time            = avg_time,
     algorithm       = algo_name_to_save,
     benchmark       = benchmark_name,
@@ -93,7 +96,11 @@ def retrieve_algorithm(algorithms, algorithm_name):
       value = None
     try:
       value = int(value)
-    except: pass
+    except:
+      try:
+        value = float(value)
+      except:
+        pass
     parameter_dict[parameter] = value
 
   for _, algo_module in algorithms.items():
@@ -286,6 +293,10 @@ def run_benchmark(
 ):
   job = rq.get_current_job()
   storage_file = ensure_storage_file(algorithm_name, benchmark_name)
+  if storage_file is None:
+    job.meta['interrupted'] = True
+    job.save_meta()
+    return
   logzero.logger.info(f"Selected storage file: {storage_file}")
   job.meta[finished_meta_key] = False
   job.meta['storage_file'] = storage_file

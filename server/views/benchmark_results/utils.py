@@ -34,6 +34,7 @@ should_be_plotted = {
   SATJobConfig.unit_prop_vals.long,
   SATJobConfig.unit_checked.long,
   SATJobConfig.conflicts.long,
+  SATJobConfig.learned_clauses.long,
 }
 
 can_be_pressed = {
