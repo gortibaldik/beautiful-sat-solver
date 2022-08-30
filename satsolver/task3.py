@@ -1,6 +1,7 @@
 from argparse import ArgumentParser
 from satsolver.dpll.decision_variable_selection import dec_var_selection
 from satsolver.dpll.dpll import DPLL
+from satsolver.dpll.dpll_iter import DPLLIter
 import satsolver.utils.general_setup as general_setup
 from satsolver.watched_literals.assignment import assign_true, unassign, unassign_multiple
 from satsolver.watched_literals.structures_preparation import prepare_structures
@@ -27,16 +28,27 @@ def find_model(
   warning=False,
   debug=False,
   output_to_stdout=False,
-  nnf_reduce_implications=True
+  nnf_reduce_implications=True,
+  iterative=False,
 ):
-  dpll = DPLL(
-    prepare_structures=prepare_structures,
-    unit_propagation=unit_propagation,
-    dec_var_selection=dec_var_selection,
-    assign_true=assign_true,
-    unassign=unassign,
-    unassign_multiple=unassign_multiple,
-  )
+  if iterative:
+    dpll = DPLLIter(
+      prepare_structures=prepare_structures,
+      unit_propagation=unit_propagation,
+      dec_var_selection=dec_var_selection,
+      assign_true=assign_true,
+      unassign=unassign,
+      unassign_multiple=unassign_multiple
+    )
+  else:
+    dpll = DPLL(
+      prepare_structures=prepare_structures,
+      unit_propagation=unit_propagation,
+      dec_var_selection=dec_var_selection,
+      assign_true=assign_true,
+      unassign=unassign,
+      unassign_multiple=unassign_multiple
+    )
   return general_setup.find_model(
     dpll.dpll,
     input_file=input_file,
