@@ -434,7 +434,7 @@ class CDCL:
           return SATSolverResult.UNSAT
 
         # restart / clause_deletion
-        if len(data.learned_clauses) > len(data.c) or (data.conflict_limit_deletion and int(data.conflict_limit_deletion) == data.stats.conflicts):
+        if data.conflict_limit_deletion and int(data.conflict_limit_deletion) == data.stats.conflicts:
           self._update_on_conflict_limit(data, config, assertive_clause)
         if data.conflict_limit_restarts and data.stats.conflicts == int(data.conflict_limit_restarts):
           if config.use_restarts:
