@@ -4,18 +4,21 @@ from flask import request
 from logzero import logger
 
 from server.config import Config
-from server.get_running_job import RunningJobType, find_running_job
+from server.get_running_job import (
+  RunningJobType,
+  construct_all_run_index,
+  construct_benchmark_index,
+  find_running_job,
+  get_job_info,
+  stop_job
+)
 from server.task_runner import (
   get_job_log_file,
-  has_job_finished,
-  has_job_started,
   task_runner_get_all_benchmarks_progress,
-  task_runner_get_benchmark_progress,
+  task_runner_get_progress,
   task_runner_get_job,
   task_runner_start_algorithm_on_all_benchmarks,
-  task_runner_start_algorithm_on_benchmark,
-  task_runner_stop_all_run_job,
-  task_runner_stop_job
+  task_runner_start_algorithm_on_benchmark
 )
 from server.utils.log_utils import get_log_file_content
 from server.utils.redis_utils import (
@@ -40,7 +43,8 @@ def get_post_debug_level():
 def retrieve_log_file(algorithm_name, benchmark_name):
   try:
     saved_jobs = get_saved_jobs()
-    job_info = get_job_info(algorithm_name, benchmark_name, saved_jobs)
+    index = construct_benchmark_index(algorithm_name, benchmark_name)
+    job_info = get_job_info(index, saved_jobs)
   except:
     logger.warning(saved_jobs)
     raise
@@ -49,9 +53,6 @@ def retrieve_log_file(algorithm_name, benchmark_name):
     log_file = get_job_log_file(job)
     job_info["logs"] = "<strong>No log file yet!</strong>" if not log_file else get_log_file_content(log_file)
   return job_info["logs"]
-
-def job_is_running(job):
-  return ('interrupted' not in job.meta or not job.meta['interrupted'] ) and not has_job_finished(job)
 
 def get_running_status(benchmarkable_algorithms, saved_jobs):
   running_statuses = []
@@ -107,11 +108,8 @@ def get_running_benchmark(saved_jobs):
   else:
     raise RuntimeError(f"KEY: {key} should be one of ALL_BENCHMARKS, BENCHMARK types")
 
-def construct_index(algorithm_name, benchmark_name):
-  return f"{algorithm_name},{benchmark_name}"
-
 def save_job(job: rq.job.Job, algorithm_name, benchmark_name, saved_jobs):
-  index = construct_index(algorithm_name, benchmark_name)
+  index = construct_benchmark_index(algorithm_name, benchmark_name)
   saved_jobs[index] = {
     "job": job.get_id(),
     "logs": None,
@@ -119,28 +117,20 @@ def save_job(job: rq.job.Job, algorithm_name, benchmark_name, saved_jobs):
   }
 
 def save_job_all_benchmarks(job: rq.job.Job, algorithm_name, saved_jobs):
-  saved_jobs[algorithm_name] = {
+  index = construct_all_run_index(algorithm_name)
+  saved_jobs[index] = {
     "job": job.get_id(),
     "logs": None,
     "interrupted": False
   }
 
-def stop_job(algorithm_name, benchmark_name, saved_jobs):
-  job_info = get_job_info(algorithm_name, benchmark_name, saved_jobs)
-  job = task_runner_get_job(job_info)
-  if has_job_started(job) and not has_job_finished(job):
-    task_runner_stop_job(job, algorithm_name, benchmark_name)
-    return True
-  logger.warning(f"Job [{construct_index(algorithm_name, benchmark_name)}] cannot be stopped!")
-  return False
+def stop_job_benchmark(algorithm_name, benchmark_name, saved_jobs):
+  index = construct_benchmark_index(algorithm_name, benchmark_name)
+  stop_job(index, saved_jobs)
 
 def stop_job_all_run(algorithm_name, saved_jobs):
-  job_info = get_all_run_job_info(algorithm_name, saved_jobs)
-  job = task_runner_get_job(job_info)
-  if has_job_started(job) and not has_job_finished(job):
-    task_runner_stop_all_run_job(job, algorithm_name)
-    return True
-  logger.warning(f"Job [{algorithm_name}] cannot be stopped!")
+  index = construct_all_run_index(algorithm_name)
+  return stop_job(index, saved_jobs)
 
 def benchmark_name_sorting_criterion(x):
   if "uuf" in x:
@@ -151,6 +141,8 @@ def benchmark_name_sorting_criterion(x):
     value = 1
   elif "flat" in x:
     value = int((x[4:].split('-')[0]))
+  elif "blocksworld" in x:
+    value = 2
   else:
     value = x
   return value
@@ -161,25 +153,16 @@ def get_benchmark_names():
   sorted_benchmark_names = sorted(benchmark_names, key=benchmark_name_sorting_criterion)
   return sorted_benchmark_names
 
-def get_job_info(algorithm_name, benchmark_name, saved_jobs):
-  index = construct_index(algorithm_name, benchmark_name)
-  if index not in saved_jobs:
-    raise RuntimeError(f"{index} not in saved_jobs" + "\n" + f"saved_jobs: {saved_jobs}")
-  return saved_jobs[index]
-
-def get_all_run_job_info(algorithm_name, saved_jobs):
-  if algorithm_name not in saved_jobs:
-    raise RuntimeError(f"{algorithm_name} not in saved_jobs: {saved_jobs}")
-  return saved_jobs[algorithm_name]
-
 def get_benchmark_progress(algorithm_name, benchmark_name):
   saved_jobs = get_saved_jobs()
-  job_info = get_job_info(algorithm_name, benchmark_name, saved_jobs)
-  return task_runner_get_benchmark_progress(job_info)
+  index = construct_benchmark_index(algorithm_name, benchmark_name)
+  job_info = get_job_info(index, saved_jobs)
+  return task_runner_get_progress(job_info)
 
 def get_all_run_progress(algorithm_name):
   saved_jobs = get_saved_jobs()
-  job_info = get_all_run_job_info(algorithm_name, saved_jobs)
+  index = construct_all_run_index(algorithm_name)
+  job_info = get_job_info(index, saved_jobs)
   return task_runner_get_all_benchmarks_progress(job_info)
 
 def start_algorithm_on_benchmark(algorithm_name, benchmark_name, debug_level):
