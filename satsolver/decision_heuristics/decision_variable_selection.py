@@ -1,11 +1,15 @@
 from typing import List
 
+from satsolver.cdcl.decision_variable_selection import add_assumptions
 from satsolver.cdcl.representation import CDCLData
 
 
 def vsids_array_dec_var_selection(
   data: CDCLData
 ):
+  result = add_assumptions(data)
+  if result is not None:
+    return result
   max_count = -1
   max_var_int = None
   for var_int, state in enumerate(data.assignment):

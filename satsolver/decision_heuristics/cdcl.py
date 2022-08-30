@@ -21,8 +21,25 @@ class CDCL(cdcl_base_module.CDCL):
     dec_var_heuristic,
     data: CDCLData,
     vsids_decay:float=1.0,
-    decay_every_n_steps:int=1
+    decay_every_n_steps:int=1,
+    assumptions:str = ""
   ):
+    assumptions = str(assumptions)
+    if len(assumptions) > 0:
+      data.assumptions = assumptions.split(".")
+      for i in range(len(data.assumptions)):
+        a = data.assumptions[i].strip()
+        negative = False
+        if "NOT" in a:
+          a = a[3:].strip()
+          negative = True
+        for j, s in enumerate(data.itv):
+          if a == s:
+            data.assumptions[i] = j + j + negative
+            break
+        else:
+          raise RuntimeError(f"{a} not found in data.itv ({data.itv})")
+
     if dec_var_heuristic == "No Heuristic":
       self.dec_var_selection = dec_var_selection_basic
     elif dec_var_heuristic == "Static Sum":

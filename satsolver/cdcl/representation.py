@@ -43,6 +43,7 @@ class CDCLData:
   n_assigned_variables: int = None
   order_of_vars: List[int] = None
   negative_first: bool = None
+  assumptions: List[int] = None
 
   def initialize(self):
     size_of_arrays = self.n_variables + 1
