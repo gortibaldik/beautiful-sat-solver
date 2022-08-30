@@ -3,7 +3,7 @@ import satsolver.cdcl.cdcl as cdcl_base_module
 from logzero import logger
 from satsolver.cdcl.decision_variable_selection import dec_var_selection_basic, dec_var_selection_static_sum
 from satsolver.cdcl.representation import CDCLData, SATClause
-from satsolver.decision_heuristics.decision_variable_selection import vsids_array_dec_var_selection
+from satsolver.decision_heuristics.decision_variable_selection import vsids_array_dec_var_selection, random_var_selection
 
 def decay_after_conflict(data: CDCLData):
   if data.decay_step % data.decay_every_n_steps != 0:
@@ -55,6 +55,8 @@ class CDCL(cdcl_base_module.CDCL):
       data.decay_step = 0
       self.conflict_found_callback = decay_after_conflict
       self.after_conflict_analysis_callback = bump_assertive_clause
+    elif dec_var_heuristic == "Random":
+      self.dec_var_selection = random_var_selection
     else:
       raise RuntimeError(f"Incorrect heuristic name ! ({dec_var_heuristic})")
 

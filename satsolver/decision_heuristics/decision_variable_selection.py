@@ -1,4 +1,4 @@
-from typing import List
+import random
 
 from satsolver.cdcl.decision_variable_selection import add_assumptions
 from satsolver.cdcl.representation import CDCLData
@@ -30,3 +30,12 @@ def vsids_array_dec_var_selection(
   else:
     # negative literal should be taken as the first one
     return max_var_int, 1
+
+def random_var_selection(data: CDCLData):
+  result = add_assumptions(data)
+  if result is not None:
+    return result
+  while True:
+    r = random.randint(0, len(data.assignment) - 1)
+    if data.assignment[r] is None:
+      return r, random.randint(1, 2)

@@ -44,7 +44,8 @@ def get_info(argumentParser: ArgumentParser=None):
         options=[
           "No Heuristic",
           "Static Sum",
-          "VSIDS_array"
+          "VSIDS_array",
+          "Random"
         ]
       ),
       general_setup.create_option(
