@@ -46,6 +46,16 @@
             />Custom Run</mdb-list-group-item
           >
         </router-link>
+        <router-link to="/nqueens" @click.native="activeItem = 5">
+          <mdb-list-group-item
+            :action="true"
+            :class="activeItem === 5 && 'active'"
+            ><mdb-icon
+              icon="clipboard-list"
+              class="mr-3"
+            />NQueens</mdb-list-group-item
+          >
+        </router-link>
       </mdb-list-group>
     </div>
     <!-- /Sidebar  -->

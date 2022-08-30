@@ -7,6 +7,7 @@ class RunningJobType(Enum):
   BENCHMARK = "benchmark"
   ALL_BENCHMARKS = "all_benchmarks"
   CUSTOM_RUN = "custom_run"
+  NQUEENS = "nqueens"
 
 def job_is_running(job):
   return ('interrupted' not in job.meta \
@@ -21,6 +22,12 @@ def construct_all_run_index(algorithm_name):
 
 def construct_custom_run_index(algorithm_name, benchmark_name, entry_name):
   return f"{algorithm_name},{benchmark_name},{entry_name}"
+
+def construct_nqueens_index(algorithm_name, n, timeout):
+  if timeout is None:
+    return f"{algorithm_name},nqueens,{n},"
+  else:
+    return f"{algorithm_name},nqueens,benchmark,{timeout}"
 
 def get_job_info(index, saved_jobs):
   if index not in saved_jobs:
@@ -54,6 +61,8 @@ def find_running_job(saved_jobs: Dict[str, Any]):
         return key, RunningJobType.BENCHMARK
       if len(key_parts) == 3:
         return key, RunningJobType.CUSTOM_RUN
+      if len(key_parts) == 4 and key_parts[1] == "nqueens":
+        return key, RunningJobType.NQUEENS
       else:
         raise RuntimeError(f"WRONG KEY in saved_jobs: key: {key} ; saved_jobs: {saved_jobs}")
 
