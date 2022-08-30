@@ -57,7 +57,7 @@
         <p class="footer-copyright mb-0 py-3 text-center">
           &copy; {{ new Date().getFullYear() }} Copyright:
           <a href="https://github.com/gortibaldik/"> gortibaldik </a>
-          Version: 0.3.2
+          Version: 0.3.3
         </p>
       </ftr>
     </main>
