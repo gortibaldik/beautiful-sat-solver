@@ -1,4 +1,5 @@
 
+from argparse import ArgumentParser
 from satsolver.cdcl.assignment import unassign, unassign_multiple
 from satsolver.cdcl.conflict_analysis import conflict_analysis
 from satsolver.cdcl.unit_propagation import unit_propagation
@@ -7,12 +8,13 @@ import satsolver.utils.general_setup as general_setup
 from satsolver.watched_literals.assignment import assign_true
 from satsolver.watched_literals.structures_preparation import prepare_structures
 
-def get_info():
-  return general_setup.get_info(
+def get_info(argumentParser: ArgumentParser=None):
+  info = general_setup.get_info(
     name="Decision Heuristics.v1",
     taskName="TASK 5",
     benchmarkable=True,
     symbol="hippo",
+    argumentParser=argumentParser,
     options=[
       general_setup.create_option(
         name="conflict_limit_restarts",
@@ -60,9 +62,18 @@ def get_info():
         name="decay_every_n_steps",
         type=general_setup.TypeOfOption.VALUE,
         default=1
+      ),
+      general_setup.create_option(
+        name="assumptions",
+        type=general_setup.TypeOfOption.VALUE,
+        default="",
+        hint="Variables which would be used as decision variables (together) " +\
+          "with literal information (negativity). They should be separated with " +\
+          "dots, e.g. 'a.b.x2.NOT __spec3__' describes 4 assumptions, a, b, x2 and NOT __spec3__"
       )
     ]
   )
+  return info
 
 def find_model(
   *,
@@ -93,10 +104,9 @@ def find_model(
 
 if __name__ == "__main__":
   parser = general_setup.create_parser()
+  get_info(parser)
   args = parser.parse_args()
+  print(vars(args))
   find_model(
-    input_file=args.input_file,
-    warning=args.warning,
-    debug=args.debug,
-    output_to_stdout=args.output_to_stdout
+    **vars(args)
   )

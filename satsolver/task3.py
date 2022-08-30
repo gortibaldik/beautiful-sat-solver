@@ -1,3 +1,4 @@
+from argparse import ArgumentParser
 from satsolver.dpll.decision_variable_selection import dec_var_selection
 from satsolver.dpll.dpll import DPLL
 import satsolver.utils.general_setup as general_setup
@@ -5,12 +6,13 @@ from satsolver.watched_literals.assignment import assign_true, unassign, unassig
 from satsolver.watched_literals.structures_preparation import prepare_structures
 from satsolver.watched_literals.unit_propagation import unit_propagation
 
-def get_info():
+def get_info(argumentParser:ArgumentParser=None):
   return general_setup.get_info(
     name="Watched Literals.v6",
     taskName="TASK 3",
     benchmarkable=True,
     symbol="crow",
+    argumentParser=argumentParser,
     options=[general_setup.create_option(
       name="iterative",
       type=general_setup.TypeOfOption.CHECKBOX,
@@ -46,10 +48,10 @@ def find_model(
 
 if __name__ == "__main__":
   parser = general_setup.create_parser()
+  get_info(parser)
   args = parser.parse_args()
+  print(vars(args))
   find_model(
-    input_file=args.input_file,
-    warning=args.warning,
-    debug=args.debug,
-    output_to_stdout=args.output_to_stdout
+    **vars(args)
   )
+

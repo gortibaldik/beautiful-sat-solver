@@ -147,7 +147,8 @@ def get_info(
   taskName: str,
   benchmarkable: bool,
   symbol: str,
-  options: List = []
+  options: List = [],
+  argumentParser: ArgumentParser=None
 ):
   """Provides information needed by server/frontend for correctly displaying the benchmark in client browser
   
@@ -160,13 +161,18 @@ def get_info(
   """
   if "," in name or ";" in name:
     raise RuntimeError(f"Commas ',' and ';' cannot be in the name of the algorithm! (name of the algorithm: {name})")
-  return {
+  
+  info = {
     "name": name,
     "taskName": taskName,
     "benchmarkable": benchmarkable,
     "symbol": symbol,
     "options": options
   }
+  if argumentParser is not None:
+    options_to_argparse(info, argumentParser)
+  
+  return info
 
 from enum import Enum
 
@@ -193,6 +199,23 @@ def create_option(
     "options": options,
     "hint": hint
   }
+
+def options_to_argparse(info, argumentParser: ArgumentParser):
+  options = info["options"]
+  for option in options:
+    name: str = option["name"]
+    type = option["type"]
+    default = option["default"]
+    option_options = option["options"]
+    hint = option["hint"]
+
+    sanitized_name = "--" + name.replace(" ", "_")
+    if type == "list":
+      argumentParser.add_argument(sanitized_name, choices=option_options, default=default, help=hint)
+    elif type == "checkbox":
+      argumentParser.add_argument(sanitized_name, action=("store_true" if default == False else "store_false"), help=hint)
+    elif type == "value":
+      argumentParser.add_argument(sanitized_name, default=default, help=hint)
 
 def find_model(
   satsolver_function,

@@ -1,4 +1,5 @@
 
+from argparse import ArgumentParser
 from satsolver.cdcl.assignment import unassign, unassign_multiple
 from satsolver.cdcl.cdcl import CDCL
 from satsolver.cdcl.conflict_analysis import conflict_analysis
@@ -7,12 +8,13 @@ import satsolver.utils.general_setup as general_setup
 from satsolver.watched_literals.assignment import assign_true
 from satsolver.watched_literals.structures_preparation import prepare_structures
 
-def get_info():
+def get_info(argumentParser: ArgumentParser=None):
   return general_setup.get_info(
     name="CDCL.v5.1",
     taskName="TASK 4",
     benchmarkable=True,
     symbol="dove",
+    argumentParser=argumentParser,
     options=[
       general_setup.create_option(
         name="conflict_limit_restarts",
@@ -82,10 +84,10 @@ def find_model(
 
 if __name__ == "__main__":
   parser = general_setup.create_parser()
+  get_info(parser)
   args = parser.parse_args()
+  print(vars(args))
   find_model(
-    input_file=args.input_file,
-    warning=args.warning,
-    debug=args.debug,
-    output_to_stdout=args.output_to_stdout
+    **vars(args)
   )
+

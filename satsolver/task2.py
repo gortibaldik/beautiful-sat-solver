@@ -1,3 +1,4 @@
+from argparse import ArgumentParser
 from satsolver.dpll.assignment import assign_true, unassign, unassign_multiple
 from satsolver.dpll.decision_variable_selection import dec_var_selection
 from satsolver.dpll.dpll_iter import DPLLIter
@@ -7,12 +8,13 @@ import satsolver.utils.general_setup as general_setup
 
 from satsolver.dpll.dpll import DPLL
 
-def get_info():
+def get_info(argumentParser: ArgumentParser=None):
   return general_setup.get_info(
     name="DPLL.v5",
     taskName="TASK 2",
     benchmarkable=True,
     symbol="cat",
+    argumentParser=argumentParser,
     options=[general_setup.create_option(
       name="iterative",
       type=general_setup.TypeOfOption.CHECKBOX,
@@ -60,10 +62,10 @@ def find_model(
 
 if __name__ == "__main__":
   parser = general_setup.create_parser()
+  get_info(parser)
   args = parser.parse_args()
+  print(vars(args))
   find_model(
-      input_file=args.input_file,
-      warning=args.warning,
-      debug=args.debug,
-      output_to_stdout=args.output_to_stdout
+    **vars(args)
   )
+
