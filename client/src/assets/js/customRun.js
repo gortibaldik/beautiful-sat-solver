@@ -67,6 +67,7 @@ export default {
       displayModal: false,
       modalMessage: "",
       modalTitle: "",
+      timeoutCustomRun: 3,
     };
   },
   methods: {
@@ -99,13 +100,18 @@ export default {
       let stdLogs = await custom_run_communication.fetchCustomRunLogs(this.serverAddress)
       let is_finished = await custom_run_communication.fetchProgress(this.serverAddress, algo, bench, benchIn)
       if (redisErrorLogs  === 'failure' ||
-          stdLogs         === 'failure' ||
-          is_finished     === 'failure' ||
-          is_finished     === "yes") {
-        clearInterval(this.pollingInterval)
-        this.pollingInterval = undefined;
-        this.isCustomRunRunning = false
-        this.stopRunFunction = undefined
+      stdLogs         === 'failure' ||
+      is_finished     === 'failure' ||
+      is_finished     === "yes") {
+        if (this.timeoutCustomRun > 0) {
+          this.timeoutCustomRun--
+        } else {
+          clearInterval(this.pollingInterval)
+          this.pollingInterval = undefined;
+          this.isCustomRunRunning = false
+          this.stopRunFunction = undefined
+          this.timeoutCustomRun = 3
+        }
       }
       this.stdLogs = stdLogs
     },
@@ -162,7 +168,7 @@ export default {
       if (data.result !== "success") {
         return
       }
-      this.startMonitoringCustomRun(algo, bench, benchIn)
+      this.startMonitoringCustomRun(algoName, bench, benchIn)
     },
     async showInputClicked(bench, benchIn) {
       this.showBenchmarkInputContent = true;
@@ -215,7 +221,7 @@ export default {
           }
         }
         this.startMonitoringCustomRun(
-          this.selectedAlgorithmName,
+          running_job.algorithm,
           this.selectedBenchmarkName,
           this.selectedBenchmarkInputName
         )

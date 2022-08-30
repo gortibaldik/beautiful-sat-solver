@@ -12,7 +12,7 @@ from server.views.custom_run.utils import (
   get_benchmarks,
   get_post_data,
   get_post_debug_level,
-  get_running_job,
+  get_running_custom_run,
   is_custom_run_finished,
   retrieve_log_file_content,
   save_job,
@@ -35,16 +35,16 @@ def custom_run_index():
     "result": "success",
     "benchmarks": get_benchmarks(),
     "algorithms": benchmarkable_algorithms,
-    "running_job": get_running_job(saved_jobs)
+    "running_job": get_running_custom_run(saved_jobs)
   })
 
-@custom_run_page.route('/get_running_custom_run', methods=['GET'])
+@custom_run_page.route('/get_running_custom_run_run', methods=['GET'])
 @on_exception_result_failure
-def get_running_custom_run():
+def get_running():
   saved_jobs = get_saved_jobs()
   return jsonify({
     'result': 'success',
-    'running_job': get_running_job(saved_jobs)
+    'running_job': get_running_custom_run(saved_jobs)
   })
 
 @custom_run_page.route('/start', methods=['POST'])

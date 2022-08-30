@@ -5,9 +5,10 @@ from logzero import logger
 from server.config import Config
 from server.task_runner import get_custom_run_log_file, has_job_finished, has_job_started, task_runner_is_custom_run_finished, task_runner_start_algorithm_on_custom_run, task_runner_stop_custom_run
 from server.utils.log_utils import get_log_file_content
+from server.get_running_job import RunningJobType, find_running_job
+from server.task_runner import task_runner_get_job
 from server.utils.redis_utils import get_saved_jobs
 from server.views.benchmark_dashboard.utils import benchmark_name_sorting_criterion
-from server.task_runner import task_runner_get_job
 
 def get_benchmarks():
   benchmark_root = Config.SATSMT_BENCHMARK_ROOT
@@ -54,7 +55,7 @@ def get_job_info(
     entry_name
   )
   if index not in saved_jobs:
-    return RuntimeError(f"{index} not in saved_jobs")
+    raise RuntimeError(f"{index} not in saved_jobs: ({saved_jobs})")
   return saved_jobs[index]
 
 def retrieve_log_file_content():
@@ -151,7 +152,11 @@ def create_running_job_dict(
     "entry": entry_name
   }
 
-def get_running_job(saved_jobs):
+def get_running_custom_run(saved_jobs):
+  # key, result = find_running_job(saved_jobs)
+  # if result is None or result != RunningJobType.CUSTOM_RUN:
+  #   return create_running_job_dict("none", "none", "none")
+
   for key in saved_jobs:
     key_parts = key.split(',')
     if len(key_parts) != 3:

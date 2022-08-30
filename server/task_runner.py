@@ -442,9 +442,12 @@ def task_runner_is_custom_run_finished(job_info):
   try:
     job = task_runner_get_job(job_info)
   except:
+    logzero.logger.warning(f"no job: {job_info}")
+    logzero.logger.warning(traceback.format_exc())
     return True
   job.refresh()
   if not 'finished' in job.meta:
+    logzero.logger.warning(f"'finished' not in job.meta ({job.meta})")
     return True
   return job.meta['finished']
 
