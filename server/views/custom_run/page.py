@@ -38,7 +38,7 @@ def custom_run_index():
     "running_job": get_running_custom_run(saved_jobs)
   })
 
-@custom_run_page.route('/get_running_custom_run_run', methods=['GET'])
+@custom_run_page.route('/get_running_custom_run', methods=['GET'])
 @on_exception_result_failure
 def get_running():
   saved_jobs = get_saved_jobs()

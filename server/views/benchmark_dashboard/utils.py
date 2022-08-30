@@ -4,6 +4,7 @@ from flask import request
 from logzero import logger
 
 from server.config import Config
+from server.get_running_job import RunningJobType, find_running_job
 from server.task_runner import (
   get_job_log_file,
   has_job_finished,
@@ -52,60 +53,38 @@ def retrieve_log_file(algorithm_name, benchmark_name):
 def job_is_running(job):
   return ('interrupted' not in job.meta or not job.meta['interrupted'] ) and not has_job_finished(job)
 
-def find_running_benchmark(algo_name, saved_jobs):
-  # finds all the jobs executing algorithm algo_name and
-  # checks whether they're still running
-  for key in saved_jobs.keys():
-    # comma separates algo,benchmark,entry
-    key_parts = key.split(',')
-
-    # if there is only one part it means, that
-    # run algorithm on all benchmarks is running
-    if len(key_parts) == 1:
-      # parameters of the algorithm are separated by ';'
-      algo_stripped = key.split(';')[0]
-      if algo_name == algo_stripped:
-        try:
-          job = task_runner_get_job(saved_jobs[key])
-        except:
-          continue
-        if job_is_running(job):
-          logger.warning(f"FOUND RUNNING JOB: {job.meta}; (key: {key})")
-          return {
-            "running": True,
-            "all":     True,
-            "options": ";".join(key.split(';')[1:])
-          }
-      continue
-    if len(key_parts) > 2:
-      continue
-    key_algo_name = key.split(",")[0]
-    key_algo_name_stripped = key_algo_name.split(";")[0]
-    if algo_name == key_algo_name_stripped:
-      try:
-        job = task_runner_get_job(saved_jobs[key])
-      except:
-        continue
-      
-      if job_is_running(job):
-        benchmark_name = key.split(',')[1]
-        logger.warning(f"FOUND RUNNING JOB: {job.meta}; (key: {key})")
-        return {
-          "running": True,
-          "all":     False,
-          "benchmarkName": benchmark_name,
-          "options": ";".join(key_algo_name.split(';')[1:])
-        }
-  return {
+def get_running_status(benchmarkable_algorithms, saved_jobs):
+  running_statuses = []
+  key, result = find_running_job(saved_jobs)
+  not_running_dict = {
     "running": False,
     "all": False,
     "benchmarkName": ""
   }
+  running_dict = {
+    "running": True
+  }
+  if result is None or result not in [RunningJobType.ALL_BENCHMARKS, RunningJobType.BENCHMARK]:
+    for ba in benchmarkable_algorithms:
+      running_statuses.append(not_running_dict)
+    return running_statuses
 
-def get_running_status(benchmarkable_algorithms, saved_jobs):
-  running_statuses = []
+  if result == RunningJobType.ALL_BENCHMARKS:
+    algo = key
+    running_dict["all"] = True
+  elif result == RunningJobType.BENCHMARK:
+    algo, bench = key.split(',')
+    running_dict["benchmarkName"] = bench
+    running_dict["all"] = False
+  
+  running_dict["options"]= ";".join(algo.split(';')[1:])
+  algo_stripped = algo.split(';')[0]
+
   for ba in benchmarkable_algorithms:
-    running_statuses.append(find_running_benchmark(ba["name"], saved_jobs))
+    if ba["name"] != algo_stripped:
+      running_statuses.append(not_running_dict)
+    else:
+      running_statuses.append(running_dict)
   return running_statuses
 
 def create_running_job_dict(
@@ -118,27 +97,15 @@ def create_running_job_dict(
   }
 
 def get_running_benchmark(saved_jobs):
-  for key in saved_jobs.keys():
-    key_parts = key.split(',')
-    if len(key_parts) > 2:
-      continue
-    if len(key_parts) == 1:
-      try:
-        job = task_runner_get_job(saved_jobs[key])
-      except:
-        continue
-      if job_is_running(job):
-        return create_running_job_dict(key, "__all__")
-      else:
-        continue
-    algo, bench = key_parts
-    try:
-      job = task_runner_get_job(saved_jobs[key])
-    except:
-      continue
-    if job_is_running(job):
-      return create_running_job_dict(algo, bench)
-  return create_running_job_dict("none", "none")
+  key, result = find_running_job(saved_jobs)
+  if result is None or result not in [RunningJobType.ALL_BENCHMARKS, RunningJobType.BENCHMARK]:
+    return create_running_job_dict("none", "none")
+  if result == RunningJobType.ALL_BENCHMARKS:
+    return create_running_job_dict(key, '__all__')
+  elif result == RunningJobType.BENCHMARK:
+    return create_running_job_dict(*key.split(','))
+  else:
+    raise RuntimeError(f"KEY: {key} should be one of ALL_BENCHMARKS, BENCHMARK types")
 
 def construct_index(algorithm_name, benchmark_name):
   return f"{algorithm_name},{benchmark_name}"
@@ -216,7 +183,13 @@ def get_all_run_progress(algorithm_name):
   return task_runner_get_all_benchmarks_progress(job_info)
 
 def start_algorithm_on_benchmark(algorithm_name, benchmark_name, debug_level):
+  key, result = find_running_job(get_saved_jobs())
+  if result is not None:
+    raise RuntimeError(f"Cannot run multiple jobs at once ! (running job key: {key})")
   return task_runner_start_algorithm_on_benchmark(algorithm_name, benchmark_name, debug_level)
 
 def start_algorithm_on_all_benchmarks(algorithm_name, debug_level):
+  key, result = find_running_job(get_saved_jobs())
+  if result is not None:
+    raise RuntimeError(f"Cannot run multiple jobs at once ! (running job key: {key})")
   return task_runner_start_algorithm_on_all_benchmarks(algorithm_name, debug_level)

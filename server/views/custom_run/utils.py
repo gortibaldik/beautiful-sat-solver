@@ -89,6 +89,9 @@ def start_algorithm_on_custom_run(
   entry_name,
   debug_level
 ):
+  key, result = find_running_job(get_saved_jobs())
+  if result is not None:
+    raise RuntimeError(f"Cannot run multiple jobs at once ! (running job key: {key})")
   return task_runner_start_algorithm_on_custom_run(
     algorithm_name,
     benchmark_name,
@@ -153,22 +156,12 @@ def create_running_job_dict(
   }
 
 def get_running_custom_run(saved_jobs):
-  # key, result = find_running_job(saved_jobs)
-  # if result is None or result != RunningJobType.CUSTOM_RUN:
-  #   return create_running_job_dict("none", "none", "none")
+  key, result = find_running_job(saved_jobs)
+  if result is None or result != RunningJobType.CUSTOM_RUN:
+    return create_running_job_dict("none", "none", "none")
 
-  for key in saved_jobs:
-    key_parts = key.split(',')
-    if len(key_parts) != 3:
-      continue
-    algo, bench, entry = key_parts
-    job_info = saved_jobs[key]
-    is_finished = task_runner_is_custom_run_finished(job_info)
-
-    # algorithm name contains algo;parameter1;parameter2 ...
-    if not is_finished:
-      return create_running_job_dict(algo, bench, entry)
-  return create_running_job_dict("none", "none", "none")
+  algo, bench, entry = key.split(',')
+  return create_running_job_dict(algo, bench, entry)
 
 def get_benchmark_entry_content(benchmark_name, entry_name):
   benchmark_dir = os.path.join(Config.SATSMT_BENCHMARK_ROOT, benchmark_name)
