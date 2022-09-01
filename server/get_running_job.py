@@ -23,11 +23,11 @@ def construct_all_run_index(algorithm_name):
 def construct_custom_run_index(algorithm_name, benchmark_name, entry_name):
   return f"{algorithm_name},{benchmark_name},{entry_name}"
 
-def construct_nqueens_index(algorithm_name, n, timeout):
-  if timeout is None:
-    return f"{algorithm_name},nqueens,{n},"
-  else:
+def construct_nqueens_index(algorithm_name, n, run_as_benchmark, timeout):
+  if run_as_benchmark:
     return f"{algorithm_name},nqueens,benchmark,{timeout}"
+  else:
+    return f"{algorithm_name},nqueens,{n},"
 
 def get_job_info(index, saved_jobs):
   if index not in saved_jobs:

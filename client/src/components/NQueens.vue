@@ -41,9 +41,44 @@
             </div>
             <mdb-card-body class="no-up-padding-card-body">
               <mdb-container>
-                  <section v-if="selectedAlgorithm.options.length > 0" style="margin-top: 10px; margin-bottom: 10px">
+                  <section v-if="problem_parameters && problem_parameters.length > 0" style="margin-top: 10px; margin-bottom: 10px">
                     <mdb-row class="logSelector">
-                      PARAMETERS:
+                      PROBLEM PARAMETERS:
+                    </mdb-row>
+                    <section
+                      v-for="(parameter, param_index) in problem_parameters"
+                      :key="param_index"
+                    >
+                      <mdb-row class="parameterSelector justify-content-between">
+                        <div>
+                        <a>{{parameter.name}}:</a>
+                        <div class="hintClass">{{parameter.hint}}</div>
+                        </div>
+                        <div v-if="parameter.type=='value'"
+                        class="align-self-center">
+                          <input v-model="parameter.default" class="benchmarkPossibilities special-width"/>
+                        </div>
+                        <div v-if="parameter.type=='checkbox'"
+                        class="align-self-center">
+                          <input type="checkbox"
+                          :id="`${param_index}_p_checkbox`"
+                          v-model="parameter.default" />
+                        </div>
+                        <div v-if="parameter.type==='list'"
+                        class="align-self-center">
+                          <select class="browser-default custom-select benchmarkPossibilities special-width" v-model="option.default">
+                            <option v-for="(value, index) in parameter.options" :key="index">
+                              {{value}}
+                            </option>
+                          </select>
+                        </div>
+                      </mdb-row>
+                    </section>
+                  </section>
+                  <section v-if="selectedAlgorithm.options.length > 0" style="margin-top: 10px; margin-bottom: 10px">
+                    <hr>
+                    <mdb-row class="logSelector">
+                      ALGORITHM PARAMETERS:
                     </mdb-row>
                     <section
                       v-for="(option, option_index) in selectedAlgorithm.options"
@@ -74,7 +109,7 @@
                         </div>
                       </mdb-row>
                     </section>
-                </section>
+                  </section>
                   <mdb-row v-show="showRunButton" class="logSelector">
                     SELECT LOG LEVEL:
                   </mdb-row>
@@ -92,9 +127,8 @@
                       <label class="custom-control-label" :for="`LogLevelWarning`">WARNING</label>
                     </div>
                   </mdb-row>
-                  <mdb-row v-show="showBenchmarkInputButton" class="justify-content-center">
-                    <mdb-btn v-show="showRunButton" :class="runButtonClass" @click="runButtonClicked(selectedAlgorithm, selectedBenchmarkName, selectedBenchmarkInputName, selectedLogLevel)">{{runButtonText}}</mdb-btn>
-                    <mdb-btn class="run-button-start" @click="showInputClicked(selectedBenchmarkName, selectedBenchmarkInputName)">Show Benchmark Input</mdb-btn>
+                  <mdb-row v-show="showRunButton" class="justify-content-center">
+                    <mdb-btn v-show="showRunButton" :class="runButtonClass" @click="runButtonClicked(selectedAlgorithm, selectedLogLevel)">{{runButtonText}}</mdb-btn>
                   </mdb-row>
               </mdb-container>
             </mdb-card-body>
@@ -102,36 +136,39 @@
           <mdb-card v-show="isOtherTabRunning">
             <mdb-card-body>
               <mdb-row class="justify-content-center margin-top-little">Unfortunately <strong>no input can be ran right now</strong> as there is another benchmark running</mdb-row>
-              <mdb-row class="justify-content-center margin-top-little">We are checking the availability of Custom Run on the background</mdb-row>
+              <mdb-row class="justify-content-center margin-top-little">We are checking the availability of N-Queens on the background</mdb-row>
             </mdb-card-body>
           </mdb-card>
         </mdb-col>
       </mdb-row>
-      <mdb-row v-show="showBenchmarkInputContent">
-        <mdb-col col="12">
-          <mdb-card>
-            <mdb-card-title class="blue darken-2 rounded-border text-center">
-                <h4 class="h4-responsive text-white spaced-title">Benchmark Input Content</h4>
+      <mdb-row v-show="showRunResults" class="row-with-logs">
+        <mdb-col xl="6" md="12" class="mb-r col-with-logs">
+          <mdb-card class="card-with-logs rounded-border custom-margin-top ">
+            <mdb-card-title class="blue darken-2 rounded-border text-center card-header-hoverable">
+              <h4 class="h4-responsive text-white spaced-title">Standard Logs from Algorithm</h4>
             </mdb-card-title>
             <mdb-card-body>
               <div class="scrollbar-class">
-                <mdb-scrollbar v-html="benchmarkInputContent">
+                <mdb-scrollbar v-html="stdLogs">
+                </mdb-scrollbar>
+              </div>
+            </mdb-card-body>
+          </mdb-card>
+        </mdb-col>
+        <mdb-col xl="6" md="12" class="mb-r col-with-logs">
+          <mdb-card class="card-with-logs rounded-border custom-margin-top ">
+            <mdb-card-title class="blue darken-2 rounded-border text-center card-header-hoverable">
+              <h4 class="h4-responsive text-white spaced-title">Dimacs SAT Encoding of the problem</h4>
+            </mdb-card-title>
+            <mdb-card-body>
+              <div class="scrollbar-class">
+                <mdb-scrollbar v-html="dimacs_str">
                 </mdb-scrollbar>
               </div>
             </mdb-card-body>
           </mdb-card>
         </mdb-col>
       </mdb-row>
-      <mdb-modal size="fluid" :show="displayModal" @close="displayModal = false" scrollable>
-        <mdb-modal-header>
-          <mdb-modal-title>{{modalTitle}}</mdb-modal-title>
-        </mdb-modal-header>
-        <mdb-modal-body v-html="modalMessage">
-        </mdb-modal-body>
-        <mdb-modal-footer>
-          <mdb-btn color="secondary" @click.native="displayModal = false">Close</mdb-btn>
-        </mdb-modal-footer>
-      </mdb-modal>
     </section>
   </section>
 </template>

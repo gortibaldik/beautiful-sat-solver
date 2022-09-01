@@ -16,14 +16,13 @@ import {
   mdbModalTitle,
 } from 'mdbvue'
 
-import redis_logs from '@/assets/js/get_redis_logs'
 import benchmark_communication from '@/assets/js/benchmark_communication'
 import custom_run_communication from '@/assets/js/customRun_communication'
 import nqueens_communication from '@/assets/js/nqueens_communication'
 
 export default {
-  name: 'CustomRun',
-  title: 'SAT: Custom Run',
+  name: 'N-Queens',
+  title: 'SAT: N-Queens',
   components: {
     mdbCard,
     mdbCardBody,
@@ -51,8 +50,8 @@ export default {
       selectedLogLevel: "WARNING",
       stopRunFunction: undefined,
       showRunResults: false,
-      isCustomRunRunning: false,
       isOtherTabRunning: false,
+      isNQueensRunning: false,
       showBenchmarkInputContent: false,
       benchmarkInputContent: "",
       redisStdLogs: "",
@@ -62,6 +61,8 @@ export default {
       modalMessage: "",
       modalTitle: "",
       timeoutCustomRun: 3,
+      problem_parameters: undefined,
+      dimacs_str: "",
     };
   },
   methods: {
@@ -96,11 +97,47 @@ export default {
         this.isOtherTabRunning = false
       }
     },
-    async stopRun(algo, bench, benchIn) {
-      custom_run_communication.fetchStop(this.serverAddress, algo, bench, benchIn)
+    async pollRunningNQueens(algo, n, run_as_benchmark, timeout) {
+      let is_finished = await nqueens_communication.fetchProgress(
+        this.serverAddress, algo, n, run_as_benchmark, timeout
+      )
+      let stdLogsPacked = await nqueens_communication.fetchStdLogs(
+        this.serverAddress, algo, n, run_as_benchmark, timeout
+      )
+      this.stdLogs = stdLogsPacked.result
+      if (this.dimacs_str.length === 0) {
+        console.log("fetching data for dimacs str")
+        let dimacs = await nqueens_communication.fetchDimacsFile(
+          this.serverAddress, n
+        )
+        if (dimacs.result == "success") {
+          console.log("data fetched !")
+          this.dimacs_str = "<code>" + dimacs.content + "</code>"
+          console.log(this.dimacs_str)
+        }
+      }
+      
+      if (is_finished === 'failure' || is_finished == "yes") {
+        console.log(`is_finished: ${is_finished}`)
+        clearInterval(this.pollingInterval)
+        this.isNQueensRunning = false
+        this.stopRunFunction = undefined
+        this.pollingInterval = undefined
+      } else {
+        console.log("not finished")
+      }
+    },
+    async stopRun(algo, n, run_as_benchmark, timeout) {
+      nqueens_communication.fetchStop(
+        this.serverAddress, algo, n, run_as_benchmark, timeout)
+    },
+    startMonitoringNQueens(algo, n, run_as_benchmark, timeout) {
+      this.dimacs_str = ""
+      this.isNQueensRunning = true
+      this.stopRunFunction = this.stopRun.bind(this, algo, n, run_as_benchmark, timeout)
+      this.pollingInterval = setInterval(this.pollRunningNQueens.bind(this, algo, n, run_as_benchmark, timeout), 1000)
     },
     startMonitoringCustomRun() {
-      this.isCustomRunRunning = true
       this.pollingInterval = setInterval(this.pollCustomRun.bind(this), 1000)
     },
     startMonitoringBenchmark(algo, bench) {
@@ -119,38 +156,47 @@ export default {
       }
       return runningAlgorithm
     },
-    async runButtonClicked(algo, bench, benchIn, logLevel) {
+    createParamsDict() {
+      let dict = {}
+      for (let i = 0; i < this.problem_parameters.length; i++) {
+        let param = this.problem_parameters[i]
+        dict[param.name] = param.default
+      }
+      return dict
+    },
+    async runButtonClicked(algo, logLevel) {
       if (this.runButtonText === "Stop") {
         this.stopRunFunction()
         return
       }
-      this.showRunResults = true
-      if ( !algo || !bench || !benchIn) {
+      if ( !algo ) {
         return
       }
+      this.showRunResults = true
       let algoName = this.createAlgorithmName(algo)
-      let data = await custom_run_communication.fetchStart(this.serverAddress, algoName, bench, benchIn, logLevel)
+      let paramsDict = this.createParamsDict()
+      let data = await nqueens_communication.fetchStart(
+        this.serverAddress,
+        algoName,
+        paramsDict.N,
+        paramsDict.run_as_benchmark,
+        paramsDict.timeout,
+        logLevel
+        )
 
       if (data.result !== "success") {
         return
       }
-      this.startMonitoringCustomRun(algoName, bench, benchIn)
-    },
-    async showInputClicked(bench, benchIn) {
-      this.showBenchmarkInputContent = true;
-      let data = await custom_run_communication.fetchBenchmarkInput(this.serverAddress, bench, benchIn)
-      this.benchmarkInputContent = `<code>${data.result}</code>`
+      this.startMonitoringNQueens(algoName,
+        paramsDict.N,
+        paramsDict.run_as_benchmark,
+        paramsDict.timeout
+      )
     },
     extractAlgorithmName(algorithmName) {
       return algorithmName.split(';')[0]
     },
-    async fetchInfoFromServer() {
-      let data = await nqueens_communication.fetchBasicInfoFromServer(this.serverAddress)
-      let custom_run_info = await custom_run_communication.fetchRunningCustomRun(this.serverAddress)
-      let [running_algo, running_bench] = await benchmark_communication.fetchRunningBenchmark(this.serverAddress)
-      if (data.result !== "success") {
-        return
-      }
+    checkOtherRunningServices(custom_run_info, running_algo, running_bench) {
       if (running_algo != "none") {
         this.isOtherTabRunning = true
         if (running_bench === "__all__") {
@@ -163,21 +209,50 @@ export default {
       } else { 
         this.isOtherTabRunning = false
       }
+    },
+    async fetchInfoFromServer() {
+      let data = await nqueens_communication.fetchBasicInfoFromServer(this.serverAddress)
+      let custom_run_info = await custom_run_communication.fetchRunningCustomRun(this.serverAddress)
+      let [running_algo, running_bench] = await benchmark_communication.fetchRunningBenchmark(this.serverAddress)
+      if (data.result !== "success") {
+        return
+      }
+
+      if (data.running_job.algorithm != "none") {
+        this.selectedAlgorithmName      = this.extractAlgorithmName(data.running_job.algorithm)
+        let options_array = data.running_job.algorithm.split(';')
+        let selAlgo = undefined
+        for (let k = 0; k < this.algorithms.length; k++) {
+          if (this.algorithms[k].name == this.selectedAlgorithmName) {
+            selAlgo = this.algorithms[k]
+            break
+          }
+        }
+        for (let j = 0; j < options_array.length; j++) {
+          let [option, value] = options_array[j].split('=')
+          if (value === "true") {
+            value = true
+          } else if (value === "false") {
+            value = false
+          }
+          for (let k = 0; k < selAlgo.options.length; k++) {
+            if (selAlgo.options[k].name == option) {
+              selAlgo.options[k].default = value
+              break
+            }
+          }
+        }
+        this.startMonitoringNQueens(
+          data.running_job.algorithm,
+          data.running_job.N,
+          data.running_job.run_as_benchmark,
+          data.running_job.timeout
+        )
+      }
+
+      this.checkOtherRunningServices(custom_run_info, running_algo, running_bench)
       this.algorithms = data.algorithms
-    },
-    async fetchRedisLogs() {
-      let [redisErrorLogs, redisStdLogs] = await redis_logs.fetch(this.serverAddress)
-      this.redisErrorLogs = redisErrorLogs
-      this.redisStdLogs = redisStdLogs
-      return [redisErrorLogs, redisStdLogs]
-    },
-    async removeStdRedisLogs() {
-      await redis_logs.fetch_remove_std(this.serverAddress)
-      setTimeout(this.fetchRedisLogs.bind(this), 1000)
-    },
-    async removeErrorRedisLogs() {
-      await redis_logs.fetch_remove_error(this.serverAddress)
-      setTimeout(this.fetchRedisLogs.bind(this), 1000)
+      this.problem_parameters = data.problem_parameters
     },
   },
   computed: {
@@ -192,42 +267,18 @@ export default {
         options: []
       }
     },
-    selectedBenchmark: function() {
-      let bench = this.findCorrespondingName(this.benchmarks, this.selectedBenchmarkName)
-      if (bench) {
-        return bench
-      }
-      return {
-        name: this.selectedBenchmarkName,
-        inputs: []
-      }
-    },
-    showBenchmarkInputs: function() {
-      return this.selectedBenchmark.inputs.length > 0
-    },
-    showCustomInputForm: function() {
-      return this.selectedBenchmark.name === this.customInputName
-    },
     showRunButton: function() {
-      return this.selectedAlgorithmName != this.defaultAlgorithmName &&
-        this.selectedBenchmarkName != this.defaultBenchmarkName && 
-        this.selectedBenchmarkInputName != this.defaultBenchmarkInputName &&
-        this.selectedBenchmarkInputName != this.customInputName
-    },
-    showBenchmarkInputButton: function() {
-      return this.selectedBenchmarkName != this.defaultBenchmarkName && 
-      this.selectedBenchmarkInputName != this.defaultBenchmarkInputName &&
-      this.selectedBenchmarkInputName != this.customInputName
+      return this.selectedAlgorithmName != this.defaultAlgorithmName
     },
     runButtonText: function() {
-      if (this.isCustomRunRunning) {
+      if (this.isNQueensRunning) {
         return "Stop"
       } else {
         return "Run"
       }
     },
     runButtonClass: function() {
-      if (this.isCustomRunRunning) { 
+      if (this.isNQueensRunning) { 
         return "run-button-stop"
       } else {
         return "run-button-start"
@@ -237,11 +288,6 @@ export default {
   created() {
     this.serverAddress = process.env.VUE_APP_SERVER_ADDRESS
     this.fetchInfoFromServer()
-    // TODO: custom input
-    // this.benchmarks.push({
-    //   name: this.customInputName,
-    //   inputs: []
-    // })
   },
   beforeDestroy() {
     if (this.pollingInterval) {

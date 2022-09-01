@@ -11,6 +11,6 @@ def read_from_input(input_file: str):
             formula = f.read()
     logger.debug(f"read formula: {formula}")
     if len(formula.strip()) == 0:
-        raise RuntimeError("No formula read from the input!")
+        raise RuntimeError(f"No formula read from the input! (input_file: {input_file})")
     
     return formula

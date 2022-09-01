@@ -1,10 +1,10 @@
+import satsolver.utils.general_setup as general_setup
 
 from argparse import ArgumentParser
 from satsolver.cdcl.assignment import unassign, unassign_multiple
 from satsolver.cdcl.conflict_analysis import conflict_analysis
 from satsolver.cdcl.unit_propagation import unit_propagation
 from satsolver.decision_heuristics.cdcl import CDCL
-import satsolver.utils.general_setup as general_setup
 from satsolver.watched_literals.assignment import assign_true
 from satsolver.watched_literals.structures_preparation import prepare_structures
 

@@ -146,7 +146,7 @@ def get_info(
   name: str,
   taskName: str,
   benchmarkable: bool,
-  symbol: str,
+  symbol: str = None,
   options: List = [],
   argumentParser: ArgumentParser=None
 ):
@@ -162,6 +162,9 @@ def get_info(
   if "," in name or ";" in name:
     raise RuntimeError(f"Commas ',' and ';' cannot be in the name of the algorithm! (name of the algorithm: {name})")
   
+  if benchmarkable and symbol is None:
+    raise RuntimeError(f"symbol cannot be None if benchmarkable")
+
   info = {
     "name": name,
     "taskName": taskName,

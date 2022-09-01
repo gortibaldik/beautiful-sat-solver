@@ -41,9 +41,12 @@ def get_post_debug_level():
   return post_data.get('logLevel')
 
 def retrieve_log_file(algorithm_name, benchmark_name):
+  index = construct_benchmark_index(algorithm_name, benchmark_name)
+  return retrieve_log_file_from_index(index)
+
+def retrieve_log_file_from_index(index):
   try:
     saved_jobs = get_saved_jobs()
-    index = construct_benchmark_index(algorithm_name, benchmark_name)
     job_info = get_job_info(index, saved_jobs)
   except:
     logger.warning(saved_jobs)
@@ -144,7 +147,7 @@ def benchmark_name_sorting_criterion(x):
   elif "blocksworld" in x:
     value = 2
   else:
-    value = x
+    value = 50_000
   return value
 
 def get_benchmark_names():
