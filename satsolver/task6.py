@@ -108,3 +108,12 @@ def generate_nqueens_dimacs(n, generate_new=True):
     f.write(s)
   logger.warning(f"Generated new nqueens file: {filename}")
   return filename
+
+def main():
+  parser = ArgumentParser()
+  parser.add_argument("n", help="Number of queens")
+  args = parser.parse_args()
+  generate_nqueens_dimacs(args.n)
+
+if __name__ == "__main__":
+  main()
