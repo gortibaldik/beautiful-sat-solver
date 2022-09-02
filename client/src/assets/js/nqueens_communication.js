@@ -28,7 +28,7 @@ var custom_run = {
         result: 'failure'
       }
     }
-    return data.result
+    return data
   },
   create_dict(algo, n, run_as_benchmark, timeout) {
     return {

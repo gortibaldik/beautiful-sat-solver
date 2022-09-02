@@ -63,6 +63,7 @@ export default {
       timeoutCustomRun: 3,
       problem_parameters: undefined,
       dimacs_str: "",
+      chessBoard: "",
     };
   },
   methods: {
@@ -98,9 +99,10 @@ export default {
       }
     },
     async pollRunningNQueens(algo, n, run_as_benchmark, timeout) {
-      let is_finished = await nqueens_communication.fetchProgress(
+      let is_finished_data = await nqueens_communication.fetchProgress(
         this.serverAddress, algo, n, run_as_benchmark, timeout
       )
+      let is_finished = is_finished_data.result
       let stdLogsPacked = await nqueens_communication.fetchStdLogs(
         this.serverAddress, algo, n, run_as_benchmark, timeout
       )
@@ -118,20 +120,36 @@ export default {
       }
       
       if (is_finished === 'failure' || is_finished == "yes") {
-        console.log(`is_finished: ${is_finished}`)
+        
         clearInterval(this.pollingInterval)
         this.isNQueensRunning = false
         this.stopRunFunction = undefined
         this.pollingInterval = undefined
-      } else {
-        console.log("not finished")
+        if (is_finished == "yes") {
+          console.log(is_finished_data.model)
+          this.drawChessboard(n, is_finished_data.model)
+        }
       }
     },
     async stopRun(algo, n, run_as_benchmark, timeout) {
       nqueens_communication.fetchStop(
         this.serverAddress, algo, n, run_as_benchmark, timeout)
     },
+    drawChessboard(n, model=undefined) {
+      let chessBoard = ""
+
+      for (let i=0; i<n; i++){
+        chessBoard += "<div>"
+        for (let j=0; j<n; j++){
+          chessBoard += `<span style="font-size: 28px; display: inline-block; height: 32px; width: 32px; background-color: ${((i + j) % 2) == 0 ? '#5595fb ' : 'white'};">`
+          chessBoard += `${(model && model[i * n + j] > 0) ? "<i class=\"fas fa-chess-queen\"></i>" : ""} </span>`
+        }
+        chessBoard += "</div>"
+      }
+      this.chessBoard = chessBoard
+    },
     startMonitoringNQueens(algo, n, run_as_benchmark, timeout) {
+      this.drawChessboard(n)
       this.dimacs_str = ""
       this.isNQueensRunning = true
       this.stopRunFunction = this.stopRun.bind(this, algo, n, run_as_benchmark, timeout)

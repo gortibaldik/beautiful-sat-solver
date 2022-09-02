@@ -144,4 +144,5 @@ def is_nqueens_finished(
     timeout
   )
   job_info = get_job_info(index, saved_jobs)
-  return task_runner_get_progress(job_info) == 100
+  progress, model = task_runner_get_progress(job_info, return_model=True)
+  return progress == 100, model

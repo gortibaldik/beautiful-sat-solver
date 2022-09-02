@@ -1,4 +1,3 @@
-from socket import timeout
 import traceback
 import logzero
 import os
@@ -287,6 +286,22 @@ def custom_run(
       logzero.logger.warning(f"Filename with error: {benchmark_filename}")
     logzero.logger.warning(traceback.format_exc())
 
+def save_model(result):
+  if "model" not in result:
+    return
+  model = result["model"]
+  array_to_write = []
+  for variable, value in model.items():
+    int_var = int(variable)
+    if not value:
+      int_var *= -1
+    array_to_write.append(int_var)
+  array_to_write = sorted(array_to_write, key=abs)
+  job = rq.get_current_job()
+  job.meta["model"] = array_to_write
+  job.save_meta()
+  
+
 def nqueens(
   file,
   algorithm_name,
@@ -322,6 +337,8 @@ def nqueens(
       is_satisfiable=int(n) != 3,
       nnf_reduce_implications=Config.NNF_REDUCE_IMPLICATIONS
     )
+    save_model(result)
+
     logzero.loglevel(Config.DEFAULT_LOGLEVEL)
     file.flush()
   except:
@@ -504,16 +521,24 @@ def task_runner_start_algorithm_on_nqueens(
     debug_level=debug_level
   )
 
-def task_runner_get_progress(job_info):
+def task_runner_get_progress(job_info, return_model=False):
   job = task_runner_get_job(job_info)
   job.refresh()
+  value, model = None, None
   if 'interrupted' in job.meta and job.meta['interrupted']:
-    return 100
-  if 'finished' in job.meta and job.meta['finished']:
-    return 100
-  if not 'progress' in job.meta:
-    return 0
-  return job.meta['progress']
+    value = 100
+  elif 'finished' in job.meta and job.meta['finished']:
+    value = 100
+  elif not 'progress' in job.meta:
+    value = 0
+  else:
+    value = job.meta['progress']
+
+  if return_model:
+    model = job.meta.get("model", None)
+    return value, model
+  else:
+    return value
 
 def task_runner_get_all_benchmarks_progress(job_info):
   job = task_runner_get_job(job_info)

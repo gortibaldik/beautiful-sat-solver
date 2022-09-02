@@ -168,6 +168,19 @@
             </mdb-card-body>
           </mdb-card>
         </mdb-col>
+        <mdb-col xl="6" md="12" class="mb-r col-with-logs">
+          <mdb-card class="card-with-logs rounded-border custom-margin-top ">
+            <mdb-card-title class="blue darken-2 rounded-border text-center card-header-hoverable">
+              <h4 class="h4-responsive text-white spaced-title">Dimacs SAT Encoding of the problem</h4>
+            </mdb-card-title>
+            <mdb-card-body>
+              <div class="scrollbar-class">
+                <mdb-scrollbar v-html="chessBoard" >
+                </mdb-scrollbar>
+              </div>
+            </mdb-card-body>
+          </mdb-card>
+        </mdb-col>
       </mdb-row>
     </section>
   </section>

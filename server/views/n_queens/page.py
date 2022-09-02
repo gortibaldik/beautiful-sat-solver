@@ -87,7 +87,7 @@ def stop():
 @on_exception_result_failure
 def dimacs():
   n = get_post_N()
-  dimacs_file = generate_nqueens_dimacs(n, generate_new=False)
+  dimacs_file = generate_nqueens_dimacs(int(n), generate_new=False)
   if dimacs_file is None:
     return jsonify(result="failure")
   return jsonify(
@@ -99,5 +99,11 @@ def dimacs():
 @on_exception_result_failure
 def is_finished():
   algorithm_name, n, run_as_benchmark, timeout = get_post_data()
-  is_finished = is_nqueens_finished(algorithm_name, n, run_as_benchmark, timeout)
-  return jsonify({'result': 'yes' if is_finished else 'no'})
+  is_finished, model = is_nqueens_finished(algorithm_name, n, run_as_benchmark, timeout)
+  if is_finished:
+    return jsonify(
+      result="yes",
+      model=model
+    )
+  else:
+    return jsonify(result="no")
