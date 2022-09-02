@@ -24,6 +24,7 @@ class CDCL(cdcl_base_module.CDCL):
     decay_every_n_steps:int=1,
     assumptions:str = ""
   ):
+    vsids_decay = float(vsids_decay)
     assumptions = str(assumptions)
     if len(assumptions) > 0:
       data.assumptions = assumptions.split(".")
@@ -51,7 +52,7 @@ class CDCL(cdcl_base_module.CDCL):
       if vsids_decay <= 0 or vsids_decay > 1:
         raise RuntimeError(f"vsids_decay should be in (0,1], current value: {vsids_decay}")
       data.vsids_decay = vsids_decay
-      data.decay_every_n_steps = decay_every_n_steps
+      data.decay_every_n_steps = int(decay_every_n_steps)
       data.decay_step = 0
       self.conflict_found_callback = decay_after_conflict
       self.after_conflict_analysis_callback = bump_assertive_clause

@@ -482,9 +482,9 @@ class CDCL:
       assignment=assignment,
       c=c,
       stats=stats,
-      conflict_limit_restarts=conflict_limit_restarts,
-      conflict_limit_deletion=conflict_limit_deletion,
-      conflict_limit_deletion_additive=conflict_limit_deletion,
+      conflict_limit_restarts=int(conflict_limit_restarts),
+      conflict_limit_deletion=int(conflict_limit_deletion),
+      conflict_limit_deletion_additive=int(conflict_limit_deletion),
       lbd_limit=lbd_limit,
       n_variables=n_variables,
       negative_first=negative_first
