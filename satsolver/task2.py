@@ -1,12 +1,12 @@
+import satsolver.utils.general_setup as general_setup
+
 from argparse import ArgumentParser
 from satsolver.dpll.assignment import assign_true, unassign, unassign_multiple
 from satsolver.dpll.decision_variable_selection import dec_var_selection
+from satsolver.dpll.dpll import DPLL
 from satsolver.dpll.dpll_iter import DPLLIter
 from satsolver.dpll.structures_preparation import health_check, prepare_structures
 from satsolver.dpll.unit_propagation import unit_propagation
-import satsolver.utils.general_setup as general_setup
-
-from satsolver.dpll.dpll import DPLL
 
 def get_info(argumentParser: ArgumentParser=None):
   return general_setup.get_info(

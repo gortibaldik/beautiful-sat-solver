@@ -1,4 +1,4 @@
-FROM gortibaldik/satsolver_base:0.11 as production
+FROM gortibaldik/satsolver_base:0.13 as production
 WORKDIR /app
  
 CMD if [ ! -d "$SATSOLVER_REDIS_LOGS" ]; then mkdir -p $SATSOLVER_REDIS_LOGS; fi && \

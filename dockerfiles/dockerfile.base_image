@@ -14,7 +14,8 @@ RUN   apk update && \
       if [ ! -e /usr/bin/pip ]; then ln -s pip3 /usr/bin/pip; fi && \
       pip install --upgrade pip setuptools && \
       rm -r /root/.cache
-RUN apk update && apk add postgresql-dev gcc python3-dev musl-dev
+RUN apk update && apk add postgresql-dev gcc python3-dev musl-dev g++ zlib-dev patch make
+ENV LIBRARY_PATH=/lib:/usr/lib
 ENV PATH="/home/satsmt/.local/bin:${PATH}"
 
 RUN pip install -r requirements.txt && pip install gunicorn

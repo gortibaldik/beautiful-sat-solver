@@ -244,6 +244,7 @@ def custom_run(
   entry_name,
   debug_level
 ):
+  benchmark_filename = None
   try:
     algorithms = server.getters.get_modules()
     algo_module = retrieve_algorithm(algorithms, algorithm_name)
