@@ -7,6 +7,7 @@ from contextlib import redirect_stderr, redirect_stdout
 from satsolver.task6 import generate_nqueens_dimacs
 from satsolver.utils.check import check_assignment
 from server.config import Config
+from server.models.nqueens import create_n_commit_nqueens, create_nqueens
 from server.task_runner.benchmark import log_level_per_debug_level
 from server.task_runner.utils import (
   ensure_storage_file,
@@ -18,6 +19,7 @@ def nqueens(
   file,
   algorithm_name,
   n,
+  storage_file,
   debug_level
 ):
   try:
@@ -53,18 +55,48 @@ def nqueens(
 
     logzero.loglevel(Config.DEFAULT_LOGLEVEL)
     file.flush()
+
+    create_n_commit_nqueens(
+      algorithm_name=algorithm_name,
+      n=n,
+      storage_file=storage_file,
+      avg_time=result["time"],
+      stats=result["stats"]
+    )
+    return result
   except:
     if benchmark_filename is not None:
       logzero.logger.warning(f"Filename with error: {benchmark_filename}")
     logzero.logger.warning(traceback.format_exc())
 
+def nqueens_benchmark(
+  f,
+  algorithm_name,
+  storage_file,
+  debug_level,
+  timeout
+):
+  n = 3
+  while True:
+    result = nqueens(
+      f,
+      algorithm_name,
+      n,
+      storage_file,
+      debug_level
+    )
+    n += 1
+    if result["time"] > timeout:
+      break
+
 def run_nqueens(
   algorithm_name=None,
   n=None,
-  run_as_benchmark=None,
+  run_as_benchmark=False,
   timeout=None,
   debug_level=None
 ):
+  timeout = int(timeout)
   job = rq.get_current_job()
   storage_file = ensure_storage_file(algorithm_name, "__nqueens__")
   job.meta['finished'] = False
@@ -74,12 +106,22 @@ def run_nqueens(
     with redirect_stdout(f):
       with redirect_stderr(f):
         logzero.logfile(storage_file)
-        nqueens(
-          f,
-          algorithm_name,
-          n,
-          debug_level
-        )
+        if run_as_benchmark:
+          nqueens_benchmark(
+            f,
+            algorithm_name,
+            storage_file,
+            debug_level,
+            timeout
+          )
+        else:
+          nqueens(
+            f,
+            algorithm_name,
+            n,
+            storage_file,
+            debug_level
+          )
         logzero.logfile(None)
   job.meta['finished'] = True
   job.save_meta()
@@ -106,6 +148,8 @@ def save_model(result):
   if "model" not in result:
     return
   model = result["model"]
+  if model is None:
+    return
   array_to_write = []
   for variable, value in model.items():
     int_var = int(variable)

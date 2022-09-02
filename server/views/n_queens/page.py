@@ -103,7 +103,7 @@ def is_finished():
   if is_finished:
     return jsonify(
       result="yes",
-      model=model
+      model=model if not run_as_benchmark else []
     )
   else:
     return jsonify(result="no")

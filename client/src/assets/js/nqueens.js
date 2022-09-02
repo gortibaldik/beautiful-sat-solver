@@ -152,6 +152,7 @@ export default {
       this.drawChessboard(n)
       this.dimacs_str = ""
       this.isNQueensRunning = true
+      this.showRunResults = true
       this.stopRunFunction = this.stopRun.bind(this, algo, n, run_as_benchmark, timeout)
       this.pollingInterval = setInterval(this.pollRunningNQueens.bind(this, algo, n, run_as_benchmark, timeout), 1000)
     },
@@ -190,7 +191,6 @@ export default {
       if ( !algo ) {
         return
       }
-      this.showRunResults = true
       let algoName = this.createAlgorithmName(algo)
       let paramsDict = this.createParamsDict()
       let data = await nqueens_communication.fetchStart(
@@ -246,17 +246,19 @@ export default {
             break
           }
         }
-        for (let j = 0; j < options_array.length; j++) {
-          let [option, value] = options_array[j].split('=')
-          if (value === "true") {
-            value = true
-          } else if (value === "false") {
-            value = false
-          }
-          for (let k = 0; k < selAlgo.options.length; k++) {
-            if (selAlgo.options[k].name == option) {
-              selAlgo.options[k].default = value
-              break
+        if (selAlgo) {
+          for (let j = 0; j < options_array.length; j++) {
+            let [option, value] = options_array[j].split('=')
+            if (value === "true") {
+              value = true
+            } else if (value === "false") {
+              value = false
+            }
+            for (let k = 0; k < selAlgo.options.length; k++) {
+              if (selAlgo.options[k].name == option) {
+                selAlgo.options[k].default = value
+                break
+              }
             }
           }
         }

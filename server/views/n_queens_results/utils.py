@@ -1,9 +1,9 @@
 from logzero import logger
-from server.models.job import (
+from server.models.nqueens import (
   Descr,
-  SATJob,
-  SATJobConfig,
-  enumerateSATJobConfig,
+  SATNQueens,
+  SATNQueensConfig,
+  enumerateSATNQueensConfig,
   can_be_pressed,
   should_be_plotted,
   should_be_categorized,
@@ -40,7 +40,7 @@ def sortColDefs(colDef: Descr):
 def get_data():
   columns = []
   colDefs = []
-  for _, col in enumerateSATJobConfig():
+  for _, col in enumerateSATNQueensConfig():
     if col.long in shouldnt_be_displayed:
       continue
     colDefs.append(col)
@@ -55,8 +55,8 @@ def get_data():
     ))
   logger.debug(f"returned column definitions: {columns}")
   rows = []
-  for row in SATJob.query.all():
-    rows.append(SATJobConfig.create_row(row))
+  for row in SATNQueens.query.all():
+    rows.append(SATNQueensConfig.create_row(row))
   return {
     "columns": columns,
     "rows": rows

@@ -6,6 +6,7 @@ import BadGateway from '@/components/BadGateway'
 import RedisLogs from '@/components/RedisLogs'
 import CustomRun from '@/components/CustomRun'
 import NQueens from '@/components/NQueens'
+import NQueensResults from '@/components/NQueensResults'
 
 
 Vue.use(Router);
@@ -45,14 +46,20 @@ export default new Router({
       component: NQueens
     },
     {
+      path: '/nqueens_results',
+      name: 'NQueensResults',
+      props: { page: 6 },
+      component: NQueensResults
+    },
+    {
       path: '/404',
       name: 'BadGateway',
-      props: { page: 6 },
+      props: { page: 7 },
       component: BadGateway
     },
     {
       path: '*',
-      props: { page: 6 },
+      props: { page: 7 },
       redirect: '/404'
     }
   ]
