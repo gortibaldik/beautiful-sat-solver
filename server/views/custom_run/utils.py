@@ -3,9 +3,16 @@ import os
 from flask import request
 from logzero import logger
 from server.config import Config
-from server.task_runner import get_custom_run_log_file, task_runner_get_progress, task_runner_start_algorithm_on_custom_run
+from server.task_runner.custom_run import task_runner_start_algorithm_on_custom_run
+from server.task_runner.utils import get_custom_run_log_file, task_runner_get_progress
 from server.utils.log_utils import get_log_file_content
-from server.get_running_job import RunningJobType, construct_custom_run_index, find_running_job, get_job_info, stop_job
+from server.get_running_job import (
+  RunningJobType,
+  construct_custom_run_index,
+  find_running_job,
+  get_job_info,
+  stop_job
+)
 from server.utils.redis_utils import get_saved_jobs
 from server.views.benchmark_dashboard.utils import benchmark_name_sorting_criterion
 

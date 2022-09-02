@@ -1,7 +1,8 @@
 from flask import request
 from satsolver.utils.general_setup import TypeOfOption, create_option
 from server.get_running_job import RunningJobType, construct_nqueens_index, find_running_job, get_job_info, stop_job
-from server.task_runner import task_runner_get_progress, task_runner_start_algorithm_on_nqueens
+from server.task_runner.nqueens import task_runner_start_algorithm_on_nqueens
+from server.task_runner.utils import task_runner_get_progress
 from server.utils.redis_utils import get_saved_jobs
 from server.views.benchmark_dashboard.utils import retrieve_log_file_from_index
 

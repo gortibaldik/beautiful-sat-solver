@@ -1,5 +1,14 @@
 from logzero import logger
-from server.models.job import Descr, SATJob, SATJobConfig, enumerateSATJobConfig
+from server.models.job import (
+  Descr,
+  SATJob,
+  SATJobConfig,
+  enumerateSATJobConfig,
+  can_be_pressed,
+  should_be_plotted,
+  should_be_categorized,
+  shouldnt_be_displayed
+)
 
 def create_col(
   label,
@@ -18,28 +27,6 @@ def create_col(
     "plotted": should_be_plotted,
     "can_be_pressed": can_be_pressed,
   }
-
-should_be_categorized = {
-  SATJobConfig.algorithm.long,
-  SATJobConfig.benchmark.long
-}
-
-shouldnt_be_displayed = {
-  SATJobConfig.id.long
-}
-
-should_be_plotted = {
-  SATJobConfig.decision_vars.long,
-  SATJobConfig.time.long,
-  SATJobConfig.unit_prop_vals.long,
-  SATJobConfig.unit_checked.long,
-  SATJobConfig.conflicts.long,
-  SATJobConfig.learned_clauses.long,
-}
-
-can_be_pressed = {
-  SATJobConfig.log_file.long
-}
 
 def sortColDefs(colDef: Descr):
   if colDef.long in can_be_pressed:

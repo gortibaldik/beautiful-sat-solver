@@ -1,6 +1,11 @@
 from enum import Enum
 from logzero import logger
-from server.task_runner import has_job_finished, has_job_started, task_runner_get_job, task_runner_stop_job
+from server.task_runner.utils import (
+  has_job_finished,
+  has_job_started,
+  task_runner_get_job,
+  task_runner_stop_job
+)
 from typing import Any, Dict
 
 class RunningJobType(Enum):

@@ -12,11 +12,13 @@ from server.get_running_job import (
   get_job_info,
   stop_job
 )
-from server.task_runner import (
+from server.task_runner.utils import (
   get_job_log_file,
   task_runner_get_all_benchmarks_progress,
   task_runner_get_progress,
-  task_runner_get_job,
+  task_runner_get_job
+)
+from server.task_runner.benchmark import (
   task_runner_start_algorithm_on_all_benchmarks,
   task_runner_start_algorithm_on_benchmark
 )
