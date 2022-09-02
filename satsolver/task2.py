@@ -10,7 +10,8 @@ def get_info():
   return general_setup.get_info(
     name="DPLL.v5",
     taskName="TASK 2",
-    benchmarkable=True
+    benchmarkable=True,
+    symbol="cat"
   )
 
 def find_model(

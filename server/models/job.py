@@ -13,6 +13,7 @@ class SATJobConfig:
   unit_prop_vals  = Descr("Unit Propagations", "UPs")
   unit_checked    = Descr("No. Checked UP Clauses", "UPCs")
   decision_vars   = Descr("Derivations of Decision Variables", "DDVs")
+  conflicts       = Descr("Conflicts", "Cs")
   time            = Descr("Time of Execution", "ToE")
   algorithm       = Descr("Algorithm", "Algo")
   benchmark       = Descr("Benchmark", "Bench")
@@ -39,11 +40,12 @@ def enumerateSATJobConfig():
     yield name, SATJobConfig.__dict__[name]
 
 class SATJob(Base):
-  __tablename__ = "sat_jobs"
+  __tablename__   = "sat_jobs"
   id              = Column(SATJobConfig.id.long, Integer, primary_key=True)
   unit_prop_vals  = Column(SATJobConfig.unit_prop_vals.long, Float)
   unit_checked    = Column(SATJobConfig.unit_checked.long, Float)
   decision_vars   = Column(SATJobConfig.decision_vars.long, Float)
+  conflicts       = Column(SATJobConfig.conflicts.long, Float)
   time            = Column(SATJobConfig.time.long, Float)
   algorithm       = Column(SATJobConfig.algorithm.long, String(32))
   benchmark       = Column(SATJobConfig.benchmark.long, String(32))

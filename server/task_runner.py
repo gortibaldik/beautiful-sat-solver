@@ -41,6 +41,7 @@ def create_sat_job(
   sat_job = SATJob(
     unit_prop_vals  = stats.unitProps,
     decision_vars   = stats.decVars,
+    conflicts       = stats.conflicts,
     time            = avg_time,
     algorithm       = algorithm_name,
     benchmark       = benchmark_name,
@@ -195,7 +196,7 @@ def benchmark(file, algorithm_name, benchmark_name, debug_level):
       )
       file.flush()
     avg_cumulative_stats(cumulative_stats)
-    logzero.logger.info(cumulative_stats)
+    logzero.logger.info(f"Stats: {cumulative_stats['stats']}; time: {cumulative_stats['time']}")
   except:
     if filename is not None:
       logzero.logger.warning(f"Filename with error: {filename}")

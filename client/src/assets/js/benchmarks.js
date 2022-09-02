@@ -118,6 +118,8 @@ export default {
             this.startMonitoringProgress(this.algorithms[i].name, running_statuses[i].benchmarkName, i)
             Vue.set(this.selected, i, [running_statuses[i].benchmarkName])
           }
+          // only one can be running
+          break
         }
       }
     },
@@ -127,7 +129,8 @@ export default {
       for (let i = 0; i < benchmarkableAlgorithms.length; i++) {
         algorithmNames.push({
           name: benchmarkableAlgorithms[i].name,
-          task: benchmarkableAlgorithms[i].taskName
+          task: benchmarkableAlgorithms[i].taskName,
+          symbol: benchmarkableAlgorithms[i].symbol
         })
       }
       return algorithmNames
@@ -344,9 +347,11 @@ export default {
   beforeDestroy() {
     if (this.pollingInterval) {
       clearInterval(this.pollingInterval)
+      this.pollingInterval = undefined
     }
     if (this.customRunInterval) {
       clearInterval(this.customRunInterval)
+      this.customRunInterval = undefined
     }
   }
 }

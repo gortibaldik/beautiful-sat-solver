@@ -29,7 +29,7 @@
 ----------------------
 
 ## Task 3: Watched Literals
-- [executaable](satsolver/task3.py)
+- [executable](satsolver/task3.py)
 - [sources](satsolver/watched_literals/)
 - Watched Literals can be either ran as `python3 satsolver/task3.py <input_file>` or by using frontend
 
@@ -41,6 +41,30 @@
 - To conclude, `watched literals` allow us to search through lower number of clauses when looking for unit and conflicting clauses. However a more clever implementation would be needed to beat `adjacency lists` when no `non-chronological` backtracking is used.
 - __UPDATE__: I implemented new encoding of literals and variables, and also an iterative solution. It seems like iterative dpll.v5 is the best yet, however the time of execution varies greatly, hence I'm not quite sure about [the results](./results/dpll.wl.cmp.02.csv).
 - __UPDATE 2__: I spent another day optimizing the watched literals implementation and now [the results](./results/dpll.wl.cmp.03.csv) correspond more or less to my assumptions. Now, the watched literals are by far the fastest method (as can be seen in [this graph](./results/dpll.wl.cmp.time.02.png)). As I have found out the reason for slowness of my implementation was two-fold. 1. At first I used classes instead of simple numbers/array indices to represent literals and variables. 2. When I implemented better encoding, I still suffered from a lot of function calls manipulating with these numbers. As I have inlined most of them, the watched literals got faster by about 35%.
+
+-----
+
+## Task 4: CDCL
+- [executable (no restarts)](satsolver/task4.py), [executable (clause deletion)](satsolver/task4_luby32lbd4.py) [executable (restarts and clause deletion)](satsolver/task4_restarts.py)
+- [sources](satsolver/cdcl/)
+#### How to run
+- CDCL pure `python3 satsolver/task4.py <input_file>`
+- CDCL with clause deletion `python3 satsolver/task4_luby32lbd4.py <input_file>`
+- CDCL with restarts and clause deletion `python3 satsolver/task4_restarts.py <input_file>`
+- or by using frontend
+
+### Results
+- Assumption: By using clause learning, the search space should be prunned, so with reasonably fast implementation, the execution time should be a lot lower
+  - Result: The time reduction is of factor of more than 4. On [time comparison picture](results/cdcl.wl.cmp.time.png) we can see huge differences in the runtime of CDCL and the fastest yet implementation, _watched literals iterative_. Regarding [comparisons of decision variables](results/cdcl.wl.cmp.decs.png) and [comparisons of number of variables derived by unit propagations](results/cdcl.wl.cmp.up.png) we can conclude that the search space is effectively prunned and that's the result for lower runtime.
+- Assumption: By using restarts and clause deletion, we should be able to exploit learned clauses better and gain even better runtime
+  - Setup: The restarts occur each time, the number of conflicts breaks the bareer of `conflict_limit`, which increases by a factor of `1.1`. On every restart each clause with _Lateral Block Distance_ bigger than `lbd_limit` is deleted, the `lbd_limit` increases by a factor of `1.1`. The initial values are 200 for `conflict_limit` and `3` for the `lbd_limit`.
+  - Result: On [the time comparison picture](results/cdcl.restarts.cmp.time.png) we can see that these settings of restarts slightly help. I may try some further finetuning of the values to gain even better results, however now I'm satisfied with even little improvement when using restarts.
+
+__UPDATE__:
+  - Since the results of geometrically increasing `conflict_limit` and `lbd_limit` weren't persuasive I spent some time reading about _luby_ which is the SotA. After implementing _luby_ I can conclude that this strategy helps a lot (lowering the runtime by more than 40% on the hardest problems). One particularity which is kind of puzzling for me is that I achieved the best results when I didn't increase `lbd_limit` by any factor. Hence the best results are for constant `lbd_limit` = 4. [The results picture](results/cdcl.restarts.luby.cmp.png)
+
+__UPDATE 2__:
+  - After few more experiments I found out that what I have been referring to as _clause deletion and restarts_ was in reality only _clause deletion_ because of a bug in the code. After resolving the bug I'm not able to achieve better results with restarts than with only _clause deletion_. I cannot answer why it is so. I tried implementing some sort of basic heuristic (number of clauses where the literal is present at the moment of the restart is the criterion), but while lowering the runtime by a factor of 3, I still suffer that _restarts_ seem to hurt more than help. [New restarts comparison](results/cdcl.restarts.02.png) 
 
 -----
 
@@ -64,6 +88,12 @@
 - [publishing docker images to docker repositories](https://docs.docker.com/docker-hub/repos/#pushing-a-docker-container-image-to-docker-hub)
 - [publishing docker images with github actions](https://docs.github.com/en/actions/publishing-packages/publishing-docker-images)
 - [simple satsolver implementation](https://sahandsaba.com/understanding-sat-by-implementing-a-simple-sat-solver-in-python.html)
+- [cdcl 1](https://cse442-17f.github.io/Conflict-Driven-Clause-Learning/)
+- [cdcl - handbook on satisfiability](https://www.ics.uci.edu/~dechter/courses/ics-275a/winter-2016/readings/SATHandbook-CDCL.pdf)
+- [cdcl - some python implementation](https://github.com/z11i/pysat)
+- [cdcl - presentation on the topic](http://ssa-school-2016.it.uu.se/wp-content/uploads/2016/06/LaurentSimon.pdf)
+- [glucose cdcl solver](https://www.ijcai.org/Proceedings/09/Papers/074.pdf)
+- [ipynb with various sat improvements](https://github.com/aimacode/aima-python/blob/master/improving_sat_algorithms.ipynb)
 
 #### Problems with installation of `psycopg2`
 

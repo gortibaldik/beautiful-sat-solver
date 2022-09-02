@@ -15,7 +15,7 @@
               <mdb-view>
               <mdb-card-title>
                   <div>
-                    <mdb-icon :icon="symbolsForAlgorithms[index]" fas class="m-2 primary-color" size="3x"/>
+                    <mdb-icon :icon="algorithm.symbol" fas class="m-2 primary-color" size="3x"/>
                     <strong class="algorithmName">{{algorithm.name}}</strong>
                   </div>
               </mdb-card-title>

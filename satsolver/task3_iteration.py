@@ -9,7 +9,8 @@ def get_info():
   return general_setup.get_info(
     name="Watched Literals.v6.iter",
     taskName="TASK 3 - iter",
-    benchmarkable=True
+    benchmarkable=True,
+    symbol="crow"
   )
 
 def find_model(

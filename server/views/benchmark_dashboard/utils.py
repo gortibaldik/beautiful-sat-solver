@@ -185,7 +185,7 @@ def get_benchmark_names():
 def get_job_info(algorithm_name, benchmark_name, saved_jobs):
   index = construct_index(algorithm_name, benchmark_name)
   if index not in saved_jobs:
-    raise RuntimeError(f"{index} not in saved_jobs")
+    raise RuntimeError(f"{index} not in saved_jobs" + "\n" + f"saved_jobs: {saved_jobs}")
   return saved_jobs[index]
 
 def get_all_run_job_info(algorithm_name, saved_jobs):

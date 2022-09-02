@@ -1,9 +1,4 @@
-import os
-import traceback
-
 from logzero import logger
-from server import db
-from server.config import Config
 from server.models.job import Descr, SATJob, SATJobConfig, enumerateSATJobConfig
 
 def create_col(
@@ -38,6 +33,7 @@ should_be_plotted = {
   SATJobConfig.time.long,
   SATJobConfig.unit_prop_vals.long,
   SATJobConfig.unit_checked.long,
+  SATJobConfig.conflicts.long,
 }
 
 can_be_pressed = {

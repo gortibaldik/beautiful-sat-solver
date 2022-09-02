@@ -56,6 +56,7 @@ class DPLL:
     unitPropResult, assigned_literals = self.unit_propagation(itv, itc, assignment, cs, stats)
 
     if unitPropResult == UnitPropagationResult.CONFLICT:
+      stats.conflicts += 1
       return SATSolverResult.UNSAT, assigned_literals
 
     # end condition -> each variable is assigned and there is no conflict
@@ -63,6 +64,7 @@ class DPLL:
     if debug:
       logger.debug(f"UP: {debug_str_multi(assigned_literals, itv)}")
     if n_assigned_variables == n_variables:
+      logger.debug(f"RESULT: {debug_str_multi([i + i for i, v in enumerate(assignment) if v == 1], itv)}")
       return SATSolverResult.SAT, None
 
     var_int = self.dec_var_selection(assignment)

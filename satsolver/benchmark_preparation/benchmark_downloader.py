@@ -16,15 +16,17 @@ satlib_benchmark_urls = [
   # ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/GCP/flat50-115.tar.gz", 10),
   # ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/GCP/flat75-180.tar.gz", 10),
   # ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/GCP/flat100-239.tar.gz", 10),
-  # ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/RND3SAT/uf20-91.tar.gz", 100),
+  ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/RND3SAT/uf20-91.tar.gz", 100),
   # ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/RND3SAT/uf50-218.tar.gz", 50),
-  # ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/RND3SAT/uuf50-218.tar.gz", 50),
+  ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/RND3SAT/uuf50-218.tar.gz", 50),
   ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/RND3SAT/uf75-325.tar.gz", 10),
   ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/RND3SAT/uuf75-325.tar.gz", 10),
   ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/RND3SAT/uf100-430.tar.gz", 10),
   ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/RND3SAT/uuf100-430.tar.gz", 10),
-  # ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/RND3SAT/uf125-538.tar.gz", 10),
-  # ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/RND3SAT/uuf125-538.tar.gz", 10),
+  ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/RND3SAT/uf125-538.tar.gz", 10),
+  ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/RND3SAT/uuf125-538.tar.gz", 10),
+  ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/RND3SAT/uf150-645.tar.gz", 10),
+  ("https://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/RND3SAT/uuf150-645.tar.gz", 10)
 ]
 
 def _construct_filename(base_filename, suffix_int, suffix_targz):

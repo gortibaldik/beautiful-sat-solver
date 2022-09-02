@@ -106,6 +106,7 @@ class DPLLIter:
 
       unitPropResult, assigned_literals = self.unit_propagation(itv, itc, assignment, cs, stats)
       if unitPropResult == UnitPropagationResult.CONFLICT:
+        stats.conflicts += 1
         continue
 
       if debug: logger.debug(f"UP: {debug_str_multi(assigned_literals, itv)}")

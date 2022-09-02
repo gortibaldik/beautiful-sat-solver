@@ -10,7 +10,7 @@ from satsolver.watched_literals.structures_preparation import prepare_structures
 
 def get_info():
   return general_setup.get_info(
-    name="CDCL.v3",
+    name="CDCL.v5.luby32.lbd3.restarts",
     taskName="TASK 4",
     benchmarkable=True,
     symbol="dove"
@@ -34,7 +34,7 @@ def find_model(
     conflict_analysis=conflict_analysis
   )
   return general_setup.find_model(
-    cdcl.cdcl_no_restarts,
+    cdcl.cdcl_luby32_lbd3_restarts,
     input_file=input_file,
     warning=warning,
     debug=debug,
