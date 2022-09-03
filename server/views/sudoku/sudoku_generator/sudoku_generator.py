@@ -4,7 +4,7 @@
 
 from argparse import ArgumentParser
 from enum import Enum
-from Sudoku.Generator import *
+from server.views.sudoku.sudoku_generator.Sudoku.Generator import *
 
 # setting difficulties and their cutoffs for each solve method
 difficulties = {

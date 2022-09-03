@@ -1,7 +1,7 @@
 
 # original author: https://github.com/RutledgePaulV
 
-from Sudoku.Cell import Cell
+from server.views.sudoku.sudoku_generator.Sudoku.Cell import Cell
 
 class Board:
 
@@ -123,8 +123,8 @@ class Board:
                     new_set.append("_")
                 else:
                     new_set.append(x)
-            output.append('|'.join(new_set))
-        return '\r\n'.join(output)
+            output.append(' '.join(new_set))
+        return '\n'.join(output)
 
     # exporting puzzle to a html table for prettier visualization
     def html(self):
