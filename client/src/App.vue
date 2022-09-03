@@ -10,61 +10,91 @@
           <mdb-list-group-item
             :action="true"
             :class="activeItem === 1 && 'active'"
-            ><mdb-icon
-              icon="clipboard-list"
-              class="mr-3"
-            />Benchmarks</mdb-list-group-item
-          >
+            >
+              <ul class="list-inline" style="width: max-content">
+                <li class="list-inline-item">
+                  <mdb-icon icon="clipboard-list"/>
+                </li>
+                <li class="list-inline-item">
+                  Benchmarks
+                </li>
+              </ul>
+          </mdb-list-group-item>
         </router-link>
         <router-link to="/results" @click.native="activeItem = 2">
           <mdb-list-group-item
             :action="true"
             :class="activeItem === 2 && 'active'"
-            ><mdb-icon
-              icon="clipboard-list"
-              class="mr-3"
-            />Results</mdb-list-group-item
-          >
+            >
+              <ul class="list-inline" style="width: max-content">
+                <li class="list-inline-item">
+                  <mdb-icon icon="clipboard-list"/>
+                </li>
+                <li class="list-inline-item">
+                  Results
+                </li>
+              </ul>
+          </mdb-list-group-item>
         </router-link>
         <router-link to="/redis_logs" @click.native="activeItem = 3">
           <mdb-list-group-item
             :action="true"
             :class="activeItem === 3 && 'active'"
-            ><mdb-icon
-              icon="clipboard-list"
-              class="mr-3"
-            />Redis Logs</mdb-list-group-item
-          >
+            >
+              <ul class="list-inline" style="width: max-content">
+                <li class="list-inline-item">
+                  <mdb-icon icon="clipboard-list"/>
+                </li>
+                <li class="list-inline-item">
+                  Redis Logs
+                </li>
+              </ul>
+          </mdb-list-group-item>
         </router-link>
         <router-link to="/custom_run" @click.native="activeItem = 4">
           <mdb-list-group-item
             :action="true"
             :class="activeItem === 4 && 'active'"
-            ><mdb-icon
-              icon="clipboard-list"
-              class="mr-3"
-            />Custom Run</mdb-list-group-item
-          >
+            >
+              <ul class="list-inline" style="width: max-content">
+                <li class="list-inline-item">
+                  <mdb-icon icon="clipboard-list"/>
+                </li>
+                <li class="list-inline-item">
+                  Custom Run
+                </li>
+              </ul>
+          </mdb-list-group-item>
         </router-link>
         <router-link to="/nqueens" @click.native="activeItem = 5">
           <mdb-list-group-item
             :action="true"
             :class="activeItem === 5 && 'active'"
-            ><mdb-icon
-              icon="clipboard-list"
-              class="mr-3"
-            />NQueens</mdb-list-group-item
-          >
+            >
+              <ul class="list-inline" style="width: max-content">
+                <li class="list-inline-item">
+                  <mdb-icon icon="clipboard-list"/>
+                </li>
+                <li class="list-inline-item">
+                  NQueens
+                </li>
+              </ul>
+          </mdb-list-group-item>
         </router-link>
         <router-link to="/nqueens_results" @click.native="activeItem = 6">
           <mdb-list-group-item
             :action="true"
             :class="activeItem === 6 && 'active'"
-            ><mdb-icon
-              icon="clipboard-list"
-              class="mr-3"
-            />NQueens-Results</mdb-list-group-item
-          >
+            >
+              <ul class="list-inline" style="width: max-content">
+                <li class="list-inline-item">
+                  <mdb-icon icon="clipboard-list"/>
+                </li>
+                <li class="list-inline-item">
+                  NQueens-Results
+                </li>
+              </ul>
+          </mdb-list-group-item>
         </router-link>
       </mdb-list-group>
     </div>
@@ -77,7 +107,7 @@
         <p class="footer-copyright mb-0 py-3 text-center">
           &copy; {{ new Date().getFullYear() }} Copyright:
           <a href="https://github.com/gortibaldik/"> gortibaldik </a>
-          Version: 0.3.3
+          Version: 0.3.4
         </p>
       </ftr>
     </main>
@@ -115,7 +145,7 @@ export default {
       if (window.innerWidth > 1199.98) {
         this.sideBarHorizontalClass = ""
       } else {
-        this.sideBarHorizontalClass = "list-group-horizontal"
+        this.sideBarHorizontalClass = "list-group-horizontal overflow-auto"
       }
     }
   },
