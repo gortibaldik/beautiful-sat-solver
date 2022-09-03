@@ -139,7 +139,7 @@ export default {
       let chessBoard = ""
 
       for (let i=0; i<n; i++){
-        chessBoard += "<div>"
+        chessBoard += `<div style="height: 32px; width: ${n * 32}px;">`
         for (let j=0; j<n; j++){
           chessBoard += `<span style="font-size: 28px; display: inline-block; height: 32px; width: 32px; background-color: ${((i + j) % 2) == 0 ? '#5595fb ' : 'white'};">`
           chessBoard += `${(model && model[i * n + j] > 0) ? "<i class=\"fas fa-chess-queen\"></i>" : ""} </span>`
