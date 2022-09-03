@@ -49,7 +49,7 @@
                       @change="selectedBenchmarkInputName=defaultBenchmarkInputName"
                     >
                       <option selected disabled>{{defaultBenchmarkName}}</option>
-                      <option v-for="(bench, index) in benchmarks" :key="index">
+                      <option v-for="(bench, bench_index) in benchmarks" :key="bench_index">
                         {{bench.name}}
                       </option>
                     </select>
@@ -61,12 +61,49 @@
                       v-model="selectedBenchmarkInputName"
                     >
                       <option selected disabled>{{defaultBenchmarkInputName}}</option>
-                      <option v-for="(benchIn, index) in selectedBenchmark.inputs" :key="index">
+                      <option v-for="(benchIn, entry_index) in selectedBenchmark.inputs" :key="entry_index">
                         {{benchIn}}
                       </option>
                     </select>
                   </mdb-row>
                   <mdb-row v-show="showCustomInputForm">Custom input isn't implemented yet!</mdb-row>
+                  <section v-if="selectedAlgorithm.options.length > 0" style="margin-top: 10px; margin-bottom: 10px">
+                    <mdb-row class="logSelector">
+                      PARAMETERS:
+                    </mdb-row>
+                    <section
+                      v-for="(option, option_index) in selectedAlgorithm.options"
+                      :key="option_index"
+                    >
+                      <mdb-row class="parameterSelector justify-content-between">
+                        <div>
+                        <a>{{option.name}}:</a>
+                        <div class="hintClass">{{option.hint}}</div>
+                        </div>
+                        <div v-if="option.type=='value'"
+                        class="align-self-center">
+                          <input v-model="option.default" class="benchmarkPossibilities special-width"/>
+                        </div>
+                        <div v-if="option.type=='checkbox'"
+                        class="align-self-center">
+                          <input type="checkbox"
+                          :id="`${option_index}_checkbox`"
+                          v-model="option.default" />
+                        </div>
+                        <div v-if="option.type==='list'"
+                        class="align-self-center">
+                          <select class="browser-default custom-select benchmarkPossibilities special-width" v-model="option.default">
+                            <option v-for="value in option.options" :key="value">
+                              {{value}}
+                            </option>
+                          </select>
+                        </div>
+                      </mdb-row>
+                    </section>
+                </section>
+                  <mdb-row v-show="showRunButton" class="logSelector">
+                    SELECT LOG LEVEL:
+                  </mdb-row>
                   <mdb-row v-show="showRunButton" class="justify-content-center margin-top-little">
                     <div class="custom-control custom-radio custom-control-inline">
                       <input type="radio" :name="`radioLogLevel`" class="custom-control-input" :id="`LogLevelDebug`" value="DEBUG" v-model="selectedLogLevel">
@@ -82,7 +119,7 @@
                     </div>
                   </mdb-row>
                   <mdb-row v-show="showBenchmarkInputButton" class="justify-content-center">
-                    <mdb-btn v-show="showRunButton" :class="runButtonClass" @click="runButtonClicked(selectedAlgorithmName, selectedBenchmarkName, selectedBenchmarkInputName, selectedLogLevel)">{{runButtonText}}</mdb-btn>
+                    <mdb-btn v-show="showRunButton" :class="runButtonClass" @click="runButtonClicked(selectedAlgorithm, selectedBenchmarkName, selectedBenchmarkInputName, selectedLogLevel)">{{runButtonText}}</mdb-btn>
                     <mdb-btn class="run-button-start" @click="showInputClicked(selectedBenchmarkName, selectedBenchmarkInputName)">Show Benchmark Input</mdb-btn>
                   </mdb-row>
               </mdb-container>

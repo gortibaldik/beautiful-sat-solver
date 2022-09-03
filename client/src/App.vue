@@ -46,6 +46,26 @@
             />Custom Run</mdb-list-group-item
           >
         </router-link>
+        <router-link to="/nqueens" @click.native="activeItem = 5">
+          <mdb-list-group-item
+            :action="true"
+            :class="activeItem === 5 && 'active'"
+            ><mdb-icon
+              icon="clipboard-list"
+              class="mr-3"
+            />NQueens</mdb-list-group-item
+          >
+        </router-link>
+        <router-link to="/nqueens_results" @click.native="activeItem = 6">
+          <mdb-list-group-item
+            :action="true"
+            :class="activeItem === 6 && 'active'"
+            ><mdb-icon
+              icon="clipboard-list"
+              class="mr-3"
+            />NQueens-Results</mdb-list-group-item
+          >
+        </router-link>
       </mdb-list-group>
     </div>
     <!-- /Sidebar  -->
@@ -57,7 +77,7 @@
         <p class="footer-copyright mb-0 py-3 text-center">
           &copy; {{ new Date().getFullYear() }} Copyright:
           <a href="https://github.com/gortibaldik/"> gortibaldik </a>
-          Version: 0.2.5
+          Version: 0.3.3
         </p>
       </ftr>
     </main>

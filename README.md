@@ -21,7 +21,7 @@
 ## Task 2: DPLL
 - [executable](satsolver/task2.py)
 - [sources](satsolver/dpll/)
-- DPLL can be either ran as `python3 satsolver/task2.py <input_file>` or by using frontend
+- DPLL can be either ran as `python3 -m satsolver.task2 <input_file>` or by using frontend
 
 ### Results
 - I first implemented DPLL in May 2022. I faced problems with running benchmarks and comparing results, so I spent a month (probably too much time) developping a frontend so that I could store all the results in a database, access them, dynamically create graphs etc. Then I rewrote DPLL in August 2022, so that no advanced data structures (red-black trees/hash tables in python implementation of `dict` and `set`) would be used, just python `list`, and no copying would occur. The results can be seen in [whole comparison](./results/dpll.cmp.01.02.png) and [time comparison](./results/dpll.cmp.01.02.time.png), or in numerical data in [.csv](./results/dpll.cmp.01.02.csv). Basically we can see approximatelly 5-times improvement in speed, while dropping _pure literal elimination_ so further improvement should be possible. (The reason for not including _PLE_ is that I want the differences between _unit propagation_ with _adjacency lists_ and with _watched literals_ to be more visible).
@@ -31,7 +31,7 @@
 ## Task 3: Watched Literals
 - [executable](satsolver/task3.py)
 - [sources](satsolver/watched_literals/)
-- Watched Literals can be either ran as `python3 satsolver/task3.py <input_file>` or by using frontend
+- Watched Literals can be either ran as `python3 -m satsolver.task3 <input_file>` or by using frontend
 
 ### Results
 - Assumption: Since the literal is watched only in a subset of all the clauses where it is present, I expected the number of checked clauses to be lower than in adjacency lists.
@@ -45,12 +45,12 @@
 -----
 
 ## Task 4: CDCL
-- [executable (no restarts)](satsolver/task4.py), [executable (clause deletion)](satsolver/task4_luby32lbd4.py) [executable (restarts and clause deletion)](satsolver/task4_restarts.py)
+- [executable (no restarts)](satsolver/task4.py)
 - [sources](satsolver/cdcl/)
 #### How to run
-- CDCL pure `python3 satsolver/task4.py <input_file>`
-- CDCL with clause deletion `python3 satsolver/task4_luby32lbd4.py <input_file>`
-- CDCL with restarts and clause deletion `python3 satsolver/task4_restarts.py <input_file>`
+- CDCL pure `python3 -m satsolver.task4 <input_file>`
+- CDCL with clause deletion `python3 -m satsolver.task4 --conflict_limit_deletion <how many conflicts till deletion> <input_file>`
+- CDCL with restarts and clause deletion `python3 -m satsolver.task4 --conflict_limit_deletion <how many conflicts till deletion> --conflict_limit_restarts <how many conflicts till restart> <input_file>`
 - or by using frontend
 
 ### Results
@@ -67,6 +67,38 @@ __UPDATE 2__:
   - After few more experiments I found out that what I have been referring to as _clause deletion and restarts_ was in reality only _clause deletion_ because of a bug in the code. After resolving the bug I'm not able to achieve better results with restarts than with only _clause deletion_. I cannot answer why it is so. I tried implementing some sort of basic heuristic (number of clauses where the literal is present at the moment of the restart is the criterion), but while lowering the runtime by a factor of 3, I still suffer that _restarts_ seem to hurt more than help. [New restarts comparison](results/cdcl.restarts.02.png) 
 
 -----
+
+## Task 5: Decision Heuristics
+- [executable (no restarts)](satsolver/task5.py)
+- [sources](satsolver/decision_heuristics/)
+#### How to run
+- CDCL pure `python3 -m satsolver.task5 <input_file>`
+- or by using frontend
+
+### Results
+- Assumption:With VSIDS I should be able to improve on my best yet heuristic (Static Sum - `score[var] = sum(1 for clause in clauses if var in clause)`)
+  - Result: It seems VSIDS isn't the best heuristic for this particular set of benchmarks. From my experiments and from profiling it looks like the number of checked unit clauses correlates strongly with the time of execution. From [the comparison of checked unit clauses between VSIDS and Static Sum](results/vsids.cmp.checked.png) it looks like VSIDS heuristics causes much more checks than the simple Static Sum heuristic, which causes that [in the time comparison](results/vsids.cmp.time.png) the VSIDS guided cdcl is about 50% worse.
+
+
+- Regarding the assumptions, I have chosen the method of using the assumption as decision variable together with its negativity (assumption is in form of a literal). They work, I'm considering to use them for n-queens problem as kind of a reduction experiment: e.g. create nxn formula for huge n and then use assumptions to find the solution of n-queens problem for smaller n.
+- Regarding random heuristic, it should have been the slowest one, and as can be seen in the [time comparison](results/random.cmp.png) it is definitely the slowest one. (by a factor of 3) From the [time comparison with watched literals](results/random.cmp.wl.png) it looks like random heuristics hurts the cdcl back to the level of dpll with watched literals.
+
+------
+
+## Task 6: N-Queens
+- [executable](satsolver/task6.py)
+- create a file with the executable, then use any of the satsolvers to actually run it
+- or use frontend
+
+### Results
+- I implemented two new features into the frontend, visualization of the placement of queens, and database with visualization for comparison
+- I ran the following experiment:
+
+  1. set up timeout
+  2. run the problem for all the `n` until single solution takes longer than `timeout`
+
+- As expected, DPLL is the weakest, reaching the timeout at N == 18, watched literals improve to N == 20, cdcl improves to N == 22 ([results](results/nqueens.my_impl.png))
+- I also ran several other satsolvers on the benchmark. Each of them surpased my implementation of cdcl by a huge margin, namely: Glucose ended at N == 64, Minisat at N == 67 ([results](results/nqueens.others.png))
 
 #### Resources
 

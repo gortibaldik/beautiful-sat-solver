@@ -2,6 +2,7 @@ import os
 
 from argparse import ArgumentParser
 from enum import Enum
+from typing import List
 from logzero import logger
 from satsolver.task1 import tseitin_encoding
 from satsolver.tseitin_encoding.ast_tree import ASTNaryNode, ASTUnaryNode, ASTVariableNode
@@ -145,22 +146,79 @@ def get_info(
   name: str,
   taskName: str,
   benchmarkable: bool,
-  symbol: str
+  symbol: str = None,
+  options: List = [],
+  argumentParser: ArgumentParser=None
 ):
   """Provides information needed by server/frontend for correctly displaying the benchmark in client browser
   
   Args:
-    @name: str              name of the benchmark
-    @taskName: str          name of the task
-    @benchmarkable: bool    whether to display task in the benchmark/custom run menu (whether it can be ran on benchmarks)
-    @symbol: str            symbol which to display in frontend
+    @name: (str)              name of the benchmark, cannot contain commas, nor ';'
+    @taskName: (str)          name of the task
+    @benchmarkable: (bool)    whether to display task in the benchmark/custom run menu (whether it can be ran on benchmarks)
+    @symbol: (str)            symbol which to display in frontend
+    @options: (List)          list of options for the algorithm run
   """
-  return {
+  if "," in name or ";" in name:
+    raise RuntimeError(f"Commas ',' and ';' cannot be in the name of the algorithm! (name of the algorithm: {name})")
+  
+  if benchmarkable and symbol is None:
+    raise RuntimeError(f"symbol cannot be None if benchmarkable")
+
+  info = {
     "name": name,
     "taskName": taskName,
     "benchmarkable": benchmarkable,
-    "symbol": symbol
+    "symbol": symbol,
+    "options": options
   }
+  if argumentParser is not None:
+    options_to_argparse(info, argumentParser)
+  
+  return info
+
+from enum import Enum
+
+class TypeOfOption(Enum):
+  LIST  = "list"
+  VALUE = "value"
+  CHECKBOX = "checkbox"
+
+def create_option(
+  name: str,
+  type: TypeOfOption,
+  default,
+  hint: str = "",
+  options: List = None
+):
+  if type != TypeOfOption.LIST and options is not None:
+    raise RuntimeError(f"When not choosing {TypeOfOption.LIST}, options should be None (current options: {options})")
+  if type == TypeOfOption.LIST and options is None:
+    raise RuntimeError(f"When choosing {TypeOfOption.LIST}, options should not be None (current options: {options})")
+  return {
+    "name": name,
+    "type": type.value,
+    "default": default,
+    "options": options,
+    "hint": hint
+  }
+
+def options_to_argparse(info, argumentParser: ArgumentParser):
+  options = info["options"]
+  for option in options:
+    name: str = option["name"]
+    type = option["type"]
+    default = option["default"]
+    option_options = option["options"]
+    hint = option["hint"]
+
+    sanitized_name = "--" + name.replace(" ", "_")
+    if type == "list":
+      argumentParser.add_argument(sanitized_name, choices=option_options, default=default, help=hint)
+    elif type == "checkbox":
+      argumentParser.add_argument(sanitized_name, action=("store_true" if default == False else "store_false"), help=hint)
+    elif type == "value":
+      argumentParser.add_argument(sanitized_name, default=default, help=hint)
 
 def find_model(
   satsolver_function,
@@ -169,11 +227,12 @@ def find_model(
   warning=False,
   debug=False,
   output_to_stdout=False,
-  nnf_reduce_implications=True
+  nnf_reduce_implications=True,
+  **kwargs
 ):
   set_debug_level(warning=warning, debug=debug)
   ast_tree_root = read_tree(input_file, nnf_reduce_implications=nnf_reduce_implications)
-  start, end, result, model, stats = time_execution(satsolver_function, ast_tree_root, debug)
+  start, end, result, model, stats = time_execution(satsolver_function, ast_tree_root, debug, **kwargs)
   print_result(result, model, stats, end - start, input_file, output_to_stdout)
   return pack_result_to_dict(
     result=result,

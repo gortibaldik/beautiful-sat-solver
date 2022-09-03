@@ -22,7 +22,7 @@ from server.views.benchmark_dashboard.utils import (
   save_job_all_benchmarks,
   start_algorithm_on_all_benchmarks,
   start_algorithm_on_benchmark,
-  stop_job,
+  stop_job_benchmark,
   stop_job_all_run
 )
 
@@ -62,7 +62,7 @@ def start_algorithm():
 def stop_algorithm():
   saved_jobs = get_saved_jobs()
   algorithm_name, benchmark_name = get_post_data()
-  if stop_job(algorithm_name, benchmark_name, saved_jobs):
+  if stop_job_benchmark(algorithm_name, benchmark_name, saved_jobs):
     logger.info(saved_jobs)
     set_saved_jobs(saved_jobs)
     return jsonify({'result': 'success'})

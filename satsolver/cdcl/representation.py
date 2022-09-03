@@ -28,7 +28,9 @@ class CDCLData:
   """Clauses that will undergo Unit Propagation in the next step"""
   
   stats: SATSolverStats = None
-  conflict_limit: float = None
+  conflict_limit_restarts: float = None
+  conflict_limit_deletion: float = None
+  conflict_limit_deletion_additive: float = None
   lbd_limit: float = None
   n_variables: int = None
   assigned_literals: List[List[int]] = None
@@ -40,6 +42,8 @@ class CDCLData:
   k: int = None
   n_assigned_variables: int = None
   order_of_vars: List[int] = None
+  negative_first: bool = None
+  assumptions: List[int] = None
 
   def initialize(self):
     size_of_arrays = self.n_variables + 1

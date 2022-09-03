@@ -67,6 +67,7 @@ export default {
       displayModal: false,
       modalMessage: "",
       modalTitle: "",
+      timeoutCustomRun: 3,
     };
   },
   methods: {
@@ -99,13 +100,18 @@ export default {
       let stdLogs = await custom_run_communication.fetchCustomRunLogs(this.serverAddress)
       let is_finished = await custom_run_communication.fetchProgress(this.serverAddress, algo, bench, benchIn)
       if (redisErrorLogs  === 'failure' ||
-          stdLogs         === 'failure' ||
-          is_finished     === 'failure' ||
-          is_finished     === "yes") {
-        clearInterval(this.pollingInterval)
-        this.pollingInterval = undefined;
-        this.isCustomRunRunning = false
-        this.stopRunFunction = undefined
+      stdLogs         === 'failure' ||
+      is_finished     === 'failure' ||
+      is_finished     === "yes") {
+        if (this.timeoutCustomRun > 0) {
+          this.timeoutCustomRun--
+        } else {
+          clearInterval(this.pollingInterval)
+          this.pollingInterval = undefined;
+          this.isCustomRunRunning = false
+          this.stopRunFunction = undefined
+          this.timeoutCustomRun = 3
+        }
       }
       this.stdLogs = stdLogs
     },
@@ -137,6 +143,16 @@ export default {
     startMonitoringBenchmarkAll(algo) {
       this.pollingInterval = setInterval(this.pollRunningBenchmarkAll.bind(this, algo), 1000)
     },
+    createAlgorithmName(algo) {
+      let runningAlgorithm = algo.name
+      if (algo.options.length > 0) {
+        let options = algo.options
+        for (let i = 0; i < options.length; i++) {
+          runningAlgorithm += ';' + options[i].name + '=' + options[i].default
+        }
+      }
+      return runningAlgorithm
+    },
     async runButtonClicked(algo, bench, benchIn, logLevel) {
       if (this.runButtonText === "Stop") {
         this.stopRunFunction()
@@ -146,17 +162,21 @@ export default {
       if ( !algo || !bench || !benchIn) {
         return
       }
-      let data = await custom_run_communication.fetchStart(this.serverAddress, algo, bench, benchIn, logLevel)
+      let algoName = this.createAlgorithmName(algo)
+      let data = await custom_run_communication.fetchStart(this.serverAddress, algoName, bench, benchIn, logLevel)
 
       if (data.result !== "success") {
         return
       }
-      this.startMonitoringCustomRun(algo, bench, benchIn)
+      this.startMonitoringCustomRun(algoName, bench, benchIn)
     },
     async showInputClicked(bench, benchIn) {
       this.showBenchmarkInputContent = true;
       let data = await custom_run_communication.fetchBenchmarkInput(this.serverAddress, bench, benchIn)
       this.benchmarkInputContent = `<code>${data.result}</code>`
+    },
+    extractAlgorithmName(algorithmName) {
+      return algorithmName.split(';')[0]
     },
     async fetchInfoFromServer() {
       let [benchmarks, algorithms, running_job] = await custom_run_communication.fetchBasicInfoFromServer(this.serverAddress)
@@ -174,12 +194,34 @@ export default {
       this.benchmarks = benchmarks
       this.algorithms = algorithms
       if (running_job.algorithm !== "none") {
-        this.selectedAlgorithmName      = running_job.algorithm
+        this.selectedAlgorithmName      = this.extractAlgorithmName(running_job.algorithm)
         this.selectedBenchmarkName      = running_job.benchmark
         this.selectedBenchmarkInputName = running_job.entry
         this.showRunResults             = true
+        let options_array = running_job.algorithm.split(';')
+        let selAlgo = undefined
+        for (let k = 0; k < this.algorithms.length; k++) {
+          if (this.algorithms[k].name == this.selectedAlgorithmName) {
+            selAlgo = this.algorithms[k]
+            break
+          }
+        }
+        for (let j = 0; j < options_array.length; j++) {
+          let [option, value] = options_array[j].split('=')
+          if (value === "true") {
+            value = true
+          } else if (value === "false") {
+            value = false
+          }
+          for (let k = 0; k < selAlgo.options.length; k++) {
+            if (selAlgo.options[k].name == option) {
+              selAlgo.options[k].default = value
+              break
+            }
+          }
+        }
         this.startMonitoringCustomRun(
-          this.selectedAlgorithmName,
+          running_job.algorithm,
           this.selectedBenchmarkName,
           this.selectedBenchmarkInputName
         )
@@ -208,7 +250,8 @@ export default {
       }
       return {
         name: this.selectedAlgorithmName,
-        taskName: "TASK --none--"
+        taskName: "TASK --none--",
+        options: []
       }
     },
     selectedBenchmark: function() {

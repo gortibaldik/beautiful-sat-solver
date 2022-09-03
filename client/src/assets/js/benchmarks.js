@@ -112,13 +112,33 @@ export default {
     restartMonitorings(running_statuses) {
       for (let i = 0; i < running_statuses.length; i++) {
         if (running_statuses[i].running) {
+          this.runningAlgorithm = this.algorithms[i].name
+          if (running_statuses[i].options.length > 0) {
+            this.runningAlgorithm += ';' + running_statuses[i].options
+          }
+          console.log(`FOUND RUNNING ALGORITHM: ${this.runningAlgorithm}`)
           if (running_statuses[i].all) {
-            this.startMonitoringProgressAll(this.algorithms[i].name, i)
+            this.startMonitoringProgressAll(this.runningAlgorithm, i)
           } else {
-            this.startMonitoringProgress(this.algorithms[i].name, running_statuses[i].benchmarkName, i)
+            this.startMonitoringProgress(this.runningAlgorithm, running_statuses[i].benchmarkName, i)
             Vue.set(this.selected, i, [running_statuses[i].benchmarkName])
           }
           // only one can be running
+          let options_array = running_statuses[i].options.split(';')
+          for (let j = 0; j < options_array.length; j++) {
+            let [option, value] = options_array[j].split('=')
+            if (value === "true") {
+              value = true
+            } else if (value === "false") {
+              value = false
+            }
+            for (let k = 0; k < this.algorithms[i].options.length; k++) {
+              if (this.algorithms[i].options[k].name == option) {
+                this.algorithms[i].options[k].default = value
+                break
+              }
+            }
+          }
           break
         }
       }
@@ -130,7 +150,8 @@ export default {
         algorithmNames.push({
           name: benchmarkableAlgorithms[i].name,
           task: benchmarkableAlgorithms[i].taskName,
-          symbol: benchmarkableAlgorithms[i].symbol
+          symbol: benchmarkableAlgorithms[i].symbol,
+          options: benchmarkableAlgorithms[i].options
         })
       }
       return algorithmNames
@@ -178,40 +199,53 @@ export default {
         return "primary"
       }
     },
+    createAlgorithmName(algorithmName, selectedIndex) {
+      let runningAlgorithm = algorithmName
+      if (this.algorithms[selectedIndex].options.length > 0) {
+        let options = this.algorithms[selectedIndex].options
+        for (let i = 0; i < options.length; i++) {
+          runningAlgorithm += ';' + options[i].name + '=' + options[i].default
+        }
+      }
+      return runningAlgorithm
+    },
     async runBenchmarkClicked(algorithmName, selectedBenchmark, selectedIndex) {
       if (this.allBenchmarksAreRunning) {
-        this.clickStopAll(algorithmName)
+        this.clickStopAll(this.runningAlgorithm)
+        return
+      } else if (this.runButtonDisplaysStopMessage(selectedIndex)) {
+        this.clickStopComputation(this.runningAlgorithm, this.runningBenchmark, selectedIndex)
         return
       } else if (!algorithmName || !selectedBenchmark) {
         return
-      } else if (this.runButtonDisplaysStopMessage(selectedIndex)) {
-        this.clickStopComputation(algorithmName, selectedBenchmark, selectedIndex)
-        return
       }
+      this.runningAlgorithm = this.createAlgorithmName(algorithmName, selectedIndex)
+      this.runningBenchmark = selectedBenchmark
       let data = await benchmark_comm.fetchStartBenchmark(
         this.serverAddress,
-        algorithmName,
+        this.runningAlgorithm,
         selectedBenchmark,
         this.selectedLogLevels[selectedIndex]
       )
       if (data['result'] != "success") {
         return
       }
-      this.startMonitoringProgress(algorithmName, selectedBenchmark, selectedIndex)
+      this.startMonitoringProgress(this.runningAlgorithm, selectedBenchmark, selectedIndex)
     },
     async runAllClicked(algorithmName, selectedIndex) {
       if (!algorithmName) {
         return
       }
+      this.runningAlgorithm = this.createAlgorithmName(algorithmName, selectedIndex)
       let data = await benchmark_comm.fetchStartAll(
         this.serverAddress,
-        algorithmName,
+        this.runningAlgorithm,
         this.selectedLogLevels[selectedIndex]
       )
       if (data['result'] === "failure") {
         return
       }
-      this.startMonitoringProgressAll(algorithmName, selectedIndex)
+      this.startMonitoringProgressAll(this.runningAlgorithm, selectedIndex)
     },
     startMonitoringProgressAll(algorithmName, selectedIndex) {
       this.allBenchmarksAreRunning = true
@@ -238,12 +272,14 @@ export default {
       this.pollingInterval = setInterval(this.pollComputation.bind(this, algorithmName, selectedBenchmark), this.pollTimeoutValue)
     },
     async clickStopComputation(algorithmName, benchmarkName) {
+      console.log("stop button clicked")
       let data = await benchmark_comm.fetchStopCommunication(
         this.serverAddress,
         algorithmName,
         benchmarkName
       )
       if (data['result'] === 'failure') {
+        console.log("FAILURE ON STOP")
         return
       }
       else {
@@ -260,6 +296,7 @@ export default {
         algorithmName
       )
       if (data['result'] === "failure") {
+        console.log("FAILURE ON STOP")
         return
       } else {
         clearInterval(this.pollingInterval)
@@ -314,8 +351,8 @@ export default {
     },
     async clickDisplayModalButton(index) {
       let data = await benchmark_comm.fetchBenchmarkResult(
-        this.serverAddress, 
-        this.algorithms[index].name,
+        this.serverAddress,
+        this.runningAlgorithm,
         this.displayedModalButtonsBenchmarks[index]
       )
       if (data['result'] === "failure") {

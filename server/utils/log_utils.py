@@ -43,16 +43,19 @@ def get_log_file_content(log_file_name, redis_log_file=False):
   except:
     logger.warning(traceback.format_exc())
 
-def remove_log_file(log_file):
+def remove_log_file(log_file, collection=SATJob):
   at_least_one = False
-  for row in SATJob.query.filter_by(log_file=log_file):
+  for row in collection.query.filter_by(log_file=log_file):
     at_least_one = True
     db.session.delete(row)
   db.session.commit()
   if at_least_one and is_correct_log_file(log_file):
     os.remove(log_file)
   else:
-    logger.warning(f"incorrect log file: {log_file}")
+    if not at_least_one:
+      logger.warning(f"{log_file} not in database!")
+    else:
+      logger.warning(f"incorrect log file: {log_file}")
 
 def clear_redis_std_logs():
   redis_std_logs_file = os.path.join(
