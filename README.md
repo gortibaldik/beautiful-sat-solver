@@ -87,7 +87,7 @@ __UPDATE 2__:
 
 ## Task 6: N-Queens
 - [executable](satsolver/task6.py)
-- create a file with the executable, then use any of the satsolvers to actually run it
+- create a file with the encoded n-queens problem, then use any of the satsolvers to actually run it
 - or use frontend
 
 ### Results
@@ -99,6 +99,12 @@ __UPDATE 2__:
 
 - As expected, DPLL is the weakest, reaching the timeout at N == 18, watched literals improve to N == 20, cdcl improves to N == 22 ([results](results/nqueens.my_impl.png))
 - I also ran several other satsolvers on the benchmark. Each of them surpased my implementation of cdcl by a huge margin, namely: Glucose ended at N == 64, Minisat at N == 67 ([results](results/nqueens.others.png))
+
+-------
+
+# Task 7: Sudoku
+- [sudoku generator](server/views/sudoku/sudoku-generator/sudoku_generator.py)
+- creates a valid sudoku with unique solution, cloned from https://github.com/RutledgePaulV/sudoku-generator
 
 #### Resources
 
