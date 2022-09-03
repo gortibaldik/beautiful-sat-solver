@@ -28,7 +28,7 @@ def get_sudoku_parameters():
       options=[
         "easy",
         "medium",
-        "difficult",
+        "hard",
         "extreme"
       ]
     )
