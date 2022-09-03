@@ -182,6 +182,7 @@ from enum import Enum
 class TypeOfOption(Enum):
   LIST  = "list"
   VALUE = "value"
+  MULTILINE_VALUE = "multiline"
   CHECKBOX = "checkbox"
 
 def create_option(

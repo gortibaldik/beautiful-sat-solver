@@ -96,6 +96,21 @@
               </ul>
           </mdb-list-group-item>
         </router-link>
+        <router-link to="/sudoku" @click.native="activeItem = 7">
+          <mdb-list-group-item
+            :action="true"
+            :class="activeItem === 7 && 'active'"
+            >
+              <ul class="list-inline" style="width: max-content">
+                <li class="list-inline-item">
+                  <mdb-icon icon="clipboard-list"/>
+                </li>
+                <li class="list-inline-item">
+                  Sudoku
+                </li>
+              </ul>
+          </mdb-list-group-item>
+        </router-link>
       </mdb-list-group>
     </div>
     <!-- /Sidebar  -->
@@ -107,7 +122,7 @@
         <p class="footer-copyright mb-0 py-3 text-center">
           &copy; {{ new Date().getFullYear() }} Copyright:
           <a href="https://github.com/gortibaldik/"> gortibaldik </a>
-          Version: 0.3.4
+          Version: 0.4
         </p>
       </ftr>
     </main>

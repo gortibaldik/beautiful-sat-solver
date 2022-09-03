@@ -9,10 +9,11 @@ from server.task_runner.utils import (
 from typing import Any, Dict
 
 class RunningJobType(Enum):
-  BENCHMARK = "benchmark"
-  ALL_BENCHMARKS = "all_benchmarks"
-  CUSTOM_RUN = "custom_run"
-  NQUEENS = "nqueens"
+  BENCHMARK       = "benchmark"
+  ALL_BENCHMARKS  = "all_benchmarks"
+  CUSTOM_RUN      = "custom_run"
+  NQUEENS         = "nqueens"
+  SUDOKU          = "sudoku"
 
 def job_is_running(job):
   return ('interrupted' not in job.meta \
@@ -28,11 +29,14 @@ def construct_all_run_index(algorithm_name):
 def construct_custom_run_index(algorithm_name, benchmark_name, entry_name):
   return f"{algorithm_name},{benchmark_name},{entry_name}"
 
-def construct_nqueens_index(algorithm_name, n, run_as_benchmark, timeout):
+def construct_nqueens_index(algorithm, N, run_as_benchmark, timeout):
   if run_as_benchmark:
-    return f"{algorithm_name},nqueens,benchmark,{timeout}"
+    return f"{algorithm},nqueens,benchmark,{timeout}"
   else:
-    return f"{algorithm_name},nqueens,{n},"
+    return f"{algorithm},nqueens,{N},"
+
+def construct_sudoku_index(algorithm):
+  return f"{algorithm},sudoku,,"
 
 def get_job_info(index, saved_jobs):
   if index not in saved_jobs:
@@ -66,9 +70,11 @@ def find_running_job(saved_jobs: Dict[str, Any]):
         return key, RunningJobType.BENCHMARK
       if len(key_parts) == 3:
         return key, RunningJobType.CUSTOM_RUN
-      if len(key_parts) == 4 and key_parts[1] == "nqueens":
-        return key, RunningJobType.NQUEENS
-      else:
-        raise RuntimeError(f"WRONG KEY in saved_jobs: key: {key} ; saved_jobs: {saved_jobs}")
+      if len(key_parts) == 4:
+        if key_parts[1] == "nqueens":
+          return key, RunningJobType.NQUEENS
+        elif key_parts[1] == "sudoku":
+          return key, RunningJobType.SUDOKU
+      raise RuntimeError(f"WRONG KEY in saved_jobs: key: {key} ; saved_jobs: {saved_jobs}")
 
   return None, None

@@ -34,7 +34,7 @@ def nqueens(
     check_debug, check_info, check_warning = log_level_per_debug_level(Config.CHECK_LOG_LEVEL)
     logzero.logger.warning(f"Algorithm: {algorithm_name}, nqueens: N = {n} Log Level: {debug_level}")
     benchmark_filename = None
-    benchmark_filename = generate_nqueens_dimacs(int(n))
+    benchmark_filename = generate_nqueens_dimacs(N=n)
     result = algo_module(
       input_file=benchmark_filename,
       debug=debug,
@@ -129,16 +129,16 @@ def run_nqueens(
   return job
 
 def task_runner_start_algorithm_on_nqueens(
-  algorithm_name,
-  n,
+  algorithm,
+  N,
   run_as_benchmark,
   timeout,
   debug_level
 ):
   return task_runner_start(
     'server.task_runner.nqueens.run_nqueens',
-    algorithm_name=algorithm_name,
-    n=n,
+    algorithm_name=algorithm,
+    n=N,
     run_as_benchmark=run_as_benchmark,
     timeout=timeout,
     debug_level=debug_level

@@ -7,6 +7,7 @@ import RedisLogs from '@/components/RedisLogs'
 import CustomRun from '@/components/CustomRun'
 import NQueens from '@/components/NQueens'
 import NQueensResults from '@/components/NQueensResults'
+import Sudoku from '@/components/Sudoku'
 
 
 Vue.use(Router);
@@ -52,14 +53,20 @@ export default new Router({
       component: NQueensResults
     },
     {
+      path: '/sudoku',
+      name: 'Sudoku',
+      props: { page: 7 },
+      component: Sudoku
+    },
+    {
       path: '/404',
       name: 'BadGateway',
-      props: { page: 7 },
+      props: { page: 8 },
       component: BadGateway
     },
     {
       path: '*',
-      props: { page: 7 },
+      props: { page: 8 },
       redirect: '/404'
     }
   ]

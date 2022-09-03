@@ -1,10 +1,6 @@
 from flask import request
 from satsolver.utils.general_setup import TypeOfOption, create_option
-from server.get_running_job import RunningJobType, construct_nqueens_index, find_running_job, get_job_info, stop_job
-from server.task_runner.nqueens import task_runner_start_algorithm_on_nqueens
-from server.task_runner.utils import task_runner_get_progress
-from server.utils.redis_utils import get_saved_jobs
-from server.views.benchmark_dashboard.utils import retrieve_log_file_from_index
+from server.get_running_job import RunningJobType, find_running_job
 
 def get_running_nqueens(saved_jobs):
   key, result = find_running_job(saved_jobs)
@@ -55,95 +51,8 @@ def get_post_N():
   N = post_data.get('N')
   return N
 
-def get_post_data():
-  post_data = request.get_json()
-  algorithm        = post_data.get('algorithm')
-  n                = post_data.get('N')
-  run_as_benchmark = post_data.get('run_as_benchmark')
-  timeout          = post_data.get('timeout')
-  return algorithm, n, run_as_benchmark, timeout
+def should_return_model(**kwargs):
+  return kwargs['run_as_benchmark']
 
-def save_job(
-  job,
-  algorithm_name,
-  n,
-  run_as_benchmark,
-  timeout,
-  saved_jobs
-):
-  index = construct_nqueens_index(
-    algorithm_name,
-    n,
-    run_as_benchmark,
-    timeout
-  )
-  saved_jobs[index] = {
-    "job": job.get_id(),
-    "logs": None
-  }
-
-def start_algorithm_on_nqueens(
-  algorithm_name,
-  n,
-  run_as_benchmark,
-  timeout,
-  debug_level
-):
-  key, result = find_running_job(get_saved_jobs())
-  if result is not None:
-    raise RuntimeError(f"Cannot run multiple jobs at once ! (running job key: {key})")
-  return task_runner_start_algorithm_on_nqueens(
-    algorithm_name,
-    n,
-    run_as_benchmark,
-    timeout,
-    debug_level
-  )
-
-def retrieve_log_file(
-  algorithm_name,
-  n,
-  run_as_benchmark,
-  timeout
-):
-  index = construct_nqueens_index(
-    algorithm_name,
-    n,
-    run_as_benchmark,
-    timeout
-  )
-  return retrieve_log_file_from_index(index)
-
-def stop_job_nqueens(
-  algorithm_name,
-  n,
-  run_as_benchmark,
-  timeout,
-  saved_jobs
-):
-  index = construct_nqueens_index(
-    algorithm_name,
-    n,
-    run_as_benchmark,
-    timeout
-  )
-  return stop_job(index, saved_jobs)
-
-def is_nqueens_finished(
-  algorithm_name,
-  n,
-  run_as_benchmark,
-  timeout,
-  saved_jobs=None
-):
-  if saved_jobs is None:
-    saved_jobs = get_saved_jobs()
-  index = construct_nqueens_index(
-    algorithm_name,
-    n,
-    run_as_benchmark,
-    timeout
-  )
-  job_info = get_job_info(index, saved_jobs)
-  progress, model = task_runner_get_progress(job_info, return_model=True)
-  return progress == 100, model
+def get_entry_name(**kwargs):
+  return f"{kwargs['N']}.cnf"
