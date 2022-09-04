@@ -35,7 +35,7 @@ def construct_nqueens_index(algorithm, N, run_as_benchmark, timeout):
   else:
     return f"{algorithm},nqueens,{N},"
 
-def construct_sudoku_index(algorithm):
+def construct_sudoku_index(algorithm, **kwargs):
   return f"{algorithm},sudoku,,"
 
 def get_job_info(index, saved_jobs):

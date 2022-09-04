@@ -136,7 +136,7 @@
                     </div>
                   </mdb-row>
                   <mdb-row class="justify-content-center">
-                    <mdb-btn v-show="showRunButton" :class="runButtonClass" @click="runButtonClicked(selectedAlgorithm, selectedLogLevel)">{{runButtonText}}</mdb-btn>
+                    <mdb-btn v-show="showRunButton && showSudoku" :class="runButtonClass" @click="runButtonClicked(selectedAlgorithm, selectedLogLevel)">{{runButtonText}}</mdb-btn>
                     <mdb-btn :class="runButtonClass" @click="generateSudokuClicked()" :disabled="! generateAgain">Generate Sudoku</mdb-btn>
                   </mdb-row>
               </mdb-container>
@@ -181,7 +181,7 @@
         <mdb-col v-show="showSudoku" xl="6" md="12" class="mb-r col-with-logs">
           <mdb-card class="card-with-logs rounded-border custom-margin-top ">
             <mdb-card-title class="blue darken-2 rounded-border text-center card-header-hoverable">
-              <h4 class="h4-responsive text-white spaced-title">Sudoku in the input</h4>
+              <h4 class="h4-responsive text-white spaced-title">Sudoku</h4>
             </mdb-card-title>
             <mdb-card-body>
               <div class="scrollbar-class">

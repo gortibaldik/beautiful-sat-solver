@@ -4,37 +4,38 @@ import server.getters
 import traceback
 
 from contextlib import redirect_stderr, redirect_stdout
-from satsolver.task6 import generate_nqueens_dimacs
 from satsolver.utils.check import check_assignment
 from server.config import Config
-from server.models.nqueens import create_n_commit_nqueens, create_nqueens
 from server.task_runner.benchmark import log_level_per_debug_level
 from server.task_runner.utils import (
-  ensure_storage_file,
   retrieve_algorithm,
   task_runner_start
 )
 
-def nqueens(
-  file,
-  algorithm_name,
-  n,
-  storage_file,
-  debug_level
+def problem(
+  get_problem_start_log,
+  generate_dimacs_file,
+  is_satisfiable,
+  commit_f,
+  file=None,
+  algorithm=None,
+  storage_file=None,
+  debug_level=None,
+  **kwargs
 ):
+  benchmark_filename = None
   try:
     algorithms = server.getters.get_modules()
-    algo_module = retrieve_algorithm(algorithms, algorithm_name)
+    algo_module = retrieve_algorithm(algorithms, algorithm)
 
     if algo_module is None:
-      logzero.logger.warning(f"Algorithm with name: {algorithm_name} not found, EXITING!")
+      logzero.logger.warning(f"Algorithm with name: {algorithm} not found, EXITING!")
       return
 
     debug, info, warning = log_level_per_debug_level(debug_level)
     check_debug, check_info, check_warning = log_level_per_debug_level(Config.CHECK_LOG_LEVEL)
-    logzero.logger.warning(f"Algorithm: {algorithm_name}, nqueens: N = {n} Log Level: {debug_level}")
-    benchmark_filename = None
-    benchmark_filename = generate_nqueens_dimacs(N=n)
+    logzero.logger.warning(f"Algorithm: {algorithm}, {get_problem_start_log(**kwargs)}, Log Level: {debug_level}")
+    benchmark_filename = generate_dimacs_file(generate_new=True, **kwargs)
     result = algo_module(
       input_file=benchmark_filename,
       debug=debug,
@@ -48,7 +49,7 @@ def nqueens(
       debug=check_debug,
       warning=check_warning,
       read_from_file=False,
-      is_satisfiable=int(n) != 3,
+      is_satisfiable=is_satisfiable(**kwargs),
       nnf_reduce_implications=Config.NNF_REDUCE_IMPLICATIONS
     )
     save_model(result)
@@ -56,12 +57,12 @@ def nqueens(
     logzero.loglevel(Config.DEFAULT_LOGLEVEL)
     file.flush()
 
-    create_n_commit_nqueens(
-      algorithm_name=algorithm_name,
-      n=n,
+    commit_f(
+      algorithm=algorithm,
       storage_file=storage_file,
       avg_time=result["time"],
-      stats=result["stats"]
+      stats=result["stats"],
+      **kwargs
     )
     return result
   except:
@@ -69,36 +70,45 @@ def nqueens(
       logzero.logger.warning(f"Filename with error: {benchmark_filename}")
     logzero.logger.warning(traceback.format_exc())
 
-def nqueens_benchmark(
-  f,
-  algorithm_name,
-  storage_file,
-  debug_level,
-  timeout
+def benchmark_problem(
+  get_problem_start_log,
+  generate_dimacs_file,
+  is_satisfiable,
+  get_benchmark_start,
+  get_benchmark_next,
+  is_benchmark_finished,
+  commit_f,
+  **kwargs
 ):
-  n = 3
+  kwargs = get_benchmark_start(**kwargs)
   while True:
-    result = nqueens(
-      f,
-      algorithm_name,
-      n,
-      storage_file,
-      debug_level
+    result = problem(
+      get_problem_start_log,
+      generate_dimacs_file,
+      is_satisfiable,
+      commit_f,
+      **kwargs
     )
-    n += 1
-    if result["time"] > timeout:
+    kwargs = get_benchmark_next(**kwargs)
+    if is_benchmark_finished(result, **kwargs):
       break
 
-def run_nqueens(
-  algorithm_name=None,
-  n=None,
+def run_problem(
+  get_problem_start_log,
+  generate_dimacs_file,
+  is_satisfiable,
+  commit_f,
+  ensure_storage_file,
+  get_benchmark_start=None,
+  get_benchmark_next=None,
+  is_benchmark_finished=None,
+  algorithm=None,
+  debug_level=None,
   run_as_benchmark=False,
-  timeout=None,
-  debug_level=None
+  **kwargs
 ):
-  timeout = int(timeout)
   job = rq.get_current_job()
-  storage_file = ensure_storage_file(algorithm_name, "__nqueens__")
+  storage_file = ensure_storage_file(algorithm)
   job.meta['finished'] = False
   job.meta['storage_file'] = storage_file
   job.save_meta()
@@ -107,20 +117,31 @@ def run_nqueens(
       with redirect_stderr(f):
         logzero.logfile(storage_file)
         if run_as_benchmark:
-          nqueens_benchmark(
-            f,
-            algorithm_name,
-            storage_file,
-            debug_level,
-            timeout
+          benchmark_problem(
+            get_problem_start_log,
+            generate_dimacs_file,
+            is_satisfiable,
+            get_benchmark_start,
+            get_benchmark_next,
+            is_benchmark_finished,
+            commit_f,
+            file=f,
+            algorithm=algorithm,
+            storage_file=storage_file,
+            debug_level=debug_level,
+            **kwargs
           )
         else:
-          nqueens(
-            f,
-            algorithm_name,
-            n,
-            storage_file,
-            debug_level
+          problem(
+            get_problem_start_log,
+            generate_dimacs_file,
+            is_satisfiable,
+            commit_f,
+            file=f,
+            algorithm=algorithm,
+            storage_file=storage_file,
+            debug_level=debug_level,
+            **kwargs
           )
         logzero.logfile(None)
   job.meta['finished'] = True
@@ -128,20 +149,22 @@ def run_nqueens(
 
   return job
 
-def task_runner_start_algorithm_on_nqueens(
-  algorithm,
-  N,
-  run_as_benchmark,
-  timeout,
-  debug_level
+def task_runner_start_algo_on_problem(
+  get_problem_start_log,
+  generate_dimacs_file,
+  is_satisfiable,
+  commit_f,
+  ensure_storage_file,
+  **kwargs
 ):
   return task_runner_start(
-    'server.task_runner.nqueens.run_nqueens',
-    algorithm_name=algorithm,
-    n=N,
-    run_as_benchmark=run_as_benchmark,
-    timeout=timeout,
-    debug_level=debug_level
+    'server.task_runner.nqueens.run_problem',
+    get_problem_start_log=get_problem_start_log,
+    generate_dimacs_file=generate_dimacs_file,
+    is_satisfiable=is_satisfiable,
+    commit_f=commit_f,
+    ensure_storage_file=ensure_storage_file,
+    **kwargs
   )
 
 def save_model(result):

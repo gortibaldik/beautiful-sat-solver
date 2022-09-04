@@ -102,7 +102,7 @@ export default {
         this.isOtherTabRunning = false
       }
     },
-    async pollRunningSudoku(algo) {
+    async pollRunningSudoku(algo, sudoku) {
       let is_finished_data = await sudoku_communication.fetchProgress(this.serverAddress, algo)
       let is_finished = is_finished_data.result
       let stdLogsPacked = await sudoku_communication.fetchStdLogs(this.serverAddress, algo)
@@ -110,7 +110,7 @@ export default {
       if (this.dimacs_str.length === 0) {
         console.log("fetching data for dimacs str")
         let dimacs = await sudoku_communication.fetchDimacsFile(
-          this.serverAddress, algo
+          this.serverAddress, algo, sudoku
         )
         if (dimacs.result == "success") {
           console.log("data fetched !")
@@ -128,7 +128,7 @@ export default {
         if (is_finished == "yes") {
           console.log(is_finished_data.model)
           // DRAW SUDOKU
-          //this.drawChessboard(n, is_finished_data.model)
+          this.createSudokuTable(sudoku, is_finished_data.model)
         }
       }
     },
@@ -136,25 +136,12 @@ export default {
       sudoku_communication.fetchStop(
         this.serverAddress, algo)
     },
-    drawChessboard(n, model=undefined) {
-      let chessBoard = ""
-
-      for (let i=0; i<n; i++){
-        chessBoard += `<div style="height: 32px; width: ${n * 32}px;">`
-        for (let j=0; j<n; j++){
-          chessBoard += `<span style="font-size: 28px; display: inline-block; height: 32px; width: 32px; background-color: ${((i + j) % 2) == 0 ? '#5595fb ' : 'white'};">`
-          chessBoard += `${(model && model[i * n + j] > 0) ? "<i class=\"fas fa-chess-queen\"></i>" : ""} </span>`
-        }
-        chessBoard += "</div>"
-      }
-      this.chessBoard = chessBoard
-    },
-    startMonitoringSudoku(algo) {
+    startMonitoringSudoku(algo, sudoku) {
       this.dimacs_str = ""
       this.isSudokuRunning = true
       this.showRunResults = true
       this.stopRunFunction = this.stopRun.bind(this, algo)
-      this.pollingInterval = setInterval(this.pollRunningSudoku.bind(this, algo), 1000)
+      this.pollingInterval = setInterval(this.pollRunningSudoku.bind(this, algo, sudoku), 1000)
     },
     startMonitoringCustomRun() {
       this.pollingInterval = setInterval(this.pollCustomRun.bind(this), 1000)
@@ -196,14 +183,14 @@ export default {
       let data = await sudoku_communication.fetchStart(
         this.serverAddress,
         algoName,
-        paramsDict.sudoku,
+        paramsDict.Sudoku,
         logLevel
         )
 
       if (data.result !== "success") {
         return
       }
-      this.startMonitoringSudoku(algoName)
+      this.startMonitoringSudoku(algoName, paramsDict.Sudoku)
     },
     extractAlgorithmName(algorithmName) {
       return algorithmName.split(';')[0]
@@ -297,7 +284,7 @@ export default {
       problem_parameter.default = sudoku
       Vue.set(this.problem_parameters, this.si, problem_parameter)
     },
-    createSudokuTable(sudoku) {
+    createSudokuTable(sudoku, model=undefined) {
       let rows = sudoku.trim().split('\n')
       let html = `<table style="background-color: #7faaf0;">`
       for (let r = 0; r < 9; r++) {
@@ -305,7 +292,18 @@ export default {
         let columns = rows[r].trim().split(' ')
         for (let c = 0; c < 9; c++) {
           if (columns[c] == "_") {
-            html += `<td style="background-color: #d2ddff; padding: 3px; padding-left: 10px; padding-right: 10px; border-style: solid; border-width: 1px;"> </td>`
+            html += `<td style="background-color: #d2ddff; padding: 3px; padding-left: 10px; padding-right: 10px; border-style: solid; border-width: 1px;">`
+            if (! model) {
+              html += " "
+            } else {
+              let first = r * 81 + c * 9
+              for (let v = 1; v < 10; v++) {
+                if (model[first + v - 1] > 0) {
+                  html += `${v}`
+                }
+              }
+            }
+            html += `</td>`
           } else {
             html += `<td style="padding: 3px; padding-left: 10px; padding-right: 10px; border-style: solid; border-width: 1px;">${columns[c]}</td>`
           }

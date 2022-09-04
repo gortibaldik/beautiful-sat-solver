@@ -35,9 +35,10 @@ var custom_run = {
       algorithm:        algo,
     })
   },
-  async fetchDimacsFile(serverAddress, algo) {
+  async fetchDimacsFile(serverAddress, algo, sudoku) {
     return await fetch_json.post(`${serverAddress}/sudoku/get_dimacs`,  {
       algorithm:        algo,
+      sudoku:           sudoku,
     })
   },
   async fetchGenerateSudoku(serverAddress, difficulty) {

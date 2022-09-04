@@ -1,6 +1,7 @@
 from flask import request
 from satsolver.utils.general_setup import TypeOfOption, create_option
 from server.get_running_job import RunningJobType, find_running_job
+from server.task_runner.utils import ensure_storage_file
 
 def get_running_nqueens(saved_jobs):
   key, result = find_running_job(saved_jobs)
@@ -51,8 +52,41 @@ def get_post_N():
   N = post_data.get('N')
   return N
 
-def should_return_model(**kwargs):
+def shouldnt_return_model(**kwargs):
   return kwargs['run_as_benchmark']
 
-def get_entry_name(**kwargs):
-  return f"{kwargs['N']}.cnf"
+def get_nqueens_start_log(N, **kwargs):
+  return f"nqueens: N = {N}"
+
+def is_nqueens_satisfiable(N, **kwargs):
+  return int(N) > 3 or int(N) == 1
+
+def get_nqueens_benchmark_start(
+  N,
+  timeout,
+  **kwargs
+):
+  return {
+    "N": 3,
+    "timeout": int(timeout),
+    **kwargs
+  }
+
+def get_nqueens_benchmark_next(
+  N,
+  **kwargs
+):
+  return {
+    "N": N + 1,
+    **kwargs
+  }
+
+def is_nqueens_benchmark_finished(
+  result,
+  timeout,
+  **kwargs
+):
+  return result["time"] > timeout
+
+def ensure_nqueens_storage_file(algorithm):
+  return ensure_storage_file(algorithm, "__nqueens__")
