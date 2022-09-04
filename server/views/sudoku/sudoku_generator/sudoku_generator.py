@@ -61,11 +61,8 @@ def main():
     args = parser.parse_args()
     initial, final = generate_sudoku(SudokuDifficulty(args.difficulty))
 
-    # printing out complete board (solution)
-    print("The initial board before removals was: \r\n\r\n{0}".format(initial.html()))
-
     # printing out board after reduction
-    print("The generated board after removals was: \r\n\r\n{0}".format(final))
+    print(final)
 
 if __name__ == "__main__":
     main()

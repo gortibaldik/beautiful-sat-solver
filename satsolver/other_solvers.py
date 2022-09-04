@@ -42,3 +42,12 @@ def find_model(
     nnf_reduce_implications=nnf_reduce_implications,
     **kwargs
   )
+
+if __name__ == "__main__":
+  parser = general_setup.create_parser()
+  get_info(parser)
+  args = parser.parse_args()
+  print(vars(args))
+  find_model(
+    **vars(args)
+  )
