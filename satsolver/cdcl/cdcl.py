@@ -416,6 +416,9 @@ class CDCL:
     if config.debug: logger.debug(f"UP: {debug_str_multi(data.assigned_literals[data.current_dec_lvl], data.itv)}")
     data.current_dec_lvl += 1
 
+    if data.n_assigned_variables == data.n_variables:
+      return SATSolverResult.SAT
+
     while True:
       self.collect_stats_callback(data)
       decision = data.decisions[data.current_dec_lvl]
