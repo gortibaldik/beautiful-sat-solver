@@ -1,0 +1,31 @@
+# Resources
+
+- [How to deploy flask with vue.js in docker container](https://testdriven.io/blog/deploying-flask-to-heroku-with-docker-and-gitlab/)
+- [Proxy pass in nginx](https://dev.to/danielkun/nginx-everything-about-proxypass-2ona)
+- [Develop SPA with Flask and Vue.js](https://testdriven.io/blog/developing-a-single-page-app-with-flask-and-vuejs/)
+- [WSGI servers](https://www.fullstackpython.com/wsgi-servers.html)
+- [What is Green Unicorn](https://vsupalov.com/what-is-gunicorn/)
+- [Using fetch API](https://flaviocopes.com/fetch-api/)
+- [Redis Message Queue for long running tasks](https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-xxii-background-jobs)
+- [official Docker tutorial - Docker compose part](https://docs.docker.com/get-started/08_using_compose/)
+- [better selectors for tables](https://mdbootstrap.com/education/bootstrap/admin-dashboard-lesson-6/)
+- [sql alchemy 1](https://realpython.com/python-sqlite-sqlalchemy/#working-with-sqlalchemy-and-python-objects)
+- [sql alchemy 2](https://realpython.com/flask-by-example-part-2-postgres-sqlalchemy-and-alembic/)
+- [sql alchemy 3](https://www.digitalocean.com/community/tutorials/how-to-use-a-postgresql-database-in-a-flask-application)
+- [sql alchemy 4](https://www.learndatasci.com/tutorials/using-databases-python-postgres-sqlalchemy-and-alembic/)
+- [postgres connection string](https://stackoverflow.com/questions/3582552/what-is-the-format-for-the-postgresql-connection-string-url)
+- [postgres pooling](https://stackoverflow.blog/2020/10/14/improve-database-performance-with-connection-pooling/)
+- [publishing docker images to docker repositories](https://docs.docker.com/docker-hub/repos/#pushing-a-docker-container-image-to-docker-hub)
+- [publishing docker images with github actions](https://docs.github.com/en/actions/publishing-packages/publishing-docker-images)
+- [simple satsolver implementation](https://sahandsaba.com/understanding-sat-by-implementing-a-simple-sat-solver-in-python.html)
+- [cdcl 1](https://cse442-17f.github.io/Conflict-Driven-Clause-Learning/)
+- [cdcl - handbook on satisfiability](https://www.ics.uci.edu/~dechter/courses/ics-275a/winter-2016/readings/SATHandbook-CDCL.pdf)
+- [cdcl - some python implementation](https://github.com/z11i/pysat)
+- [cdcl - presentation on the topic](http://ssa-school-2016.it.uu.se/wp-content/uploads/2016/06/LaurentSimon.pdf)
+- [cdcl - sudoku](https://cse442-17f.github.io/Conflict-Driven-Clause-Learning/)
+- [glucose cdcl solver](https://www.ijcai.org/Proceedings/09/Papers/074.pdf)
+- [ipynb with various sat improvements](https://github.com/aimacode/aima-python/blob/master/improving_sat_algorithms.ipynb)
+
+#### Problems with installation of `psycopg2`
+
+- [stack overflow](https://stackoverflow.com/questions/19843945/psycopg-python-h-no-such-file-or-directory)
