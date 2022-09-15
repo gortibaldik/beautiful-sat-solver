@@ -19,6 +19,9 @@ import {
 import redis_logs from '@/assets/js/get_redis_logs'
 import benchmark_communication from '@/assets/js/benchmark_communication'
 import custom_run_communication from '@/assets/js/customRun_communication'
+import ModalCard from '@/components/ModalCard.vue'
+import Vue from 'vue'
+
 
 export default {
   name: 'CustomRun',
@@ -39,6 +42,7 @@ export default {
     mdbModalBody,
     mdbBtn,
     mdbModalTitle,
+    ModalCard,
   },
   data () {
     let defaultBenchmarkName = "Pick a benchmark"
@@ -60,32 +64,25 @@ export default {
       isCustomRunRunning: false,
       isBenchmarkRunning: false,
       showBenchmarkInputContent: false,
-      benchmarkInputContent: "",
-      redisStdLogs: "",
-      redisErrorLogs: "",
-      stdLogs: "",
       displayModal: false,
       modalMessage: "",
       modalTitle: "",
       timeoutCustomRun: 3,
+      redisStdLogs: {
+        data: ""
+      },
+      redisErrorLogs: {
+        data: ""
+      },
+      stdLogs: {
+        data: ""
+      },
+      benchmarkInputContent: {
+        data: ""
+      }
     };
   },
   methods: {
-    switchOnModalRedisStd() {
-      this.displayModal = true
-      this.modalMessage = this.redisStdLogs
-      this.modalTitle = "Standard Logs from Algorithm"
-    },
-    switchOnModalRedisError() {
-      this.displayModal = true
-      this.modalMessage = this.redisErrorLogs
-      this.modalTitle = "Error Redis Worker Logs"
-    },
-    switchOnModalStd() {
-      this.displayModal = true
-      this.modalMessage = this.stdLogs
-      this.modalTitle = "Standard Redis Worker Logs"
-    },
     findCorrespondingName(array, name) {
       for (let i = 0; i < array.length; i++) {
         if (array[i].name === name) {
@@ -113,7 +110,7 @@ export default {
           this.timeoutCustomRun = 3
         }
       }
-      this.stdLogs = stdLogs
+      Vue.set(this.stdLogs, "data", stdLogs)
     },
     async pollRunningBenchmark(algo, bench) {
       let data = await benchmark_communication.fetchBenchmarkProgress(this.serverAddress, algo, bench)
@@ -173,7 +170,7 @@ export default {
     async showInputClicked(bench, benchIn) {
       this.showBenchmarkInputContent = true;
       let data = await custom_run_communication.fetchBenchmarkInput(this.serverAddress, bench, benchIn)
-      this.benchmarkInputContent = `<code>${data.result}</code>`
+      Vue.set(this.benchmarkInputContent, "data", `<code>${data.result}</code>`)
     },
     extractAlgorithmName(algorithmName) {
       return algorithmName.split(';')[0]
@@ -229,8 +226,8 @@ export default {
     },
     async fetchRedisLogs() {
       let [redisErrorLogs, redisStdLogs] = await redis_logs.fetch(this.serverAddress)
-      this.redisErrorLogs = redisErrorLogs
-      this.redisStdLogs = redisStdLogs
+      Vue.set(this.redisErrorLogs, "data", redisErrorLogs)
+      Vue.set(this.redisStdLogs, "data", redisStdLogs)
       return [redisErrorLogs, redisStdLogs]
     },
     async removeStdRedisLogs() {
@@ -299,6 +296,8 @@ export default {
   created() {
     this.serverAddress = process.env.VUE_APP_SERVER_ADDRESS
     this.fetchInfoFromServer()
+    this.removeStdRedisLogsBinded = this.removeStdRedisLogs.bind(this)
+    this.removeErrorRedisLogsBinded = this.removeErrorRedisLogs.bind(this)
     // TODO: custom input
     // this.benchmarks.push({
     //   name: this.customInputName,

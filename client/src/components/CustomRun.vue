@@ -135,86 +135,38 @@
       </mdb-row>
       <mdb-row v-show="showRunResults" class="row-with-logs">
         <mdb-col xl="6" md="12" class="mb-r col-with-logs">
-          <mdb-card class="card-with-logs rounded-border custom-margin-top ">
-            <mdb-card-title class="blue darken-2 rounded-border text-center card-header-hoverable">
-              <h4 class="h4-responsive text-white spaced-title"
-                  @click="switchOnModalStd()">Standard Logs from Algorithm</h4>
-            </mdb-card-title>
-            <mdb-card-body>
-              <div class="scrollbar-class">
-                <mdb-scrollbar v-html="stdLogs">
-                </mdb-scrollbar>
-              </div>
-            </mdb-card-body>
-          </mdb-card>
+          <modal-card
+            :message="stdLogs"
+            title="Standard Logs from Algorithm"
+            :clearPossibility="false"
+          />
         </mdb-col>
         <mdb-col xl="6" md="12" class="mb-r col-with-logs">
-          <mdb-card class="card-with-logs rounded-border custom-margin-top ">
-            <mdb-card-title
-              class="blue darken-2 rounded-border text-center">
-              <li class="list-inline-item card-header-hoverable"
-                @click="switchOnModalRedisStd()">
-                <h4 class="h4-responsive text-white spaced-title">Standard Redis Worker Logs</h4>
-              </li>
-              <li class="header-button-style list-inline-item"
-                @click="removeStdRedisLogs()">
-                <h4 class="h4-responsive text-white">Clear</h4>
-              </li>
-            </mdb-card-title>
-            <mdb-card-body>
-              <div class="scrollbar-class">
-                <mdb-scrollbar v-html="redisStdLogs">
-                </mdb-scrollbar>
-              </div>
-            </mdb-card-body>
-          </mdb-card>
+          <modal-card
+            :message="redisStdLogs"
+            title="Standard Redis Worker Logs"
+            :clearPossibility="true"
+            :clearFunction="removeStdRedisLogsBinded"
+          />
         </mdb-col>
         <mdb-col xl="6" md="12" class="mb-r col-with-logs">
-          <mdb-card class="card-with-logs rounded-border custom-margin-top ">
-            <mdb-card-title class="blue darken-2 rounded-border text-center">
-              <li class="list-inline-item card-header-hoverable"
-                @click="switchOnModalRedisError()">
-                <h4 class="h4-responsive text-white spaced-title">Error Redis Worker Logs</h4>
-              </li>
-              <li class="header-button-style list-inline-item"
-                @click="removeErrorRedisLogs()">
-                <h4 class="h4-responsive text-white">Clear</h4>
-              </li>
-            </mdb-card-title>
-            <mdb-card-body>
-              <div class="scrollbar-class">
-                <mdb-scrollbar v-html="redisErrorLogs">
-                </mdb-scrollbar>
-              </div>
-            </mdb-card-body>
-          </mdb-card>
+          <modal-card
+            :message="redisErrorLogs"
+            title="Error Redis Worker Logs"
+            :clearPossibility="true"
+            :clearFunction="removeErrorRedisLogsBinded"
+          />
         </mdb-col>
       </mdb-row>
       <mdb-row v-show="showBenchmarkInputContent">
         <mdb-col col="12">
-          <mdb-card>
-            <mdb-card-title class="blue darken-2 rounded-border text-center">
-                <h4 class="h4-responsive text-white spaced-title">Benchmark Input Content</h4>
-            </mdb-card-title>
-            <mdb-card-body>
-              <div class="scrollbar-class">
-                <mdb-scrollbar v-html="benchmarkInputContent">
-                </mdb-scrollbar>
-              </div>
-            </mdb-card-body>
-          </mdb-card>
+          <modal-card
+            :message="benchmarkInputContent"
+            title="Benchmark Input Content"
+            :clearPossibility="false"
+          />
         </mdb-col>
       </mdb-row>
-      <mdb-modal size="fluid" :show="displayModal" @close="displayModal = false" scrollable>
-        <mdb-modal-header>
-          <mdb-modal-title>{{modalTitle}}</mdb-modal-title>
-        </mdb-modal-header>
-        <mdb-modal-body v-html="modalMessage">
-        </mdb-modal-body>
-        <mdb-modal-footer>
-          <mdb-btn color="secondary" @click.native="displayModal = false">Close</mdb-btn>
-        </mdb-modal-footer>
-      </mdb-modal>
     </section>
   </section>
 </template>
