@@ -32,57 +32,15 @@
                     {{value}}
                   </option>
                 </select>
-                <mdb-row class="logSelector">
-                  SELECT LOG LEVEL:
-                </mdb-row>
-                <mdb-row class="justify-content-center">
-                  <div class="custom-control custom-radio custom-control-inline">
-                    <input type="radio" :name="`radioLogLevel__${index}`" class="custom-control-input" :id="`${index}__LogLevelDebug`" value="DEBUG" v-model="selectedLogLevels[index]">
-                    <label class="custom-control-label" :for="`${index}__LogLevelDebug`">DEBUG</label>
-                  </div>
-                  <div class="custom-control custom-radio custom-control-inline">
-                    <input type="radio" :name="`radioLogLevel__${index}`" class="custom-control-input" :id="`${index}__LogLevelInfo`" value="INFO" v-model="selectedLogLevels[index]">
-                    <label class="custom-control-label" :for="`${index}__LogLevelInfo`">INFO</label>
-                  </div>
-                  <div class="custom-control custom-radio custom-control-inline">
-                    <input type="radio" :name="`radioLogLevel__${index}`" class="custom-control-input" :id="`${index}__LogLevelWarning`" value="WARNING" v-model="selectedLogLevels[index]">
-                    <label class="custom-control-label" :for="`${index}__LogLevelWarning`">WARNING</label>
-                  </div>
-                </mdb-row>
-                <section v-if="algorithm.options.length > 0">
-                  <mdb-row class="logSelector">
-                    PARAMETERS:
-                  </mdb-row>
-                  <section
-                    v-for="(option, option_index) in algorithm.options"
-                    :key="option_index"
-                  >
-                    <mdb-row class="parameterSelector justify-content-between">
-                      <div>
-                      <a>{{option.name}}:</a>
-                      <div class="hintClass">{{option.hint}}</div>
-                      </div>
-                      <div v-if="option.type=='value'"
-                      class="align-self-center special-width">
-                        <input v-model="option.default" class="benchmarkPossibilities special-width"/>
-                      </div>
-                      <div v-if="option.type=='checkbox'"
-                      class="align-self-center">
-                        <input type="checkbox"
-                        :id="`${option_index}_${index}_checkbox`"
-                        v-model="option.default" />
-                      </div>
-                      <div v-if="option.type==='list'"
-                      class="align-self-center">
-                        <select class="browser-default custom-select benchmarkPossibilities special-width" v-model="option.default">
-                          <option v-for="value in option.options" :key="value">
-                            {{value}}
-                          </option>
-                        </select>
-                      </div>
-                    </mdb-row>
-                  </section>
-                </section>
+                <log-selector
+                  :index="index"
+                  :selectedLogLevels="selectedLogLevels"
+                />
+                <run-parameters
+                  :optionArray="algorithm.options"
+                  title="PARAMETERS:"
+                  :index="index"
+                />
                 <mdb-row class="justify-content-center">
                   <mdb-btn :color="runButtonColor(index)" class="runButton" @click="runBenchmarkClicked(algorithm.name,selected[index][0], index)" :disabled="runButtonIsDisabled(index)">{{runButtonText(index)}}</mdb-btn>
                   <mdb-btn :color="runButtonColor(index)" class="runButton" @click="runAllClicked(algorithm.name, index)" v-if="! runButtonDisplaysStopMessage(index)" :disabled="runButtonIsDisabled(index)">RUN ALL</mdb-btn>
