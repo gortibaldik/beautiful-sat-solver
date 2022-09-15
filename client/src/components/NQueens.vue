@@ -41,79 +41,18 @@
             </div>
             <mdb-card-body class="no-up-padding-card-body">
               <mdb-container>
-                  <section v-if="problem_parameters && problem_parameters.length > 0" style="margin-top: 10px; margin-bottom: 10px">
-                    <mdb-row class="logSelector">
-                      PROBLEM PARAMETERS:
-                    </mdb-row>
-                    <section
-                      v-for="(parameter, param_index) in problem_parameters"
-                      :key="param_index"
-                    >
-                      <mdb-row class="parameterSelector justify-content-between">
-                        <div>
-                        <a>{{parameter.name}}:</a>
-                        <div class="hintClass">{{parameter.hint}}</div>
-                        </div>
-                        <div v-if="parameter.type=='value'"
-                        class="align-self-center">
-                          <input v-model="parameter.default" class="benchmarkPossibilities special-width"/>
-                        </div>
-                        <div v-if="parameter.type=='checkbox'"
-                        class="align-self-center">
-                          <input type="checkbox"
-                          :id="`${param_index}_p_checkbox`"
-                          v-model="parameter.default" />
-                        </div>
-                        <div v-if="parameter.type==='list'"
-                        class="align-self-center">
-                          <select class="browser-default custom-select benchmarkPossibilities special-width" v-model="option.default">
-                            <option v-for="(value, index) in parameter.options" :key="index">
-                              {{value}}
-                            </option>
-                          </select>
-                        </div>
-                      </mdb-row>
-                    </section>
-                  </section>
-                  <section v-if="selectedAlgorithm.options.length > 0" style="margin-top: 10px; margin-bottom: 10px">
-                    <hr>
-                    <mdb-row class="logSelector">
-                      ALGORITHM PARAMETERS:
-                    </mdb-row>
-                    <section
-                      v-for="(option, option_index) in selectedAlgorithm.options"
-                      :key="option_index"
-                    >
-                      <mdb-row class="parameterSelector justify-content-between">
-                        <div>
-                        <a>{{option.name}}:</a>
-                        <div class="hintClass">{{option.hint}}</div>
-                        </div>
-                        <div v-if="option.type=='value'"
-                        class="align-self-center">
-                          <input v-model="option.default" class="benchmarkPossibilities special-width"/>
-                        </div>
-                        <div v-if="option.type=='checkbox'"
-                        class="align-self-center">
-                          <input type="checkbox"
-                          :id="`${option_index}_checkbox`"
-                          v-model="option.default" />
-                        </div>
-                        <div v-if="option.type==='list'"
-                        class="align-self-center">
-                          <select class="browser-default custom-select benchmarkPossibilities special-width" v-model="option.default">
-                            <option v-for="value in option.options" :key="value">
-                              {{value}}
-                            </option>
-                          </select>
-                        </div>
-                      </mdb-row>
-                    </section>
-                  </section>
-                  <log-selector v-show="showRunButton" :selectedLogLevels="selectedLogLevels" />
-                  <mdb-row v-show="showRunButton" class="justify-content-center">
-                    <mdb-btn v-show="showRunButton" :class="runButtonClass" @click="runButtonClicked(selectedAlgorithm, selectedLogLevels[0])">{{runButtonText}}</mdb-btn>
-                  </mdb-row>
+                <run-parameters
+                  :optionArray="problem_parameters"
+                  title="PROBLEM PARAMETERS:"
+                />
+                <run-parameters
+                  :optionArray="selectedAlgorithm.options"
+                  title="ALGORITHM PARAMETERS:"
+                />
+                <log-selector v-show="showRunButton" :selectedLogLevels="selectedLogLevels" />
+                <mdb-row v-show="showRunButton" class="justify-content-center">
+                  <mdb-btn v-show="showRunButton" :class="runButtonClass" @click="runButtonClicked(selectedAlgorithm, selectedLogLevels[0])">{{runButtonText}}</mdb-btn>
+                </mdb-row>
               </mdb-container>
             </mdb-card-body>
           </mdb-card>

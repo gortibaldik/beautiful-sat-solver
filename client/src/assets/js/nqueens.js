@@ -21,6 +21,7 @@ import custom_run_communication from '@/assets/js/customRun_communication'
 import nqueens_communication from '@/assets/js/nqueens_communication'
 import ModalCard from '@/components/ModalCard.vue'
 import LogSelector from '@/components/LogSelectorComponent.vue'
+import RunParameters from '@/components/ParametersComponent.vue'
 import Vue from 'vue'
 
 export default {
@@ -43,7 +44,8 @@ export default {
     mdbBtn,
     mdbModalTitle,
     ModalCard,
-    LogSelector
+    LogSelector,
+    RunParameters,
   },
   data () {
     let defaultAlgorithmName = "Pick an algorithm"

@@ -21,6 +21,7 @@ import benchmark_communication from '@/assets/js/benchmark_communication'
 import custom_run_communication from '@/assets/js/customRun_communication'
 import ModalCard from '@/components/ModalCard.vue'
 import LogSelector from '@/components/LogSelectorComponent.vue'
+import RunParameters from '@/components/ParametersComponent.vue'
 import Vue from 'vue'
 
 
@@ -44,7 +45,8 @@ export default {
     mdbBtn,
     mdbModalTitle,
     ModalCard,
-    LogSelector
+    LogSelector,
+    RunParameters,
   },
   data () {
     let defaultBenchmarkName = "Pick a benchmark"

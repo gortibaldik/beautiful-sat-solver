@@ -41,66 +41,36 @@
             </div>
             <mdb-card-body class="no-up-padding-card-body">
               <mdb-container>
-                  <mdb-row class="benchmarkSelector">{{defaultBenchmarkName}}</mdb-row>
-                  <mdb-row>
-                    <select
-                      class="browser-default custom-select benchmarkPossibilities"
-                      v-model="selectedBenchmarkName"
-                      @change="selectedBenchmarkInputName=defaultBenchmarkInputName"
-                    >
-                      <option selected disabled>{{defaultBenchmarkName}}</option>
-                      <option v-for="(bench, bench_index) in benchmarks" :key="bench_index">
-                        {{bench.name}}
-                      </option>
-                    </select>
-                  </mdb-row>
-                  <mdb-row v-show="showBenchmarkInputs" class="benchmarkSelector">{{defaultBenchmarkInputName}}</mdb-row>
-                  <mdb-row v-show="showBenchmarkInputs">
-                    <select
-                      class="browser-default custom-select benchmarkPossibilities"
-                      v-model="selectedBenchmarkInputName"
-                    >
-                      <option selected disabled>{{defaultBenchmarkInputName}}</option>
-                      <option v-for="(benchIn, entry_index) in selectedBenchmark.inputs" :key="entry_index">
-                        {{benchIn}}
-                      </option>
-                    </select>
-                  </mdb-row>
-                  <mdb-row v-show="showCustomInputForm">Custom input isn't implemented yet!</mdb-row>
-                  <section v-if="selectedAlgorithm.options.length > 0" style="margin-top: 10px; margin-bottom: 10px">
-                    <mdb-row class="logSelector">
-                      PARAMETERS:
-                    </mdb-row>
-                    <section
-                      v-for="(option, option_index) in selectedAlgorithm.options"
-                      :key="option_index"
-                    >
-                      <mdb-row class="parameterSelector justify-content-between">
-                        <div>
-                        <a>{{option.name}}:</a>
-                        <div class="hintClass">{{option.hint}}</div>
-                        </div>
-                        <div v-if="option.type=='value'"
-                        class="align-self-center">
-                          <input v-model="option.default" class="benchmarkPossibilities special-width"/>
-                        </div>
-                        <div v-if="option.type=='checkbox'"
-                        class="align-self-center">
-                          <input type="checkbox"
-                          :id="`${option_index}_checkbox`"
-                          v-model="option.default" />
-                        </div>
-                        <div v-if="option.type==='list'"
-                        class="align-self-center">
-                          <select class="browser-default custom-select benchmarkPossibilities special-width" v-model="option.default">
-                            <option v-for="value in option.options" :key="value">
-                              {{value}}
-                            </option>
-                          </select>
-                        </div>
-                      </mdb-row>
-                    </section>
-                </section>
+                <mdb-row class="benchmarkSelector">{{defaultBenchmarkName}}</mdb-row>
+                <mdb-row>
+                  <select
+                    class="browser-default custom-select benchmarkPossibilities"
+                    v-model="selectedBenchmarkName"
+                    @change="selectedBenchmarkInputName=defaultBenchmarkInputName"
+                  >
+                    <option selected disabled>{{defaultBenchmarkName}}</option>
+                    <option v-for="(bench, bench_index) in benchmarks" :key="bench_index">
+                      {{bench.name}}
+                    </option>
+                  </select>
+                </mdb-row>
+                <mdb-row v-show="showBenchmarkInputs" class="benchmarkSelector">{{defaultBenchmarkInputName}}</mdb-row>
+                <mdb-row v-show="showBenchmarkInputs">
+                  <select
+                    class="browser-default custom-select benchmarkPossibilities"
+                    v-model="selectedBenchmarkInputName"
+                  >
+                    <option selected disabled>{{defaultBenchmarkInputName}}</option>
+                    <option v-for="(benchIn, entry_index) in selectedBenchmark.inputs" :key="entry_index">
+                      {{benchIn}}
+                    </option>
+                  </select>
+                </mdb-row>
+                <mdb-row v-show="showCustomInputForm">Custom input isn't implemented yet!</mdb-row>
+                <run-parameters
+                  :optionArray="selectedAlgorithm.options"
+                  title="PARAMETERS"
+                />
                 <log-selector v-show="showRunButton" :selectedLogLevels="selectedLogLevels" />
                 <mdb-row v-show="showBenchmarkInputButton" class="justify-content-center">
                   <mdb-btn v-show="showRunButton" :class="runButtonClass" @click="runButtonClicked(selectedAlgorithm, selectedBenchmarkName, selectedBenchmarkInputName, selectedLogLevels[0])">{{runButtonText}}</mdb-btn>
