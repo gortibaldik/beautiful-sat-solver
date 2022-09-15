@@ -1,5 +1,5 @@
 <template>
-  <section id="nqueens">
+  <section id="sudoku">
     <mdb-card class="mb-4">
       <mdb-card-body class="title-class d-sm-flex justify-content-between">
         <h4 class="mb-sm-0 pt-2">

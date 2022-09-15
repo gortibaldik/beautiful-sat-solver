@@ -102,4 +102,8 @@ export default {
 .header-button-style:hover {
   background-color: #5595fb
 }
+
+.rounded-border {
+  border-radius: 5px;
+}
 </style>
