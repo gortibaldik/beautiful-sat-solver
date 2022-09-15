@@ -23,8 +23,7 @@ import Vue from 'vue'
 import results_comm from '@/assets/js/results_communication'
 
 export default {
-  name: 'Results',
-  title: 'SAT: Results',
+  name: 'results-prototype',
   components: {
     mdbRow,
     mdbCol,
@@ -45,6 +44,12 @@ export default {
     mdbModalFooter,
     mdbModalHeader,
     mdbModalTitle,
+  },
+  props: {
+    title: { required: true },
+    barChartFirstLabel: { default: "Algorithm" },
+    barChartSecondLabel: { required: true },
+    serverSubpath: {required: true }
   },
   data () {
     return {
@@ -142,7 +147,7 @@ export default {
   created() {
     window.addEventListener('resize', this.onResize)
     this.onResize()
-    this.serverAddress = process.env.VUE_APP_SERVER_ADDRESS
+    this.serverAddress = process.env.VUE_APP_SERVER_ADDRESS + this.serverSubpath
     this.initBenchmarkResults()
   },
   methods: {
@@ -221,12 +226,16 @@ export default {
 
       return row[colHeader.label]
     },
+    isInteger(str) {
+      var n = Math.floor(Number(str));
+      return n !== Infinity && String(n) === str && n >= 0;
+    },
     sortRowsByIndex(index) {
       if (this.headers_sorted[index] != "asc") {
-        this.filtered_rows.sort((a, b) => a[index] > b[index])
+        this.filtered_rows.sort((a, b) => (this.isInteger(a[index]) && this.isInteger(b[index])) ? parseInt(a[index]) > parseInt(b[index]) : a[index] > b[index])
         Vue.set(this.headers_sorted, index, "asc")
       } else {
-        this.filtered_rows.sort((a, b) => a[index] <= b[index])
+        this.filtered_rows.sort((a, b) => (this.isInteger(a[index]) && this.isInteger(b[index])) ? parseInt(a[index]) <= parseInt(b[index]) : a[index] <= b[index])
         Vue.set(this.headers_sorted, index, "desc")
       }
     },
@@ -303,7 +312,7 @@ export default {
         }
       }
       for (let i = 0; i < checked.length; i++) {
-        barChartData.labels.push(`${checked[i]["Algorithm"]} ${checked[i]["Benchmark"]}`)
+        barChartData.labels.push(`${checked[i][this.barChartFirstLabel]} ${checked[i][this.barChartSecondLabel]}`)
         let k = 0
         for (let j = 0; j < this.data.columns.length; j++) {
           if (this.data.columns[j].plotted) {
@@ -328,8 +337,8 @@ export default {
       let datasetNamesSet = new Set();
       let labelsSet = new Set();
       for (let i = 0; i < checked.length; i++) {
-        datasetNamesSet.add(checked[i]["Algorithm"])
-        labelsSet.add(checked[i]["Benchmark"])
+        datasetNamesSet.add(checked[i][this.barChartFirstLabel])
+        labelsSet.add(checked[i][this.barChartSecondLabel])
       }
       let datasetNames = Array.from(datasetNamesSet)
       let labelNames = Array.from(labelsSet)
@@ -348,8 +357,8 @@ export default {
         for (let lnix = 0; lnix < labelNames.length; lnix++) {
           let data = undefined;
           for (let cix = 0; cix < checked.length; cix++) {
-            if (checked[cix]["Algorithm"] == datasetNames[dix] &&
-                checked[cix]["Benchmark"] == labelNames[lnix]) {
+            if (checked[cix][this.barChartFirstLabel] == datasetNames[dix] &&
+                checked[cix][this.barChartSecondLabel] == labelNames[lnix]) {
               data = checked[cix][nameOfField]
             }
           }

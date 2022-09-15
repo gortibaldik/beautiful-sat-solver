@@ -2,15 +2,7 @@ import {
   mdbRow,
   mdbCol,
   mdbCard,
-  mdbCardTitle,
   mdbCardBody,
-  mdbScrollbar,
-  mdbModal,
-  mdbModalHeader,
-  mdbModalFooter,
-  mdbModalBody,
-  mdbBtn,
-  mdbModalTitle,
 } from 'mdbvue'
 
 import redis_logs from '@/assets/js/get_redis_logs'
