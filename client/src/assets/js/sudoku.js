@@ -19,6 +19,7 @@ import {
 import benchmark_communication from '@/assets/js/benchmark_communication'
 import custom_run_communication from '@/assets/js/customRun_communication'
 import sudoku_communication from '@/assets/js/sudoku_communication'
+import ModalCard from '@/components/ModalCard.vue'
 import Vue from 'vue'
 
 export default {
@@ -40,6 +41,7 @@ export default {
     mdbModalBody,
     mdbBtn,
     mdbModalTitle,
+    ModalCard
   },
   data () {
     let defaultAlgorithmName = "Pick an algorithm"
@@ -57,16 +59,22 @@ export default {
       benchmarkInputContent: "",
       redisStdLogs: "",
       redisErrorLogs: "",
-      stdLogs: "",
       displayModal: false,
       modalMessage: "",
       modalTitle: "",
       timeoutCustomRun: 3,
       problem_parameters: undefined,
-      dimacs_str: "",
       chessBoard: "",
       si: -1,
-      sudoku: "",
+      stdLogs: {
+        data: ""
+      },
+      dimacs_str: {
+        data: ""
+      },
+      sudoku: {
+        data: ""
+      },
       lastSudoku: "",
     };
   },
@@ -106,16 +114,16 @@ export default {
       let is_finished_data = await sudoku_communication.fetchProgress(this.serverAddress, algo)
       let is_finished = is_finished_data.result
       let stdLogsPacked = await sudoku_communication.fetchStdLogs(this.serverAddress, algo)
-      this.stdLogs = stdLogsPacked.result
-      if (this.dimacs_str.length === 0) {
+      Vue.set(this.stdLogs, "data", stdLogsPacked.result)
+      if (this.dimacs_str.data.length === 0) {
         console.log("fetching data for dimacs str")
         let dimacs = await sudoku_communication.fetchDimacsFile(
           this.serverAddress, algo, sudoku
         )
         if (dimacs.result == "success") {
           console.log("data fetched !")
-          this.dimacs_str = "<code>" + dimacs.content + "</code>"
-          console.log(this.dimacs_str)
+          Vue.set(this.dimacs_str, "data", "<code>" + dimacs.content + "</code>")
+          console.log(this.dimacs_str.data)
         }
       }
       
@@ -137,7 +145,7 @@ export default {
         this.serverAddress, algo)
     },
     startMonitoringSudoku(algo, sudoku) {
-      this.dimacs_str = ""
+      Vue.set(this.dimacs_str, "data", "")
       this.isSudokuRunning = true
       this.showRunResults = true
       this.stopRunFunction = this.stopRun.bind(this, algo)
@@ -273,9 +281,9 @@ export default {
         return
       }
       let problem_parameter = this.problem_parameters[this.si]
-      this.lastSudoku = this.sudoku
-      if (this.sudoku == "") {
-        this.sudoku = "_"
+      this.lastSudoku = this.sudoku.data
+      if (this.sudoku.data == "") {
+        this.sudoku.data = "_"
       }
       let sudoku = await sudoku_communication.fetchGenerateSudoku(
         this.serverAddress,
@@ -311,12 +319,12 @@ export default {
         html += "</tr>"
       }
       html += "</table>"
-      this.sudoku = html
+      Vue.set(this.sudoku, "data", html)
     }
   },
   computed: {
     generateAgain() {
-      return this.sudoku == "" || this.sudoku != this.lastSudoku
+      return this.sudoku.data == "" || this.sudoku.data != this.lastSudoku
     },
     showSudoku: function() {
       if (! this.problem_parameters) {

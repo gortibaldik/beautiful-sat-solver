@@ -19,6 +19,8 @@ import {
 import benchmark_communication from '@/assets/js/benchmark_communication'
 import custom_run_communication from '@/assets/js/customRun_communication'
 import nqueens_communication from '@/assets/js/nqueens_communication'
+import ModalCard from '@/components/ModalCard.vue'
+import Vue from 'vue'
 
 export default {
   name: 'N-Queens',
@@ -39,6 +41,7 @@ export default {
     mdbModalBody,
     mdbBtn,
     mdbModalTitle,
+    ModalCard
   },
   data () {
     let defaultAlgorithmName = "Pick an algorithm"
@@ -56,14 +59,20 @@ export default {
       benchmarkInputContent: "",
       redisStdLogs: "",
       redisErrorLogs: "",
-      stdLogs: "",
       displayModal: false,
       modalMessage: "",
       modalTitle: "",
       timeoutCustomRun: 3,
       problem_parameters: undefined,
-      dimacs_str: "",
-      chessBoard: "",
+      chessBoard: {
+        data: ""
+      },
+      dimacs_str: {
+        data: ""
+      },
+      stdLogs: {
+        data: ""
+      }
     };
   },
   methods: {
@@ -106,16 +115,16 @@ export default {
       let stdLogsPacked = await nqueens_communication.fetchStdLogs(
         this.serverAddress, algo, n, run_as_benchmark, timeout
       )
-      this.stdLogs = stdLogsPacked.result
-      if (this.dimacs_str.length === 0) {
+      Vue.set(this.stdLogs, "data", stdLogsPacked.result)
+      if (this.dimacs_str.data.length === 0) {
         console.log("fetching data for dimacs str")
         let dimacs = await nqueens_communication.fetchDimacsFile(
           this.serverAddress, n
         )
         if (dimacs.result == "success") {
           console.log("data fetched !")
-          this.dimacs_str = "<code>" + dimacs.content + "</code>"
-          console.log(this.dimacs_str)
+          Vue.set(this.dimacs_str, "data", "<code>" + dimacs.content + "</code>")
+          console.log(this.dimacs_str.data)
         }
       }
       
@@ -146,11 +155,11 @@ export default {
         }
         chessBoard += "</div>"
       }
-      this.chessBoard = chessBoard
+      Vue.set(this.chessBoard, "data", chessBoard)
     },
     startMonitoringNQueens(algo, n, run_as_benchmark, timeout) {
       this.drawChessboard(n)
-      this.dimacs_str = ""
+      Vue.set(this.dimacs_str, "data", "")
       this.isNQueensRunning = true
       this.showRunResults = true
       this.stopRunFunction = this.stopRun.bind(this, algo, n, run_as_benchmark, timeout)

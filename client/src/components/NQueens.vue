@@ -143,43 +143,25 @@
       </mdb-row>
       <mdb-row v-show="showRunResults" class="row-with-logs">
         <mdb-col xl="6" md="12" class="mb-r col-with-logs">
-          <mdb-card class="card-with-logs rounded-border custom-margin-top ">
-            <mdb-card-title class="blue darken-2 rounded-border text-center card-header-hoverable">
-              <h4 class="h4-responsive text-white spaced-title">Standard Logs from Algorithm</h4>
-            </mdb-card-title>
-            <mdb-card-body>
-              <div class="scrollbar-class">
-                <mdb-scrollbar v-html="stdLogs">
-                </mdb-scrollbar>
-              </div>
-            </mdb-card-body>
-          </mdb-card>
+          <modal-card
+            :message="stdLogs"
+            title="Standard Logs from Algorithm"
+            :clearPossibility="false"
+          />
         </mdb-col>
         <mdb-col xl="6" md="12" class="mb-r col-with-logs">
-          <mdb-card class="card-with-logs rounded-border custom-margin-top ">
-            <mdb-card-title class="blue darken-2 rounded-border text-center card-header-hoverable">
-              <h4 class="h4-responsive text-white spaced-title">Dimacs SAT Encoding of the problem</h4>
-            </mdb-card-title>
-            <mdb-card-body>
-              <div class="scrollbar-class">
-                <mdb-scrollbar v-html="dimacs_str">
-                </mdb-scrollbar>
-              </div>
-            </mdb-card-body>
-          </mdb-card>
+          <modal-card
+            :message="dimacs_str"
+            title="Dimacs SAT Encoding of the Problem"
+            :clearPossibility="false"
+          />
         </mdb-col>
         <mdb-col xl="6" md="12" class="mb-r col-with-logs">
-          <mdb-card class="card-with-logs rounded-border custom-margin-top ">
-            <mdb-card-title class="blue darken-2 rounded-border text-center card-header-hoverable">
-              <h4 class="h4-responsive text-white spaced-title">Dimacs SAT Encoding of the problem</h4>
-            </mdb-card-title>
-            <mdb-card-body>
-              <div class="scrollbar-class">
-                <mdb-scrollbar v-html="chessBoard" >
-                </mdb-scrollbar>
-              </div>
-            </mdb-card-body>
-          </mdb-card>
+          <modal-card
+            :message="chessBoard"
+            title="Chessboard with Queens"
+            :clearPossibility="false"
+          />
         </mdb-col>
       </mdb-row>
     </section>
