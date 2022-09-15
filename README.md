@@ -15,6 +15,10 @@
 
 
 ## [Frontend User Manual](documentation/frontend_user_manual.md)
+- [Main Screen Manual](documentation/frontend_user_manual.md#main-screen)
+- [Results Screen Manual](documentation/frontend_user_manual.md#results-screen)
+- [N-Queens Screen Manual](documentation/frontend_user_manual.md#n-queens-problem-screen)
+- [Sudoku Screen Manual](documentation/frontend_user_manual.md#sudoku-screen)
 
 -----
 
