@@ -22,6 +22,7 @@ import sudoku_communication from '@/assets/js/sudoku_communication'
 import ModalCard from '@/components/ModalCard.vue'
 import LogSelector from '@/components/LogSelectorComponent.vue'
 import RunParameters from '@/components/ParametersComponent.vue'
+import AlgorithmSelector from '@/components/AlgorithmSelector.vue'
 import Vue from 'vue'
 
 export default {
@@ -46,6 +47,7 @@ export default {
     ModalCard,
     LogSelector,
     RunParameters,
+    AlgorithmSelector,
   },
   data () {
     let defaultAlgorithmName = "Pick an algorithm"
@@ -53,7 +55,9 @@ export default {
       algorithms: [],
       benchmarks: [],
       defaultAlgorithmName: defaultAlgorithmName,
-      selectedAlgorithmName: defaultAlgorithmName,
+      selectedAlgorithmName: [
+        defaultAlgorithmName,
+      ],
       selectedLogLevels: [
         "WARNING",
       ],
@@ -232,11 +236,11 @@ export default {
       }
 
       if (data.running_job.algorithm != "none") {
-        this.selectedAlgorithmName      = this.extractAlgorithmName(data.running_job.algorithm)
+        Vue.set(this.selectedAlgorithmName, 0, this.extractAlgorithmName(data.running_job.algorithm))
         let options_array = data.running_job.algorithm.split(';')
         let selAlgo = undefined
         for (let k = 0; k < this.algorithms.length; k++) {
-          if (this.algorithms[k].name == this.selectedAlgorithmName) {
+          if (this.algorithms[k].name == this.selectedAlgorithmName[0]) {
             selAlgo = this.algorithms[k]
             break
           }
@@ -356,18 +360,18 @@ export default {
       return false
     },
     selectedAlgorithm: function() {
-      let algo = this.findCorrespondingName(this.algorithms, this.selectedAlgorithmName)
+      let algo = this.findCorrespondingName(this.algorithms, this.selectedAlgorithmName[0])
       if (algo)  {
         return algo
       }
       return {
-        name: this.selectedAlgorithmName,
+        name: this.selectedAlgorithmName[0],
         taskName: "TASK --none--",
         options: []
       }
     },
     showRunButton: function() {
-      return this.selectedAlgorithmName != this.defaultAlgorithmName
+      return this.selectedAlgorithmName[0] != this.defaultAlgorithmName
     },
     runButtonText: function() {
       if (this.isSudokuRunning) {

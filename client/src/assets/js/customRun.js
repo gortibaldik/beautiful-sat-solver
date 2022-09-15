@@ -22,6 +22,7 @@ import custom_run_communication from '@/assets/js/customRun_communication'
 import ModalCard from '@/components/ModalCard.vue'
 import LogSelector from '@/components/LogSelectorComponent.vue'
 import RunParameters from '@/components/ParametersComponent.vue'
+import AlgorithmSelector from '@/components/AlgorithmSelector.vue'
 import Vue from 'vue'
 
 
@@ -47,6 +48,7 @@ export default {
     ModalCard,
     LogSelector,
     RunParameters,
+    AlgorithmSelector,
   },
   data () {
     let defaultBenchmarkName = "Pick a benchmark"
@@ -59,7 +61,9 @@ export default {
       selectedBenchmarkInputName: defaultBenchmarkInputName,
       customInputName: "Type custom input",
       defaultAlgorithmName: defaultAlgorithmName,
-      selectedAlgorithmName: defaultAlgorithmName,
+      selectedAlgorithmName: [
+        defaultAlgorithmName,
+      ],
       defaultBenchmarkName: defaultBenchmarkName,
       selectedBenchmarkName: defaultBenchmarkName,
       selectedLogLevels: [
@@ -197,14 +201,14 @@ export default {
       this.benchmarks = benchmarks
       this.algorithms = algorithms
       if (running_job.algorithm !== "none") {
-        this.selectedAlgorithmName      = this.extractAlgorithmName(running_job.algorithm)
+        Vue.set(this.selectedAlgorithmName, 0, this.extractAlgorithmName(running_job.algorithm))
         this.selectedBenchmarkName      = running_job.benchmark
         this.selectedBenchmarkInputName = running_job.entry
         this.showRunResults             = true
         let options_array = running_job.algorithm.split(';')
         let selAlgo = undefined
         for (let k = 0; k < this.algorithms.length; k++) {
-          if (this.algorithms[k].name == this.selectedAlgorithmName) {
+          if (this.algorithms[k].name == this.selectedAlgorithmName[0]) {
             selAlgo = this.algorithms[k]
             break
           }
@@ -247,12 +251,12 @@ export default {
   },
   computed: {
     selectedAlgorithm: function() {
-      let algo = this.findCorrespondingName(this.algorithms, this.selectedAlgorithmName)
+      let algo = this.findCorrespondingName(this.algorithms, this.selectedAlgorithmName[0])
       if (algo)  {
         return algo
       }
       return {
-        name: this.selectedAlgorithmName,
+        name: this.selectedAlgorithmName[0],
         taskName: "TASK --none--",
         options: []
       }
@@ -274,7 +278,7 @@ export default {
       return this.selectedBenchmark.name === this.customInputName
     },
     showRunButton: function() {
-      return this.selectedAlgorithmName != this.defaultAlgorithmName &&
+      return this.selectedAlgorithmName[0] != this.defaultAlgorithmName &&
         this.selectedBenchmarkName != this.defaultBenchmarkName && 
         this.selectedBenchmarkInputName != this.defaultBenchmarkInputName &&
         this.selectedBenchmarkInputName != this.customInputName

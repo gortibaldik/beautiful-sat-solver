@@ -11,34 +11,11 @@
       <mdb-row>
         <mdb-col class="mb-r">
           <mdb-card class="cascading-admin-card" v-show="! isOtherTabRunning">
-            <div class="admin-up">
-              <mdb-view>
-              <mdb-card-title>
-                <div>
-                  <mdb-icon icon="microchip" fas class="m-2 primary-color" size="3x"/>
-                  <section class="top-card-section">
-                    <mdb-row class="benchmarkSelector justify-content-center">{{defaultAlgorithmName}}</mdb-row>
-                    <mdb-row class="justify-content-center">
-                      <strong>
-                        <select
-                          class="browser-default custom-select algo-select"
-                          v-model="selectedAlgorithmName"
-                        >
-                          <option selected disabled>{{defaultAlgorithmName}}</option>
-                          <option v-for="(algo, index) in algorithms" :key="index">
-                            {{algo.name}}
-                          </option>
-                          </select>
-                      </strong>
-                    </mdb-row>
-                    <mdb-row class="taskNumber justify-content-end">
-                      {{selectedAlgorithm.taskName}}
-                    </mdb-row>
-                  </section>
-                </div>
-              </mdb-card-title>
-              </mdb-view>
-            </div>
+            <algorithm-selector 
+              :defaultName="defaultAlgorithmName"
+              :selectedNameData="selectedAlgorithmName"
+              :optionArray="algorithms"
+            />
             <mdb-card-body class="no-up-padding-card-body">
               <mdb-container>
                 <run-parameters
