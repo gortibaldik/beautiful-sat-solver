@@ -20,6 +20,7 @@ import benchmark_communication from '@/assets/js/benchmark_communication'
 import custom_run_communication from '@/assets/js/customRun_communication'
 import sudoku_communication from '@/assets/js/sudoku_communication'
 import ModalCard from '@/components/ModalCard.vue'
+import LogSelector from '@/components/LogSelectorComponent.vue'
 import Vue from 'vue'
 
 export default {
@@ -41,7 +42,8 @@ export default {
     mdbModalBody,
     mdbBtn,
     mdbModalTitle,
-    ModalCard
+    ModalCard,
+    LogSelector
   },
   data () {
     let defaultAlgorithmName = "Pick an algorithm"
@@ -50,7 +52,9 @@ export default {
       benchmarks: [],
       defaultAlgorithmName: defaultAlgorithmName,
       selectedAlgorithmName: defaultAlgorithmName,
-      selectedLogLevel: "WARNING",
+      selectedLogLevels: [
+        "WARNING",
+      ],
       stopRunFunction: undefined,
       showRunResults: false,
       isOtherTabRunning: false,

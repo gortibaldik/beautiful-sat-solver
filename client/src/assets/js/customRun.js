@@ -20,6 +20,7 @@ import redis_logs from '@/assets/js/get_redis_logs'
 import benchmark_communication from '@/assets/js/benchmark_communication'
 import custom_run_communication from '@/assets/js/customRun_communication'
 import ModalCard from '@/components/ModalCard.vue'
+import LogSelector from '@/components/LogSelectorComponent.vue'
 import Vue from 'vue'
 
 
@@ -43,6 +44,7 @@ export default {
     mdbBtn,
     mdbModalTitle,
     ModalCard,
+    LogSelector
   },
   data () {
     let defaultBenchmarkName = "Pick a benchmark"
@@ -58,7 +60,9 @@ export default {
       selectedAlgorithmName: defaultAlgorithmName,
       defaultBenchmarkName: defaultBenchmarkName,
       selectedBenchmarkName: defaultBenchmarkName,
-      selectedLogLevel: "WARNING",
+      selectedLogLevels: [
+        "WARNING"
+      ],
       stopRunFunction: undefined,
       showRunResults: false,
       isCustomRunRunning: false,

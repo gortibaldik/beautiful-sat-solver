@@ -101,27 +101,11 @@
                       </mdb-row>
                     </section>
                 </section>
-                  <mdb-row v-show="showRunButton" class="logSelector">
-                    SELECT LOG LEVEL:
-                  </mdb-row>
-                  <mdb-row v-show="showRunButton" class="justify-content-center margin-top-little">
-                    <div class="custom-control custom-radio custom-control-inline">
-                      <input type="radio" :name="`radioLogLevel`" class="custom-control-input" :id="`LogLevelDebug`" value="DEBUG" v-model="selectedLogLevel">
-                      <label class="custom-control-label" :for="`LogLevelDebug`">DEBUG</label>
-                    </div>
-                    <div class="custom-control custom-radio custom-control-inline">
-                      <input type="radio" :name="`radioLogLevel`" class="custom-control-input" :id="`LogLevelInfo`" value="INFO" v-model="selectedLogLevel">
-                      <label class="custom-control-label" :for="`LogLevelInfo`">INFO</label>
-                    </div>
-                    <div class="custom-control custom-radio custom-control-inline">
-                      <input type="radio" :name="`radioLogLevel`" class="custom-control-input" :id="`LogLevelWarning`" value="WARNING" v-model="selectedLogLevel">
-                      <label class="custom-control-label" :for="`LogLevelWarning`">WARNING</label>
-                    </div>
-                  </mdb-row>
-                  <mdb-row v-show="showBenchmarkInputButton" class="justify-content-center">
-                    <mdb-btn v-show="showRunButton" :class="runButtonClass" @click="runButtonClicked(selectedAlgorithm, selectedBenchmarkName, selectedBenchmarkInputName, selectedLogLevel)">{{runButtonText}}</mdb-btn>
-                    <mdb-btn class="run-button-start" @click="showInputClicked(selectedBenchmarkName, selectedBenchmarkInputName)">Show Benchmark Input</mdb-btn>
-                  </mdb-row>
+                <log-selector v-show="showRunButton" :selectedLogLevels="selectedLogLevels" />
+                <mdb-row v-show="showBenchmarkInputButton" class="justify-content-center">
+                  <mdb-btn v-show="showRunButton" :class="runButtonClass" @click="runButtonClicked(selectedAlgorithm, selectedBenchmarkName, selectedBenchmarkInputName, selectedLogLevels[0])">{{runButtonText}}</mdb-btn>
+                  <mdb-btn class="run-button-start" @click="showInputClicked(selectedBenchmarkName, selectedBenchmarkInputName)">Show Benchmark Input</mdb-btn>
+                </mdb-row>
               </mdb-container>
             </mdb-card-body>
           </mdb-card>

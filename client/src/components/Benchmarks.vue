@@ -32,23 +32,10 @@
                     {{value}}
                   </option>
                 </select>
-                <mdb-row class="logSelector">
-                  SELECT LOG LEVEL:
-                </mdb-row>
-                <mdb-row class="justify-content-center">
-                  <div class="custom-control custom-radio custom-control-inline">
-                    <input type="radio" :name="`radioLogLevel__${index}`" class="custom-control-input" :id="`${index}__LogLevelDebug`" value="DEBUG" v-model="selectedLogLevels[index]">
-                    <label class="custom-control-label" :for="`${index}__LogLevelDebug`">DEBUG</label>
-                  </div>
-                  <div class="custom-control custom-radio custom-control-inline">
-                    <input type="radio" :name="`radioLogLevel__${index}`" class="custom-control-input" :id="`${index}__LogLevelInfo`" value="INFO" v-model="selectedLogLevels[index]">
-                    <label class="custom-control-label" :for="`${index}__LogLevelInfo`">INFO</label>
-                  </div>
-                  <div class="custom-control custom-radio custom-control-inline">
-                    <input type="radio" :name="`radioLogLevel__${index}`" class="custom-control-input" :id="`${index}__LogLevelWarning`" value="WARNING" v-model="selectedLogLevels[index]">
-                    <label class="custom-control-label" :for="`${index}__LogLevelWarning`">WARNING</label>
-                  </div>
-                </mdb-row>
+                <log-selector
+                  :index="index"
+                  :selectedLogLevels="selectedLogLevels"
+                />
                 <section v-if="algorithm.options.length > 0">
                   <mdb-row class="logSelector">
                     PARAMETERS:

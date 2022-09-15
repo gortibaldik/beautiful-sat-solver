@@ -16,6 +16,7 @@ import {
 } from 'mdbvue'
 
 import Vue from 'vue'
+import LogSelector from '@/components/LogSelectorComponent.vue'
 import custom_run_comm from '@/assets/js/customRun_communication'
 import benchmark_comm from '@/assets/js/benchmark_communication'
 
@@ -36,7 +37,8 @@ export default {
     mdbModalBody,
     mdbModal,
     mdbModalHeader,
-    mdbModalFooter
+    mdbModalFooter,
+    LogSelector
   },
   data () {
     return {
