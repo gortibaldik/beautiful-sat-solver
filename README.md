@@ -5,12 +5,14 @@
 
 ## Run Release in Docker Container
 
+0. (Only if you had had any of previous versions installed) Rebuild: `docker compose build --no-cache --pull`
 1. Start containers: `docker compose up -d --force-recreate --build`
   - the frontend runs at `http://localhost:5000`
   - __log levels__: `DEBUG`: everything; `INFO`: transformation of the formula to cnf, model of the formula, sat/unsat; `WARNING`: only sat/unsat
 2. Stop containers: `docker compose stop`
 
-3. (Only if you had had any of previous versions installed) Rebuild: `docker compose build --no-cache --pull`
+
+## [Frontend User Manual](documentation/frontend_user_manual.md)
 
 -----
 
