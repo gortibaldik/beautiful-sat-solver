@@ -21,13 +21,13 @@
 
 ### Tasks
 
-1. [Task 1: Tseitin Encoding and DIMACS format](documentation/task1.md)
-2. [Task 2: DPLL](documentation/task2.md)
-3. [Task 3: Watched Literals](documentation/task3.md)
-4. [Task 4: CDCL](documentation/task4.md)
-5. [Task 5: Decision Heuristics](documentation/task5.md)
-6. [Task 6: N-Queens](documentation/task6.md)
-7. [Task 7: Sudoku](documentation/task7.md)
+- [Task 1: Tseitin Encoding and DIMACS format](documentation/task1.md)
+- [Task 2: DPLL](documentation/task2.md)
+- [Task 3: Watched Literals](documentation/task3.md)
+- [Task 4: CDCL](documentation/task4.md)
+- [Task 5: Decision Heuristics](documentation/task5.md)
+- [Task 6: N-Queens](documentation/task6.md)
+- [Task 7: Sudoku](documentation/task7.md)
 
 ------
 
