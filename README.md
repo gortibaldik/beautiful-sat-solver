@@ -145,6 +145,7 @@ __UPDATE 2__:
 - [cdcl - handbook on satisfiability](https://www.ics.uci.edu/~dechter/courses/ics-275a/winter-2016/readings/SATHandbook-CDCL.pdf)
 - [cdcl - some python implementation](https://github.com/z11i/pysat)
 - [cdcl - presentation on the topic](http://ssa-school-2016.it.uu.se/wp-content/uploads/2016/06/LaurentSimon.pdf)
+- [cdcl - sudoku](https://cse442-17f.github.io/Conflict-Driven-Clause-Learning/)
 - [glucose cdcl solver](https://www.ijcai.org/Proceedings/09/Papers/074.pdf)
 - [ipynb with various sat improvements](https://github.com/aimacode/aima-python/blob/master/improving_sat_algorithms.ipynb)
 
