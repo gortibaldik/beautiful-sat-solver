@@ -14,6 +14,7 @@
 
 ![main_screen_algo](./frontend_benchmarks_algo.png)
 
+-----
 
 ## Results Screen
 
@@ -29,3 +30,27 @@
 
 #### Show Individual Statistics
 ![results_screen_statistics](./frontend_results_stats.png)
+
+-----
+## N-Queens Problem Screen
+
+![nqueens_screen](./frontend_nqueens_select.png)
+
+- select problem parameters (e.g. number of queens)
+
+#### Show Results
+
+- shows:
+  - DIMACS encoding of the problem
+  - logs of the algorithm
+  - visualization of the placement of queens on the chessboard
+
+![nqueens_results](./frontend_nqueens_results.png)
+
+#### Benchmark Run
+
+- if you check the checkbox `run_as_benchmark` then the algorithm will be ran successively for N=3,4,... until the time of the run won't cross the `timeout` parameter
+- after the run, you can browse to `NQueens-Results` page, where the benchmark can be visualized in the same way as in the `Results` page
+
+![nqueens_benchmark](./frontend_nqueens_benchmark.png)
+![nqueens_stats](./frontend_nqueens_stats.png)
