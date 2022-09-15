@@ -35,12 +35,14 @@ from server.views.redis_logs.page import redis_logs_page
 from server.views.custom_run.page import custom_run_page
 from server.views.n_queens.page import n_queens_page
 from server.views.n_queens_results.page import n_queens_results_page
+from server.views.sudoku.page import sudoku_page
 app.register_blueprint(benchmark_page, url_prefix='/benchmarks')
 app.register_blueprint(results_page, url_prefix='/results')
 app.register_blueprint(redis_logs_page, url_prefix='/redis_logs')
 app.register_blueprint(custom_run_page, url_prefix='/custom_run')
 app.register_blueprint(n_queens_page, url_prefix='/nqueens')
 app.register_blueprint(n_queens_results_page, url_prefix='/nqueens_results')
+app.register_blueprint(sudoku_page, url_prefix='/sudoku')
 
 # enable CORS
 CORS(app, resources={r'/*': {'origins': '*'}})

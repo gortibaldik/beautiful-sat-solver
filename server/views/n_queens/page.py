@@ -1,109 +1,86 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint
 from satsolver.task6 import NQUEENS_PROBLEM_NAME, generate_nqueens_dimacs
+from server.get_running_job import construct_nqueens_index
+from server.models.nqueens import create_n_commit_nqueens
 from server.utils.exception_utils import (
   on_exception_result_failure,
   on_success_result_success,
 )
-from server.utils.redis_utils import (
-  get_algorithms_infos,
-  get_redis_connection,
-  get_saved_jobs,
-  set_saved_jobs,
-)
-from server.views.custom_run.utils import (
-  get_benchmark_entry_content,
-  get_post_debug_level
-)
 from server.views.n_queens.utils import (
+  ensure_nqueens_storage_file,
+  get_nqueens_benchmark_next,
+  get_nqueens_benchmark_start,
   get_nqueens_parameters,
-  get_post_N,
-  get_post_data,
+  get_nqueens_start_log,
   get_running_nqueens,
-  is_nqueens_finished,
-  retrieve_log_file,
-  save_job,
-  start_algorithm_on_nqueens,
-  stop_job_nqueens,
+  is_nqueens_benchmark_finished,
+  is_nqueens_satisfiable,
+  shouldnt_return_model,
+)
+from server.views.problem_prototype.page import (
+  dimacs,
+  get_logs,
+  get_progress,
+  index,
+  start,
+  stop
 )
 
 n_queens_page = Blueprint('n_queens_page', __name__)
+_post_data_array = ['algorithm', 'N', 'run_as_benchmark', 'timeout']
 
 @n_queens_page.route('/', methods=['GET'])
 @on_exception_result_failure
-def n_queens_index(): 
-  with get_redis_connection() as connection:
-    algorithms_infos = get_algorithms_infos(connection)
-    saved_jobs = get_saved_jobs(connection)
-  benchmarkable_algorithms = [a for a in algorithms_infos if a["benchmarkable"]]
-  return jsonify({
-    "result": "success",
-    "algorithms": benchmarkable_algorithms,
-    "running_job": get_running_nqueens(saved_jobs),
-    "problem_parameters": get_nqueens_parameters()
-  })
+def n_queens_index():
+  return index(get_running_nqueens, get_nqueens_parameters)
 
 @n_queens_page.route('/start', methods=['POST'])
 @on_exception_result_failure
 @on_success_result_success
-def run():
-  saved_jobs = get_saved_jobs()
-  algorithm_name, n, run_as_benchmark, timeout = get_post_data()
-  debug_level = get_post_debug_level()
-  job = start_algorithm_on_nqueens(
-    algorithm_name,
-    n,
-    run_as_benchmark,
-    timeout,
-    debug_level
+def start_nqueens():
+  start(
+    _post_data_array,
+    get_nqueens_start_log,
+    generate_nqueens_dimacs,
+    is_nqueens_satisfiable,
+    create_n_commit_nqueens,
+    ensure_nqueens_storage_file,
+    construct_nqueens_index,
+    get_benchmark_start=get_nqueens_benchmark_start,
+    get_benchmark_next=get_nqueens_benchmark_next,
+    is_benchmark_finished=is_nqueens_benchmark_finished
   )
-  save_job(
-    job,
-    algorithm_name,
-    n,
-    run_as_benchmark,
-    timeout,
-    saved_jobs
-  )
-  set_saved_jobs(saved_jobs)
 
 @n_queens_page.route('/get_logs', methods=['POST'])
 @on_exception_result_failure
 def get_nqueens_logs():
-  algorithm_name, n, run_as_benchmark, timeout = get_post_data()
-  log_file_content = retrieve_log_file(algorithm_name, n, run_as_benchmark, timeout)
-  return jsonify({ 'result': log_file_content})
+  return get_logs(
+    _post_data_array,
+    construct_nqueens_index
+  )
 
 @n_queens_page.route('/stop', methods=['POST'])
 @on_exception_result_failure
-def stop():
-  saved_jobs = get_saved_jobs()
-  algorithm_name, n, run_as_benchmark, timeout = get_post_data()
-  if stop_job_nqueens(algorithm_name, n, run_as_benchmark, timeout, saved_jobs):
-    set_saved_jobs(saved_jobs)
-    return jsonify({'result': 'success'})
-  return jsonify({'result': 'failure'})
+def stop_nqueens():
+  return stop(
+    _post_data_array,
+    construct_nqueens_index
+  )
 
 @n_queens_page.route('/get_dimacs', methods=['POST'])
 @on_exception_result_failure
-def dimacs():
-  n = get_post_N()
-  dimacs_file = generate_nqueens_dimacs(int(n), generate_new=False)
-  if dimacs_file is None:
-    return jsonify(result="failure")
-  return jsonify(
-    result="success",
-    content=get_benchmark_entry_content(NQUEENS_PROBLEM_NAME, f"{n}.cnf")
+def dimacs_nqueens():
+  return dimacs(
+    _post_data_array,
+    generate_nqueens_dimacs,
+    NQUEENS_PROBLEM_NAME
   )
 
 @n_queens_page.route('/is_finished', methods=['POST'])
 @on_exception_result_failure
 def is_finished():
-  algorithm_name, n, run_as_benchmark, timeout = get_post_data()
-  is_finished, model = is_nqueens_finished(algorithm_name, n, run_as_benchmark, timeout)
-  if is_finished:
-    return jsonify(
-      result="yes",
-      model=model if not run_as_benchmark else []
-    )
-  else:
-    return jsonify(result="no")
+  return get_progress(
+    _post_data_array,
+    construct_nqueens_index,
+    shouldnt_return_model
+  )

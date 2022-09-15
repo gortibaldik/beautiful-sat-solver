@@ -153,3 +153,10 @@ a:hover + div.hintClass {
   width: 100px;
   max-width: 100px;
 }
+
+.multiline-input {
+  width: 200px;
+  min-width: 200px;
+  height: 100px;
+  min-height: 100px;
+}

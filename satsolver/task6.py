@@ -85,7 +85,8 @@ def _generate_nqueens_dimacs(n):
 
 NQUEENS_PROBLEM_NAME="nqueens"
 
-def generate_nqueens_dimacs(n, generate_new=True):
+def generate_nqueens_dimacs(generate_new=True, **kwargs):
+  n = int(kwargs['N'])
   if n < 0:
     raise RuntimeError(f"N cannot be negative: N == {n}")
   benchmark_folder = os.path.join(
@@ -113,7 +114,7 @@ def main():
   parser = ArgumentParser()
   parser.add_argument("n", help="Number of queens")
   args = parser.parse_args()
-  generate_nqueens_dimacs(args.n)
+  generate_nqueens_dimacs(N=args.n)
 
 if __name__ == "__main__":
   main()

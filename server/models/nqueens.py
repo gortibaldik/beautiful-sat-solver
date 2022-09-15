@@ -54,13 +54,13 @@ class SATNQueens(Base):
 
 def create_nqueens(
   *,
-  algorithm_name,
-  n,
+  algorithm,
+  N,
   log_file,
   avg_time,
   stats: SATSolverStats
 ):
-  algo_split = algorithm_name.split(";")
+  algo_split = algorithm.split(";")
   algo_name_to_save = algo_split[0]
   for i in range(1, len(algo_split)):
     parameter, value = algo_split[i].split('=')
@@ -76,7 +76,7 @@ def create_nqueens(
     learned_clauses = stats.learnedClausesPeak,
     time            = avg_time,
     algorithm       = algo_name_to_save,
-    nqueens         = n,
+    nqueens         = N,
     log_file        = log_file,
     unit_checked    = stats.unitPropCheckedClauses
   )
@@ -84,18 +84,19 @@ def create_nqueens(
 
 def create_n_commit_nqueens(
   *,
-  algorithm_name,
-  n,
+  algorithm,
+  N,
   storage_file,
   avg_time=0,
   stats=None,
+  **kwargs
 ):
   if stats is None:
     stats = SATSolverStats()
   create_n_commit(
     create_nqueens,
-    algorithm_name=algorithm_name,
-    n=n,
+    algorithm=algorithm,
+    N=N,
     log_file=storage_file,
     avg_time=avg_time,
     stats=stats
