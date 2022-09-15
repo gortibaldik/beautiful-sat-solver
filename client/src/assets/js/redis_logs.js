@@ -14,51 +14,35 @@ import {
 } from 'mdbvue'
 
 import redis_logs from '@/assets/js/get_redis_logs'
+import ModalCard from '@/components/ModalCard.vue'
+import Vue from 'vue'
 
 export default {
-  name: 'Redis Logs',
+  name: 'RedisLogs',
   title: 'SAT: Logs',
   components: {
     mdbRow,
     mdbCol,
     mdbCard,
-    mdbCardTitle,
     mdbCardBody,
-    mdbScrollbar,
-    mdbModal,
-    mdbModalHeader,
-    mdbModalFooter,
-    mdbModalBody,
-    mdbBtn,
-    mdbModalTitle,
+    ModalCard,
   },
   data () {
     let basicMessage = "<code><strong>Nothing to show</strong></code>"
     return {
-      errorLogs: basicMessage,
-      stdLogs: basicMessage,
-      displayModal: false,
-      modalMessage: "",
-      modalTitle: "",
+      errorLogs: {
+        data: basicMessage
+      },
+      stdLogs: {
+        data: basicMessage
+      },
     }
   },
   methods: {
     async fetchRedisLogs() {
       let [errorLogs, stdLogs] = await redis_logs.fetch(this.serverAddress)
-      this.errorLogs = errorLogs
-      this.stdLogs = stdLogs
-    },
-    switchOnModalError() {
-      this.displayModal = true
-      this.modalMessage = this.errorLogs
-      this.modalTitle = "Error Redis Worker Logs"
-      this.modalInterval = setInterval(this.pollModalError.bind(this), 1000)
-    },
-    switchOnModalStd() {
-      this.displayModal = true
-      this.modalMessage = this.stdLogs
-      this.modalTitle = "Standard Redis Worker Logs"
-      this.modalInterval = setInterval(this.pollModalStd.bind(this), 1000)
+      Vue.set(this.errorLogs, "data", errorLogs)
+      Vue.set(this.stdLogs, "data", stdLogs)
     },
     async removeStdRedisLogs() {
       await redis_logs.fetch_remove_std(this.serverAddress)
@@ -73,21 +57,8 @@ export default {
         this.pollingInterval = undefined
         return
       }
-      this.errorLogs = errorLogs
-      this.stdLogs = stdLogs
-    },
-    pollModalError() {
-      this.modalMessage = this.errorLogs
-    },
-    pollModalStd() {
-      this.modalMessage = this.stdLogs
-    },
-    closeModal() {
-      this.displayModal = false
-      if (this.modalInterval) {
-        clearInterval(this.modalInterval)
-        this.modalInterval = undefined
-      }
+      Vue.set(this.errorLogs, "data", errorLogs)
+      Vue.set(this.stdLogs, "data", stdLogs)
     },
     startMonitoringLogs() {
       this.pollingInterval = setInterval(this.pollLogs.bind(this), 1000)
@@ -98,6 +69,8 @@ export default {
     console.log(`server address: "${this.serverAddress}"`)
     this.fetchRedisLogs()
     this.startMonitoringLogs()
+    this.removeErrorRedisLogsBinded = this.removeErrorRedisLogs.bind(this)
+    this.removeStdRedisLogsBinded = this.removeStdRedisLogs.bind(this)
   },
   beforeDestroy() {
     if (this.pollingInterval) {
